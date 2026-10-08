@@ -1,0 +1,159 @@
+[
+  {
+    "id": "audit-1788900662247-bgf1te",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "verify_and_approve",
+    "resourceType": "registration",
+    "resourceId": "reg-1788899557930",
+    "oldValue": {
+      "registrationStatus": "pending",
+      "paymentStatus": "Pending"
+    },
+    "newValue": {
+      "registrationStatus": "approved",
+      "paymentStatus": "Paid",
+      "studentCode": "NEXUS-SO-26-4202"
+    },
+    "timestamp": "2026-09-08T20:51:02.247Z"
+  },
+  {
+    "id": "audit-1788979774250-f3nvwy",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "registrations",
+    "timestamp": "2026-09-09T18:49:34.250Z"
+  },
+  {
+    "id": "audit-1788979819438-rnskf7",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "payments",
+    "timestamp": "2026-09-09T18:50:19.438Z"
+  },
+  {
+    "id": "audit-1788979835807-6221oe",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "payments",
+    "timestamp": "2026-09-09T18:50:35.808Z"
+  },
+  {
+    "id": "audit-1788980261151-8rtsjb",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "payments",
+    "timestamp": "2026-09-09T18:57:41.151Z"
+  },
+  {
+    "id": "audit-1788980539389-e80sk2",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "payments",
+    "timestamp": "2026-09-09T19:02:19.389Z"
+  },
+  {
+    "id": "audit-1788980673044-p1ceoi",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "students",
+    "timestamp": "2026-09-09T19:04:33.044Z"
+  },
+  {
+    "id": "audit-1788980698949-jg9pb3",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "registrations",
+    "timestamp": "2026-09-09T19:04:58.949Z"
+  },
+  {
+    "id": "audit-1788984263001-r9xafx",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "update",
+    "resourceType": "payment",
+    "resourceId": "cmtuh6pnv0003cpaaiekukaxw",
+    "newValue": {
+      "status": "Requires Verification",
+      "verificationNotes": "Payment proof submitted, awaiting verification"
+    },
+    "timestamp": "2026-09-09T20:04:23.001Z"
+  },
+  {
+    "id": "audit-1788984327034-zavzvl",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "update",
+    "resourceType": "payment",
+    "resourceId": "cmtuh6pnv0003cpaaiekukaxw",
+    "newValue": {
+      "status": "Paid",
+      "verificationNotes": "Payment verified and confirmed"
+    },
+    "timestamp": "2026-09-09T20:05:27.034Z"
+  },
+  {
+    "id": "audit-1788985298018-8hkem2",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "update",
+    "resourceType": "payment",
+    "resourceId": "cmtuh6pnv0003cpaaiekukaxw",
+    "newValue": {
+      "status": "Processing",
+      "verificationNotes": "Payment under review"
+    },
+    "timestamp": "2026-09-09T20:21:38.018Z"
+  },
+  {
+    "id": "audit-1788985333548-ww56de",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "update",
+    "resourceType": "payment",
+    "resourceId": "cmtuh6pnv0003cpaaiekukaxw",
+    "newValue": {
+      "status": "Requires Verification",
+      "verificationNotes": "Payment proof submitted, awaiting verification"
+    },
+    "timestamp": "2026-09-09T20:22:13.548Z"
+  },
+  {
+    "id": "audit-1788986203193-v78l93",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "delete_all",
+    "resourceType": "registrations",
+    "newValue": {
+      "deletedCount": 1
+    },
+    "timestamp": "2026-09-09T20:36:43.193Z"
+  },
+  {
+    "id": "audit-1788986386429-6a2e4o",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "update",
+    "resourceType": "payment",
+    "resourceId": "cmtuk933u0003cpltso2jsdy5",
+    "newValue": {
+      "status": "Paid",
+      "verificationNotes": "Payment verified and confirmed"
+    },
+    "timestamp": "2026-09-09T20:39:46.429Z"
+  },
+  {
+    "id": "audit-1788986405099-p2g7lv",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "register_students",
+    "resourceType": "registration",
+    "newValue": {
+      "count": 1
+    },
+    "timestamp": "2026-09-09T20:40:05.099Z"
+  },
+  {
+    "id": "audit-1788988888160-brprs2",
+    "adminEmail": "ncheemmanuel7@gmail.com",
+    "action": "notify_all_students",
+    "resourceType": "student",
+    "newValue": {
+      "notified": 1,
+      "skipped": 0
+    },
+    "timestamp": "2026-09-09T21:21:28.160Z"
+  }
+]

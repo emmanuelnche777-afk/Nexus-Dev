@@ -1,0 +1,21 @@
+[
+  {
+    "id": "reg-1788904280669",
+    "studentId": "student-1788904280669",
+    "studentCode": "NEXUS-SO-26-0001",
+    "programSlug": "software-development",
+    "status": "pending",
+    "submittedData": {
+      "fullName": "Jane Smith",
+      "email": "jane@example.com",
+      "phone": "623456789",
+      "city": "Yaounde",
+      "pathway": "software-development"
+    },
+    "reviewerId": null,
+    "reviewedAt": null,
+    "reviewNotes": "",
+    "createdAt": "2026-09-08T21:51:20.658Z",
+    "updatedAt": "2026-09-08T21:51:20.658Z"
+  }
+]

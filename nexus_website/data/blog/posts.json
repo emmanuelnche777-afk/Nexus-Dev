@@ -1,0 +1,83 @@
+[
+  {
+    "slug": "what-we-learned-building-nexus",
+    "title": "Scaling Trust: Lessons from Building NEXUS",
+    "titleFr": "Établir la Confiance : Leçons de la création de NEXUS",
+    "excerpt": "An insight into the governance and foundational principles required to scale a community-driven initiative.",
+    "excerptFr": "Un aperçu de la gouvernance et des principes fondamentaux requis pour faire évoluer une initiative communautaire.",
+    "content": [
+      {
+        "type": "h2",
+        "content": "Prioritizing Governance from Day One"
+      },
+      {
+        "type": "paragraph",
+        "content": "Building a sustainable ecosystem requires more than just ambition, it demands rigorous governance, transparent structures, and a relentless focus on community trust from day one. When we founded NEXUS, it would have been easy to focus solely on fast growth through social media hype. Instead, we made the conscious, and often 'boring,' decision to prioritize our constitution, code of conduct, and clear internal accountability mechanisms."
+      },
+      {
+        "type": "h2",
+        "content": "Trust is Demonstrated, Not Claimed"
+      },
+      {
+        "type": "paragraph",
+        "content": "This experience taught us a critical lesson: trust isn't earned through promises; it is earned through demonstrable consistency. By building a formal governance structure, we showed our partners, students, and stakeholders that we are committed to long-term impact rather than short-term gains."
+      },
+      {
+        "type": "h2",
+        "content": "Building for Longevity"
+      },
+      {
+        "type": "paragraph",
+        "content": "For anyone building in this space, our advice is clear: prioritize the infrastructure that ensures your longevity. The structure you build today is the trust you will harvest tomorrow. It requires patience, discipline, and constant communication. We invite you to join us on this journey as we build in public."
+      }
+    ],
+    "contentFr": [
+      {
+        "type": "h2",
+        "content": "Prioriser la Gouvernance dès le Premier Jour"
+      },
+      {
+        "type": "paragraph",
+        "content": "Construire un écosystème durable demande plus que de l'ambition, cela exige une gouvernance rigoureuse, des structures transparentes et un accent incessant sur la confiance de la communauté dès le premier jour. Lorsque nous avons fondé NEXUS, il aurait été facile de se concentrer uniquement sur une croissance rapide grâce au buzz des médias sociaux. Au lieu de cela, nous avons pris la décision consciente, et parfois « ennuyeuse », de donner la priorité à notre constitution, notre code de conduite et des mécanismes clairs de responsabilité interne."
+      },
+      {
+        "type": "h2",
+        "content": "La confiance se Démontre, Elle ne se Déclare pas"
+      },
+      {
+        "type": "paragraph",
+        "content": "Cette expérience nous a appris une leçon critique : la confiance ne se gagne pas par des promesses ; elle se gagne par une cohérence démontrable. En construisant une structure de gouvernance formelle, nous avons montré à nos partenaires, étudiants et parties prenantes que nous nous engageons à un impact à long terme plutôt qu'à des gains à court terme."
+      },
+      {
+        "type": "h2",
+        "content": "Construire pour la Pérennité"
+      },
+      {
+        "type": "paragraph",
+        "content": "Pour quiconque construit dans cet espace, notre conseil est clair : donnez la priorité à l'infrastructure qui garantit votre longévité. La structure que vous construisez aujourd'hui est la confiance que vous récolterez demain. Cela demande de la patience, de la discipline et une communication constante. Nous vous invitons à nous rejoindre dans ce voyage alors que nous construisons en public."
+      }
+    ],
+    "coverImage": "/images/blog/scaling-trust.jpeg",
+    "author": {
+      "name": "NCHE EMMANUEL, ZOUH LESLEYKEN MOFOR",
+      "role": "Co-founders",
+      "roleFr": "Cofondateurs"
+    },
+    "date": "July 2026",
+    "category": "Opinion",
+    "categoryFr": "Opinion",
+    "tags": [
+      "governance",
+      "startup",
+      "leadership",
+      "founding"
+    ],
+    "readingTime": "2 min read",
+    "status": "published",
+    "featured": false,
+    "seo": {
+      "metaTitle": "What We Learned Building NEXUS From Nothing — NEXUS",
+      "metaDescription": "Co-founders Emzie and Lesley on governance, structure, and starting with trust when building NEXUS."
+    }
+  }
+]

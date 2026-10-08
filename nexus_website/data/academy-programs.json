@@ -1,0 +1,726 @@
+[
+  {
+    "slug": "software-development",
+    "title": "Software Development",
+    "durationWeeks": 12,
+    "targetAudience": "Beginners to intermediate developers",
+    "certification": "NEXUS Software Development Certificate",
+    "awards": [
+      "Best Project Award",
+      "Top Performer Scholarship",
+      "Industry Recognition Badge"
+    ],
+    "price": 20601,
+    "currency": "XAF",
+    "thumbnailUrl": "/images/academy/software-development.svg",
+    "overviewVideoUrl": "",
+    "curriculumModules": [
+      {
+        "title": "Foundations of Programming",
+        "weeks": 2,
+        "topics": [
+          "Programming fundamentals",
+          "Variables, data types, and control structures",
+          "Functions and modular code",
+          "Debugging and problem solving"
+        ]
+      },
+      {
+        "title": "Frontend Development",
+        "weeks": 3,
+        "topics": [
+          "HTML5, CSS3, and modern CSS",
+          "JavaScript ES6+",
+          "React fundamentals",
+          "State management with hooks",
+          "Component composition and reusability"
+        ],
+        "project": "Build a responsive portfolio website"
+      },
+      {
+        "title": "Backend Development",
+        "weeks": 3,
+        "topics": [
+          "Node.js and Express.js",
+          "RESTful API design",
+          "Database design with PostgreSQL",
+          "Authentication and authorization",
+          "Error handling and logging"
+        ],
+        "project": "Build a REST API for a task management app"
+      },
+      {
+        "title": "Full Stack Integration",
+        "weeks": 2,
+        "topics": [
+          "Connecting frontend to backend",
+          "State management with React Query",
+          "File uploads and media handling",
+          "Deployment with Vercel and Railway"
+        ],
+        "project": "Deploy a full-stack application"
+      },
+      {
+        "title": "Advanced Topics & Capstone",
+        "weeks": 2,
+        "topics": [
+          "Testing (unit, integration, e2e)",
+          "CI/CD pipelines with GitHub Actions",
+          "Performance optimization",
+          "Security best practices",
+          "Capstone project development"
+        ],
+        "project": "Build and deploy a complete SaaS application"
+      }
+    ],
+    "requirements": [
+      "Basic computer literacy",
+      "Access to a laptop (8GB RAM minimum)",
+      "Stable internet connection",
+      "Willingness to learn and commit 15-20 hours/week",
+      "No prior programming experience required"
+    ],
+    "instructors": [
+      {
+        "name": "Emzie N.",
+        "title": "Chief Executive & Lead Instructor",
+        "bio": "Full-stack developer with 8+ years experience building scalable applications. Passionate about mentoring the next generation of African developers."
+      },
+      {
+        "name": "Lesley K.",
+        "title": "Senior Backend Engineer",
+        "bio": "Backend specialist with expertise in Node.js, Go, and cloud infrastructure. Has built systems handling millions of requests."
+      }
+    ],
+    "highlights": [
+      "Hands-on project-based learning",
+      "1-on-1 mentorship throughout the program",
+      "Industry-recognized certificate with verification",
+      "Portfolio of 3+ production-ready projects",
+      "Job placement support and career guidance",
+      "Access to NEXUS alumni network"
+    ],
+    "shortDescription": "Master full-stack web development with React, Node.js, and modern tools. Build real projects, get mentored by industry experts, and launch your tech career.",
+    "fullDescription": "This 12-week intensive program takes you from zero to job-ready full-stack developer. You'll learn by building real applications, not just watching tutorials. Each week combines live coding sessions, hands-on labs, and mentored project work. By the end, you'll have a portfolio of production-ready applications and the confidence to tackle real-world engineering challenges.",
+    "tools": [
+      "React",
+      "Node.js",
+      "TypeScript",
+      "PostgreSQL",
+      "Git",
+      "GitHub Actions",
+      "Vercel",
+      "Tailwind CSS",
+      "Express.js",
+      "React Query"
+    ],
+    "status": "active",
+    "id": "software-development"
+  },
+  {
+    "slug": "ui-ux-design",
+    "title": "UI/UX Design",
+    "durationWeeks": 10,
+    "targetAudience": "Designers, creatives, and career switchers",
+    "certification": "NEXUS UI/UX Design Certificate",
+    "awards": [
+      "Best Portfolio Award",
+      "Design Excellence Scholarship",
+      "Community Choice Award"
+    ],
+    "price": 20600,
+    "currency": "XAF",
+    "thumbnailUrl": "/images/academy/ui-ux-design.svg",
+    "overviewVideoUrl": "https://youtu.be/drSxXggis-k?si=ZpB3IdIgDFssNO02",
+    "curriculumModules": [
+      {
+        "title": "Design Fundamentals",
+        "weeks": 2,
+        "topics": [
+          "Design principles and visual hierarchy",
+          "Color theory and typography",
+          "Layout and composition",
+          "Design systems and consistency"
+        ]
+      },
+      {
+        "title": "User Research & Strategy",
+        "weeks": 2,
+        "topics": [
+          "User research methods",
+          "Persona creation and user journeys",
+          "Information architecture",
+          "Usability testing fundamentals"
+        ],
+        "project": "Complete user research report for a product concept"
+      },
+      {
+        "title": "UI Design & Prototyping",
+        "weeks": 3,
+        "topics": [
+          "Figma mastery",
+          "Design systems and component libraries",
+          "Responsive design patterns",
+          "Micro-interactions and animations",
+          "Design handoff to developers"
+        ],
+        "project": "Design a complete design system and high-fidelity prototype"
+      },
+      {
+        "title": "UX Engineering & Collaboration",
+        "weeks": 2,
+        "topics": [
+          "Working with developers",
+          "Design tokens and CSS variables",
+          "Accessibility (WCAG) guidelines",
+          "Design ops and workflow optimization"
+        ],
+        "project": "Collaborate with developers to implement a design"
+      },
+      {
+        "title": "Portfolio & Career Preparation",
+        "weeks": 1,
+        "topics": [
+          "Case study writing",
+          "Portfolio presentation",
+          "Interview preparation",
+          "Freelancing and contract work"
+        ],
+        "project": "Complete professional portfolio with 3 case studies"
+      }
+    ],
+    "requirements": [
+      "Basic computer literacy",
+      "Access to a laptop (8GB RAM minimum)",
+      "Figma account (free tier works)",
+      "Creative curiosity and attention to detail",
+      "No prior design experience required"
+    ],
+    "instructors": [
+      {
+        "name": "Marie N.",
+        "title": "Lead Product Designer",
+        "bio": "Product designer with 6+ years at top African tech companies. Specializes in design systems and accessible design."
+      },
+      {
+        "name": "Jean-Pierre K.",
+        "title": "Senior UX Researcher",
+        "bio": "UX researcher with experience across fintech, healthtech, and edtech. Expert in qualitative and quantitative research methods."
+      }
+    ],
+    "highlights": [
+      "Learn Figma from basics to advanced",
+      "Build a professional portfolio with 3 case studies",
+      "Real client project experience",
+      "Industry-recognized certificate with verification",
+      "Design mentorship from practicing professionals",
+      "Access to design community and resources"
+    ],
+    "shortDescription": "Master UI/UX design with Figma. Learn user research, design systems, prototyping, and build a portfolio that gets you hired. No design background needed.",
+    "fullDescription": "This 10-week program transforms creative thinkers into professional product designers. You'll master Figma, conduct real user research, build design systems, and create a portfolio that demonstrates your ability to solve real user problems. Learn from practicing designers at top African tech companies and graduate with a portfolio that stands out.",
+    "tools": [
+      "Figma",
+      "FigJam",
+      "Maze",
+      "Notion",
+      "Miro",
+      "Adobe XD",
+      "Principle",
+      "UserTesting",
+      "Hotjar",
+      "Zeplin"
+    ],
+    "status": "active",
+    "id": "ui-ux-design"
+  },
+  {
+    "slug": "graphic-design",
+    "title": "Graphic Design",
+    "durationWeeks": 8,
+    "targetAudience": "Creatives, marketers, and visual storytellers",
+    "certification": "NEXUS Graphic Design Certificate",
+    "awards": [
+      "Best Visual Identity Award",
+      "Creative Excellence Scholarship",
+      "Brand Impact Award"
+    ],
+    "price": 20600,
+    "currency": "XAF",
+    "thumbnailUrl": "/images/academy/graphic-design.svg",
+    "overviewVideoUrl": "https://youtu.be/GDN_l8hXKUo?si=5otcXyofIcccVPjO",
+    "curriculumModules": [
+      {
+        "title": "Design Foundations",
+        "weeks": 2,
+        "topics": [
+          "Design principles and elements",
+          "Color theory and psychology",
+          "Typography fundamentals",
+          "Composition and layout"
+        ]
+      },
+      {
+        "title": "Brand Identity Design",
+        "weeks": 2,
+        "topics": [
+          "Logo design and brand marks",
+          "Visual identity systems",
+          "Brand guidelines creation",
+          "Stationery and collateral design"
+        ],
+        "project": "Complete brand identity for a fictional company"
+      },
+      {
+        "title": "Digital & Print Design",
+        "weeks": 2,
+        "topics": [
+          "Social media graphics",
+          "Marketing materials (flyers, posters, brochures)",
+          "Print production fundamentals",
+          "Design for different formats and sizes"
+        ],
+        "project": "Multi-channel marketing campaign design"
+      },
+      {
+        "title": "Advanced Tools & Portfolio",
+        "weeks": 2,
+        "topics": [
+          "Advanced Photoshop techniques",
+          "Illustrator for vector graphics",
+          "After Effects for motion graphics basics",
+          "Portfolio curation and presentation"
+        ],
+        "project": "Professional portfolio with 5+ diverse projects"
+      }
+    ],
+    "requirements": [
+      "Basic computer literacy",
+      "Access to a laptop (8GB RAM minimum)",
+      "Adobe Creative Cloud subscription (student discount available)",
+      "Creative eye and attention to detail",
+      "No prior design experience required"
+    ],
+    "instructors": [
+      {
+        "name": "Grace M.",
+        "title": "Senior Graphic Designer",
+        "bio": "Brand designer with 7+ years creating identities for African startups and SMEs. Expert in visual storytelling and brand strategy."
+      }
+    ],
+    "highlights": [
+      "Master Adobe Creative Suite (Photoshop, Illustrator, After Effects)",
+      "Build a professional portfolio with 5+ projects",
+      "Real brand identity project experience",
+      "Industry-recognized certificate with verification",
+      "Learn from practicing brand designers",
+      "Access to design assets and templates library"
+    ],
+    "shortDescription": "Master graphic design with Adobe Creative Suite. Create stunning visual identities, marketing materials, and build a portfolio that showcases your creative talent.",
+    "fullDescription": "This 8-week program teaches you professional graphic design from the ground up. You'll master Photoshop, Illustrator, and After Effects while working on real-world projects like brand identities, marketing campaigns, and social media content. Graduate with a polished portfolio and the skills to work as a freelance designer or join a creative team.",
+    "tools": [
+      "Photoshop",
+      "Illustrator",
+      "After Effects",
+      "InDesign",
+      "Premiere Pro",
+      "Lightroom",
+      "Canva",
+      "Behance",
+      "Adobe Fonts",
+      "Adobe Stock"
+    ],
+    "status": "active",
+    "id": "graphic-design"
+  },
+  {
+    "slug": "ai-automation",
+    "title": "AI Automation",
+    "durationWeeks": 8,
+    "targetAudience": "Professionals looking to automate workflows, developers, and tech enthusiasts",
+    "certification": "NEXUS AI Automation Certificate",
+    "awards": [
+      "Best Automation Project Award",
+      "Innovation Scholarship",
+      "Efficiency Champion Badge"
+    ],
+    "price": 20600,
+    "currency": "XAF",
+    "thumbnailUrl": "/images/academy/ai-automation.svg",
+    "overviewVideoUrl": "https://youtu.be/ba7mB8oueCY?si=7DuCNog-b-nsBk76",
+    "curriculumModules": [
+      {
+        "title": "AI Fundamentals & Prompt Engineering",
+        "weeks": 2,
+        "topics": [
+          "How LLMs work",
+          "Prompt engineering techniques",
+          "Chain-of-thought prompting",
+          "Few-shot and zero-shot learning",
+          "Evaluating AI outputs"
+        ]
+      },
+      {
+        "title": "No-Code Automation with AI",
+        "weeks": 2,
+        "topics": [
+          "Zapier and Make (Integromat) fundamentals",
+          "Connecting apps with AI",
+          "Building AI-powered workflows",
+          "Error handling and monitoring"
+        ],
+        "project": "Automate a complete business workflow"
+      },
+      {
+        "title": "Custom AI Agents & RAG",
+        "weeks": 2,
+        "topics": [
+          "Building custom GPTs and assistants",
+          "Retrieval-Augmented Generation (RAG)",
+          "Vector databases and embeddings",
+          "Function calling and tool use"
+        ],
+        "project": "Build a custom AI assistant for a specific use case"
+      },
+      {
+        "title": "AI in Production & Capstone",
+        "weeks": 2,
+        "topics": [
+          "Deploying AI applications",
+          "Cost optimization and monitoring",
+          "Security and privacy considerations",
+          "Capstone project: end-to-end AI automation"
+        ],
+        "project": "Deploy a production-ready AI automation solution"
+      }
+    ],
+    "requirements": [
+      "Basic computer literacy",
+      "Access to a laptop (8GB RAM minimum)",
+      "Stable internet connection",
+      "Curiosity about AI and automation",
+      "No coding experience required (but helpful)"
+    ],
+    "instructors": [
+      {
+        "name": "David T.",
+        "title": "AI Engineer & Automation Specialist",
+        "bio": "AI engineer building production LLM applications. Has automated workflows saving companies 1000+ hours/month."
+      }
+    ],
+    "highlights": [
+      "Master prompt engineering and AI tools",
+      "Build no-code automations with Zapier/Make",
+      "Create custom AI agents with RAG",
+      "Deploy production-ready AI solutions",
+      "Industry-recognized certificate with verification",
+      "Learn from practicing AI engineers"
+    ],
+    "shortDescription": "Master AI automation without coding. Learn prompt engineering, build no-code workflows with Zapier/Make, create custom AI agents, and automate real business processes.",
+    "fullDescription": "This 8-week program demystifies AI and teaches you to build practical automation solutions. You'll learn prompt engineering, create no-code workflows with Zapier and Make, build custom AI agents using RAG, and deploy production-ready automations. Perfect for professionals who want to 10x their productivity or developers adding AI to their toolkit.",
+    "tools": [
+      "ChatGPT",
+      "Claude",
+      "Zapier",
+      "Make",
+      "Pinecone",
+      "LangChain",
+      "OpenAI API",
+      "n8n",
+      "Airtable",
+      "Notion AI"
+    ],
+    "status": "active",
+    "id": "ai-automation"
+  },
+  {
+    "slug": "ethical-hacking-foundations",
+    "title": "Ethical Hacking Foundations",
+    "durationWeeks": 14,
+    "price": 350000,
+    "currency": "XAF",
+    "thumbnailUrl": "/uploads/1788868066866-ChatGPT-Image-Sep-8,-2026,-11_54_20-AM.png",
+    "shortDescription": "Build practical cybersecurity skills by learning the fundamentals of ethical hacking, network security, reconnaissance, scanning, and vulnerability assessment.",
+    "fullDescription": "Ethical Hacking Foundations is a practical beginner-friendly cybersecurity program designed to introduce learners to the core concepts, tools, and methodologies used in ethical hacking.\n\nParticipants will learn how attackers identify and assess potential weaknesses while developing the knowledge needed to defend systems and networks responsibly. The program covers cybersecurity fundamentals, Linux basics, networking concepts, reconnaissance and footprinting, host discovery, port scanning, service enumeration, vulnerability assessment, and introductory web security.\n\nThrough guided exercises and hands-on labs, learners will practice using industry-relevant security tools in controlled environments. The program emphasizes responsible security testing, ethical conduct, documentation, and understanding how vulnerabilities can be identified and mitigated.\n\nBy the end of the program, participants should have a solid foundation for continuing into more advanced areas such as penetration testing, security operations, vulnerability management, and web application security.",
+    "targetAudience": "Beginners interested in cybersecurity and ethical hacking",
+    "certification": "Certificate of Completion – Ethical Hacking Foundations",
+    "status": "active",
+    "id": "ethical-hacking-foundations",
+    "overviewVideoUrl": "",
+    "curriculumModules": [
+      {
+        "title": "Cybersecurity & Ethical Hacking Fundamentals",
+        "weeks": 1,
+        "topics": [
+          "Introduction to Cybersecurity",
+          "Types of Hackers",
+          "Cyber Threats",
+          "Common Attack Vectors",
+          "Ethical Hacking Concepts",
+          "Ethical Hacking Methodology",
+          "Rules of Engagement",
+          "Cybersecurity Ethics",
+          "Setting Up a Safe Hacking Lab"
+        ],
+        "project": "Build Your Cybersecurity Lab: Set up an isolated virtual environment containing an attacker machine and a deliberately vulnerable target, then document the network configuration and security objectives."
+      },
+      {
+        "title": "Networking Fundamentals",
+        "weeks": 1,
+        "topics": [
+          "Network Fundamentals",
+          "IP Addresses",
+          "MAC Addresses",
+          "IPv4 and IPv6",
+          "Subnetting",
+          "CIDR Notation",
+          "TCP and UDP",
+          "Common Network Ports",
+          "DNS",
+          "DHCP",
+          "Network Interfaces",
+          "OSI Model",
+          "TCP/IP Model",
+          "Network Troubleshootin"
+        ],
+        "project": "Network Mapping Project: Analyze a controlled lab network, identify hosts, network interfaces, gateways, IP addresses, and available services, then create a basic network map."
+      },
+      {
+        "title": "Linux Fundamentals for Hackers",
+        "weeks": 1,
+        "topics": [
+          "Linux Architecture",
+          "File System Navigation",
+          "Files and Directories",
+          "Users and Groups",
+          "File Permissions",
+          "Processes",
+          "Services",
+          "Package Management",
+          "Environment Variables",
+          "Pipes and Redirection",
+          "Shell Commands",
+          "Bash Fundamentals",
+          "Network Commands"
+        ],
+        "project": "Linux Security Administration Lab : Configure a Linux machine with multiple users, permissions, services, and network settings, then perform a basic security audit."
+      },
+      {
+        "title": "Reconnaissance & OSINT",
+        "weeks": 1,
+        "topics": [
+          "Introduction to Reconnaissance",
+          "Passive Reconnaissance",
+          "Active Reconnaissance",
+          "Domain Enumeration",
+          "DNS Enumeration",
+          "WHOIS",
+          "Subdomain Discovery",
+          "Search Engine Intelligence",
+          "Email Enumeration",
+          "Technology Fingerprinting",
+          "OSINT Fundamentals",
+          "Reconnaissance Documentation"
+        ],
+        "project": "Target Reconnaissance Report:  Conduct passive reconnaissance on an authorized training target and produce a professional report containing domains, subdomains, DNS information, technologies, and other publicly available information. "
+      },
+      {
+        "title": "Host Discovery & Network Scanning",
+        "weeks": 1,
+        "topics": [
+          "Introduction to Network Scanning",
+          "Host Discovery",
+          "ICMP Discovery",
+          "TCP Discovery",
+          "UDP Discovery",
+          "Port Scanning",
+          "TCP Connect Scanning",
+          "SYN Scanning",
+          "UDP Scanning",
+          "Service Detection",
+          "Version Detection",
+          "Operating System Detection",
+          "Nmap Fundamentals",
+          "Masscan Fundamentals",
+          "Interpreting Scan Results"
+        ],
+        "project": "Network Discovery Assessment: Perform host discovery and port scanning against a controlled lab network, identify active systems and exposed services, and produce a structured scanning report."
+      },
+      {
+        "title": "Service Enumeration",
+        "weeks": 1,
+        "topics": [
+          "Introduction to Enumeration",
+          "Enumeration Methodology",
+          "Banner Grabbing",
+          "SSH Enumeration",
+          "FTP Enumeration",
+          "HTTP Enumeration",
+          "HTTPS Enumeration",
+          "SMB Enumeration",
+          "DNS Enumeration",
+          "SMTP Enumeration",
+          "Netcat",
+          "Curl",
+          "WhatWeb",
+          "Gobuster",
+          "Nikto",
+          "Service Version Analysis"
+        ],
+        "project": "Service Enumeration Report: Enumerate the services running on an authorized vulnerable machine, identify service versions and technologies, and document potential security weaknesses."
+      },
+      {
+        "title": "Vulnerability Assessment",
+        "weeks": 1,
+        "topics": [
+          "How Web Applications Work",
+          "HTTP and HTTPS",
+          "HTTP Methods",
+          "Headers",
+          "Cookies",
+          "Sessions",
+          "Authentication",
+          "Authorization",
+          "OWASP Top 10",
+          "Cross-Site Scripting",
+          "SQL Injection Fundamentals",
+          "Security Misconfiguration",
+          "Directory Discovery",
+          "Input Validation",
+          "Burp Suite Fundamentals",
+          "Web Security Testing"
+        ],
+        "project": "Vulnerability Assessment: Assess a deliberately vulnerable system using appropriate security tools, validate selected findings, rank vulnerabilities by severity, and produce a professional vulnerability assessment report."
+      },
+      {
+        "title": "Web Application Security",
+        "weeks": 1,
+        "topics": [
+          "How Web Applications Work",
+          "HTTP and HTTPS",
+          "HTTP Methods",
+          "Headers",
+          "Cookies",
+          "Sessions",
+          "Authentication",
+          "Authorization",
+          "OWASP Top 10",
+          "Cross-Site Scripting",
+          "SQL Injection Fundamentals",
+          "Security Misconfiguration",
+          "Directory Discovery",
+          "Input Validation",
+          "Burp Suite Fundamentals",
+          "Web Security Testing"
+        ],
+        "project": "Web Application Security Assessment: Assess a deliberately vulnerable application such as OWASP Juice Shop, identify selected vulnerabilities, collect evidence, explain their impact, and provide remediation recommendations."
+      },
+      {
+        "title": "Password Security & Authentication",
+        "weeks": 1,
+        "topics": [
+          "Authentication Fundamentals",
+          "Authorization",
+          "Password Security",
+          "Password Hashing",
+          "Salting",
+          "Password Policies",
+          "Authentication Attacks",
+          "Brute-Force Concepts",
+          "Credential Stuffing",
+          "Password Cracking Concepts",
+          "Multi-Factor Authentication",
+          "Account Lockout",
+          "Rate Limiting",
+          "Authentication Defenses"
+        ],
+        "project": "Authentication Security Audit: Analyze a controlled application's authentication system, identify weaknesses in password and login controls, and develop recommendations for improving authentication security."
+      },
+      {
+        "title": "Ethical Hacking Methodology & Final Assessment",
+        "weeks": 1,
+        "topics": [
+          "Security Assessment Planning",
+          "Scope Definition",
+          "Rules of Engagement",
+          "Reconnaissance",
+          "Host Discovery",
+          "Scanning",
+          "Enumeration",
+          "Vulnerability Assessment",
+          "Risk Analysis",
+          "Evidence Collection",
+          "Security Documentation",
+          "Remediation",
+          "Professional Reporting",
+          "Ethical Responsibilities"
+        ],
+        "project": "Complete Ethical Hacking Assessment: Perform a full security assessment against an authorized vulnerable lab environment from reconnaissance through reporting, then present the findings and recommended remediation measures."
+      },
+      {
+        "title": "Complete Ethical Hacking Assessment",
+        "weeks": 1,
+        "topics": [
+          "Security Assessment Planning",
+          "Scope Definition",
+          "Rules of Engagement",
+          "Reconnaissance",
+          "Host Discovery",
+          "Network Scanning",
+          "Service Enumeration",
+          "Vulnerability Assessment",
+          "Web Application Assessment",
+          "Risk Analysis",
+          "Evidence Collection",
+          "Vulnerability Documentation",
+          "Remediation Strategies",
+          "Professional Security Reporting",
+          "Ethical Responsibilities"
+        ],
+        "project": "NEXUS Red Team Security Assessment:  Students perform a complete ethical hacking assessment against an authorized, deliberately vulnerable lab environment. They must progress through reconnaissance, discovery, scanning, enumeration, vulnerability assessment, analysis, and documentation, then produce and present a professional penetration-testing-style report containing their findings, evidence, risk ratings, and recommended remediation measures."
+      }
+    ],
+    "requirements": [
+      "Basic computer knowledge",
+      "A laptop or desktop computer",
+      "Stable internet connection",
+      "Willingness to learn",
+      "Interest in cybersecurity",
+      "Basic understanding of the internet",
+      "Ability to attend practical training and complete assignments",
+      "No previous ethical hacking experience required"
+    ],
+    "tools": [
+      "Kali Linux",
+      "Netcat",
+      "Masscan",
+      "VirtualBox",
+      "Nmap",
+      "Wireshark",
+      "Metasploit Framework",
+      "John the Ripper"
+    ],
+    "highlights": [
+      "🧑‍💻 Hands-On Practical Training",
+      "🔐 Real-World Ethical Hacking Skills",
+      "🌐 Network Security & Scanning",
+      "🕵️ Reconnaissance & OSINT",
+      "🛡️ Vulnerability Assessment",
+      "🌍 Web Application Security",
+      "🐧 Kali Linux & Linux Fundamentals",
+      "🧰 Industry-Standard Cybersecurity Tools",
+      "🎯 Module-Based Capstone Projects",
+      "📄 Professional Security Reporting",
+      "🏆 Performance-Based Awards",
+      "🎓 Certificate of Completion",
+      "🚀 Beginner-Friendly Learning Path",
+      "🔥 Final Ethical Hacking Assessment"
+    ],
+    "awards": [
+      "🥇 Best Overall Performer",
+      "🔐 Best Ethical Hacker",
+      "🛡️ Best Vulnerability Analyst",
+      "⚡ Most Improved Student",
+      "🏅 Best Capstone Project"
+    ]
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "fullName": "Jane Smith",
+    "email": "jane@example.com",
+    "phone": "623456789",
+    "city": "Yaounde",
+    "pathway": "software-development",
+    "applicationID": "app-1788904280658-es60ig",
+    "status": "pending_verification",
+    "createdAt": "2026-09-08T21:51:20.658Z"
+  }
+]

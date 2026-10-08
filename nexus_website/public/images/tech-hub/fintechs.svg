@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <linearGradient id="bg-fintech" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B091A"/>
+      <stop offset="50%" stop-color="#1A153B"/>
+      <stop offset="100%" stop-color="#2D1B69"/>
+    </linearGradient>
+    <linearGradient id="violet-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+    <pattern id="grid-fintech" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#A855F7" stroke-width="0.5" stroke-opacity="0.15"/>
+    </pattern>
+    <filter id="glow-fintech">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg-fintech)"/>
+  <rect width="800" height="400" fill="url(#grid-fintech)"/>
+
+  <circle cx="400" cy="200" r="140" fill="#A855F7" fill-opacity="0.06" filter="url(#glow-fintech)"/>
+
+  <!-- Fintech Shield & Wallet Illustration -->
+  <g transform="translate(400, 190)">
+    <!-- Security Shield -->
+    <path d="M 0 -90 L 70 -50 V 20 C 70 70 0 100 0 100 C 0 100 -70 70 -70 20 V -50 Z" fill="#1A153B" stroke="url(#violet-glow)" stroke-width="3" filter="url(#glow-fintech)"/>
+    
+    <!-- Inner Lock / Currency Symbol -->
+    <circle cx="0" cy="-5" r="22" fill="none" stroke="#00F0FF" stroke-width="2.5" filter="url(#glow-fintech)"/>
+    <path d="M -8 15 L 8 -25 M -8 -5 L 8 -5" stroke="#00F0FF" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Orbital Nodes -->
+    <circle cx="-130" cy="0" r="10" fill="#00F0FF" filter="url(#glow-fintech)"/>
+    <path d="M -120 0 L -70 0" stroke="#00F0FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+    
+    <circle cx="130" cy="0" r="10" fill="#A855F7" filter="url(#glow-fintech)"/>
+    <path d="M 70 0 L 120 0" stroke="#A855F7" stroke-width="1.5" stroke-dasharray="3,3"/>
+  </g>
+
+  <!-- Tagline Badge -->
+  <rect x="50" y="40" width="180" height="32" rx="16" fill="#1A153B" stroke="#A855F7" stroke-opacity="0.4"/>
+  <text x="140" y="61" font-family="monospace" font-size="12" fill="#A855F7" text-anchor="middle" font-weight="bold">FINTECH &amp; BANKING</text>
+</svg>

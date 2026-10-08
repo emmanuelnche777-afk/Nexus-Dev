@@ -1,0 +1,26 @@
+[
+  {
+    "id": "chat-1",
+    "visitorName": "John Doe",
+    "visitorEmail": "john@example.com",
+    "visitorPhone": "+237677000001",
+    "messages": [
+      {
+        "id": "msg-1",
+        "sender": "visitor",
+        "text": "Hello, I'm interested in your Software Development program.",
+        "timestamp": "2026-09-01T10:00:00Z"
+      },
+      {
+        "id": "msg-2",
+        "sender": "admin",
+        "text": "Hi John! Thanks for your interest. When would you like to start?",
+        "timestamp": "2026-09-01T10:05:00Z",
+        "adminName": "Emmanuel N."
+      }
+    ],
+    "status": "active",
+    "createdAt": "2026-09-01T10:00:00Z",
+    "updatedAt": "2026-09-01T10:05:00Z"
+  }
+]

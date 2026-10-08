@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1d52"/>
+      <stop offset="55%" stop-color="#2e3192"/>
+      <stop offset="100%" stop-color="#0f123f"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-opacity="0.06"/>
+    </pattern>
+    <radialGradient id="glow" cx="70%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#5cdefe" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#5cdefe" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <rect width="800" height="450" fill="url(#grid)"/>
+  <rect width="800" height="450" fill="url(#glow)"/>
+  <g transform="translate(330 145)" stroke="#5cdefe" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M90 30 L30 80 L90 130"/>
+    <path d="M150 30 L210 80 L150 130"/>
+    <line x1="128" y1="20" x2="112" y2="140"/>
+  </g>
+  <text x="48" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="6" fill="#ffffff" opacity="0.9">NEXUS ACADEMY</text>
+  <text x="760" y="415" font-family="'Segoe UI', Arial, sans-serif" font-size="16" letter-spacing="3" fill="#ffffff" opacity="0.45" text-anchor="end">SOFTWARE DEVELOPMENT</text>
+</svg>

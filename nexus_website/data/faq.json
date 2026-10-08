@@ -1,0 +1,51 @@
+[
+  {
+    "id": "faq-1",
+    "question": "What is NEXUS?",
+    "answer": "NEXUS is empowering the next generation of Cameroonian technologists to learn hands-on, build meaningful projects, and solve the problems that matter most.",
+    "category": "general",
+    "order": 1
+  },
+  {
+    "id": "faq-2",
+    "question": "How does NEXUS Academy training work?",
+    "answer": "Hands-on, cohort-based training in software engineering, cybersecurity, and digital safety, designed to turn ambitious Cameroonians into capable builders.",
+    "category": "academy",
+    "order": 2
+  },
+  {
+    "id": "faq-3",
+    "question": "What services does NEXUS Tech Hub provide?",
+    "answer": "Our commercial arm provides software development, cloud solutions, and technical consulting to local and international clients, powering our public mission.",
+    "category": "tech-hub",
+    "order": 3
+  },
+  {
+    "id": "faq-4",
+    "question": "What is the mission of NEXUS Foundation?",
+    "answer": "The impact arm of NEXUS, aspiring to build lasting solutions for real Cameroonian problems and open a path into tech for every young person.",
+    "category": "foundation",
+    "order": 4
+  },
+  {
+    "id": "faq-5",
+    "question": "How does NEXUS Mentorship work?",
+    "answer": "Connecting emerging tech talent with experienced industry mentors for structured 1-on-1 career guidance, technical growth, and leadership development.",
+    "category": "mentorship",
+    "order": 5
+  },
+  {
+    "id": "faq-6",
+    "question": "How can I verify an Academy registration?",
+    "answer": "Public tool for employers, partners, and institutions to confirm student registrations and certificate authenticity.",
+    "category": "academy",
+    "order": 6
+  },
+  {
+    "id": "faq-7",
+    "question": "How can my organization partner with NEXUS?",
+    "answer": "We partner with organizations, institutions, tech companies, and NGOs to advance digital trust, skill building, and security in Cameroon.",
+    "category": "general",
+    "order": 7
+  }
+]

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <linearGradient id="bg-ngos" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#041217"/>
+      <stop offset="50%" stop-color="#0B2B26"/>
+      <stop offset="100%" stop-color="#164E63"/>
+    </linearGradient>
+    <linearGradient id="emerald-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <pattern id="grid-ngo" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#10B981" stroke-width="0.5" stroke-opacity="0.15"/>
+    </pattern>
+    <filter id="glow-ngo">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg-ngos)"/>
+  <rect width="800" height="400" fill="url(#grid-ngo)"/>
+
+  <circle cx="400" cy="200" r="140" fill="#10B981" fill-opacity="0.06" filter="url(#glow-ngo)"/>
+
+  <!-- Global NGO Impact Illustration -->
+  <g transform="translate(400, 200)">
+    <!-- Globe outline rings -->
+    <circle cx="0" cy="0" r="110" fill="none" stroke="#10B981" stroke-opacity="0.3" stroke-width="1.5"/>
+    <ellipse cx="0" cy="0" rx="110" ry="45" fill="none" stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.5"/>
+    <ellipse cx="0" cy="0" rx="45" ry="110" fill="none" stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.5"/>
+
+    <!-- Connected Nodes -->
+    <circle cx="-70" cy="-40" r="8" fill="#10B981" filter="url(#glow-ngo)"/>
+    <circle cx="60" cy="-50" r="8" fill="#06B6D4" filter="url(#glow-ngo)"/>
+    <circle cx="80" cy="40" r="8" fill="#10B981" filter="url(#glow-ngo)"/>
+    <circle cx="-50" cy="60" r="8" fill="#06B6D4" filter="url(#glow-ngo)"/>
+    <circle cx="0" cy="0" r="12" fill="url(#emerald-glow)" filter="url(#glow-ngo)"/>
+
+    <!-- Connection lines -->
+    <path d="M -70 -40 L 0 0 L 60 -50 M 0 0 L 80 40 M 0 0 L -50 60" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="4,4"/>
+  </g>
+
+  <!-- Tagline Badge -->
+  <rect x="50" y="40" width="180" height="32" rx="16" fill="#0B2B26" stroke="#10B981" stroke-opacity="0.4"/>
+  <text x="140" y="61" font-family="monospace" font-size="12" fill="#10B981" text-anchor="middle" font-weight="bold">NGO &amp; IMPACT</text>
+</svg>

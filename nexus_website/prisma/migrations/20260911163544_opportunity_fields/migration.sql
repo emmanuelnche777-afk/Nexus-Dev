@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "Opportunity" ADD COLUMN     "assignedTo" TEXT,
+ADD COLUMN     "autoCloseDate" TIMESTAMP(3),
+ADD COLUMN     "category" TEXT NOT NULL DEFAULT 'partnership',
+ADD COLUMN     "closedAt" TIMESTAMP(3),
+ADD COLUMN     "contactEmail" TEXT,
+ADD COLUMN     "contactName" TEXT,
+ADD COLUMN     "contactPhone" TEXT,
+ADD COLUMN     "expectedValue" INTEGER,
+ADD COLUMN     "nextSteps" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "notes" TEXT,
+ADD COLUMN     "probability" INTEGER,
+ADD COLUMN     "source" TEXT NOT NULL DEFAULT 'website',
+ADD COLUMN     "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "value" INTEGER;

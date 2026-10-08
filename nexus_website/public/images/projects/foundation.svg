@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg-foundation" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#041214"/>
+      <stop offset="50%" stop-color="#09292c"/>
+      <stop offset="100%" stop-color="#0e4348"/>
+    </linearGradient>
+    <linearGradient id="teal-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#45afe1"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#bg-foundation)"/>
+
+  <g filter="url(#card-shadow)">
+    <rect x="80" y="60" width="1040" height="680" rx="16" fill="#061c20" stroke="#45afe1" stroke-opacity="0.3" stroke-width="1.5"/>
+    
+    <rect x="80" y="60" width="1040" height="48" rx="16" fill="#0b2c32"/>
+    <circle cx="112" cy="84" r="6" fill="#ef4444"/>
+    <circle cx="132" cy="84" r="6" fill="#eab308"/>
+    <circle cx="99" cy="84" r="6" fill="#22c55e"/>
+    
+    <rect x="200" y="70" width="640" height="28" rx="8" fill="#041214" stroke="#45afe1" stroke-opacity="0.2"/>
+    <text x="220" y="89" font-family="sans-serif" font-size="12" fill="#45afe1">🔒 https://foundation.nexus.cm/campaign-tracker</text>
+
+    <!-- Top Header -->
+    <rect x="80" y="108" width="1040" height="64" fill="#09292c"/>
+    <text x="120" y="147" font-family="sans-serif" font-weight="900" font-size="20" fill="#ffffff">NEXUS FOUNDATION<tspan fill="#22c55e"> IMPACT</tspan></text>
+    
+    <!-- Impact Stats Cards -->
+    <rect x="120" y="195" width="460" height="150" rx="12" fill="#0e393e" stroke="#22c55e" stroke-opacity="0.3"/>
+    <text x="150" y="230" font-family="sans-serif" font-size="13" fill="#45afe1">Community Members Reached</text>
+    <text x="150" y="280" font-family="sans-serif" font-weight="extrabold" font-size="40" fill="#ffffff">10,000+</text>
+    <text x="150" y="315" font-family="sans-serif" font-size="12" fill="#22c55e">MoMo Scam Prevention &amp; Digital Literacy</text>
+
+    <rect x="610" y="195" width="470" height="150" rx="12" fill="#0e393e" stroke="#22c55e" stroke-opacity="0.3"/>
+    <text x="640" y="230" font-family="sans-serif" font-size="13" fill="#45afe1">School &amp; Outreach Sessions</text>
+    <text x="640" y="280" font-family="sans-serif" font-weight="extrabold" font-size="40" fill="#22c55e">50+ Active</text>
+    <text x="640" y="315" font-family="sans-serif" font-size="12" fill="#ffffff" opacity="0.7">Secondary Schools &amp; Universities</text>
+
+    <!-- Regional Map & Outreach Tracking Bar Chart -->
+    <rect x="120" y="375" width="960" height="330" rx="12" fill="#0e393e" stroke="#45afe1" stroke-opacity="0.2"/>
+    <text x="150" y="415" font-family="sans-serif" font-weight="bold" font-size="16" fill="#ffffff">Regional Outreach Distribution (Cameroon)</text>
+    
+    <!-- Bars -->
+    <rect x="150" y="600" width="80" height="50" rx="4" fill="#45afe1"/>
+    <text x="165" y="670" font-family="sans-serif" font-size="11" fill="#ffffff">Douala</text>
+    
+    <rect x="270" y="520" width="80" height="130" rx="4" fill="#22c55e"/>
+    <text x="280" y="670" font-family="sans-serif" font-size="11" fill="#ffffff">Bamenda</text>
+
+    <rect x="390" y="480" width="80" height="170" rx="4" fill="url(#teal-glow)"/>
+    <text x="405" y="670" font-family="sans-serif" font-size="11" fill="#ffffff">Buea</text>
+
+    <rect x="510" y="550" width="80" height="100" rx="4" fill="#45afe1"/>
+    <text x="520" y="670" font-family="sans-serif" font-size="11" fill="#ffffff">Yaoundé</text>
+
+    <rect x="630" y="580" width="80" height="70" rx="4" fill="#22c55e"/>
+    <text x="645" y="670" font-family="sans-serif" font-size="11" fill="#ffffff">Bafoussam</text>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "student-1788904280669",
+    "studentCode": "NEXUS-SO-26-0001",
+    "fullName": "Jane Smith",
+    "email": "jane@example.com",
+    "phone": "623456789",
+    "programSlug": "software-development",
+    "registrationDate": "2026-09-08T21:51:20.658Z",
+    "status": "Pending",
+    "paymentStatus": "Pending",
+    "notes": "Created from public application app-1788904280658-es60ig",
+    "createdBy": "public",
+    "createdAt": "2026-09-08T21:51:20.658Z",
+    "updatedAt": "2026-09-08T21:51:20.658Z"
+  }
+]

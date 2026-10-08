@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <linearGradient id="bg-momo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A1003"/>
+      <stop offset="50%" stop-color="#331E05"/>
+      <stop offset="100%" stop-color="#4D2D00"/>
+    </linearGradient>
+    <linearGradient id="amber-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#EF4444"/>
+    </linearGradient>
+    <pattern id="grid-momo" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#F59E0B" stroke-width="0.5" stroke-opacity="0.15"/>
+    </pattern>
+    <filter id="glow-momo">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg-momo)"/>
+  <rect width="800" height="400" fill="url(#grid-momo)"/>
+
+  <circle cx="400" cy="200" r="140" fill="#F59E0B" fill-opacity="0.06" filter="url(#glow-momo)"/>
+
+  <!-- MoMo Smartphone & Lightning Transfer Illustration -->
+  <g transform="translate(400, 200)">
+    <!-- Smartphone Frame -->
+    <rect x="-55" y="-95" width="110" height="190" rx="18" fill="#1C1917" stroke="url(#amber-glow)" stroke-width="3" filter="url(#glow-momo)"/>
+    <rect x="-45" y="-75" width="90" height="135" rx="6" fill="#0C0A09"/>
+    
+    <!-- Lightning Bolt / Signal Waves -->
+    <path d="M 5 -35 L -15 0 L 0 0 L -5 35 L 15 0 L 0 0 Z" fill="url(#amber-glow)" filter="url(#glow-momo)"/>
+
+    <!-- Wave Signal Arcs -->
+    <path d="M -90 0 A 90 90 0 0 1 -70 -50" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2,4"/>
+    <path d="M 70 -50 A 90 90 0 0 1 90 0" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2,4"/>
+    <path d="M -110 0 A 110 110 0 0 1 -85 -70" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 85 -70 A 110 110 0 0 1 110 0" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Tagline Badge -->
+  <rect x="50" y="40" width="180" height="32" rx="16" fill="#331E05" stroke="#F59E0B" stroke-opacity="0.4"/>
+  <text x="140" y="61" font-family="monospace" font-size="12" fill="#F59E0B" text-anchor="middle" font-weight="bold">MOBILE MONEY</text>
+</svg>

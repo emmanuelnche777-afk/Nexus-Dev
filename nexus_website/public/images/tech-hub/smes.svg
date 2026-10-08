@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <linearGradient id="bg-smes" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050B14"/>
+      <stop offset="50%" stop-color="#0A192F"/>
+      <stop offset="100%" stop-color="#0F2B48"/>
+    </linearGradient>
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#7000FF"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#00F0FF" stroke-width="0.5" stroke-opacity="0.15"/>
+    </pattern>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg-smes)"/>
+  <rect width="800" height="400" fill="url(#grid)"/>
+
+  <!-- Glowing background circles -->
+  <circle cx="400" cy="200" r="140" fill="#00F0FF" fill-opacity="0.05" filter="url(#glow)"/>
+  <circle cx="600" cy="100" r="80" fill="#7000FF" fill-opacity="0.08" filter="url(#glow)"/>
+
+  <!-- Enterprise/SME Growth Illustration -->
+  <g transform="translate(180, 80)">
+    <!-- Grid Base -->
+    <path d="M 0 200 L 440 200" stroke="#00F0FF" stroke-opacity="0.3" stroke-width="2"/>
+    
+    <!-- Growth Bar Charts -->
+    <rect x="40" y="140" width="40" height="60" rx="4" fill="#0A192F" stroke="#00F0FF" stroke-opacity="0.4" stroke-width="1.5"/>
+    <rect x="120" y="100" width="40" height="100" rx="4" fill="#0A192F" stroke="#00F0FF" stroke-opacity="0.6" stroke-width="1.5"/>
+    <rect x="200" y="70" width="40" height="130" rx="4" fill="#0A192F" stroke="#00F0FF" stroke-opacity="0.8" stroke-width="1.5"/>
+    <rect x="280" y="30" width="40" height="170" rx="4" fill="url(#cyan-glow)" filter="url(#glow)"/>
+
+    <!-- Trend Line with Nodes -->
+    <path d="M 60 130 L 140 90 L 220 50 L 300 20 L 380 10" fill="none" stroke="#00F0FF" stroke-width="3" filter="url(#glow)"/>
+    <circle cx="60" cy="130" r="5" fill="#00F0FF" filter="url(#glow)"/>
+    <circle cx="140" cy="90" r="5" fill="#00F0FF" filter="url(#glow)"/>
+    <circle cx="220" cy="50" r="5" fill="#00F0FF" filter="url(#glow)"/>
+    <circle cx="300" cy="20" r="6" fill="#FFFFFF" filter="url(#glow)"/>
+    <circle cx="380" cy="10" r="7" fill="#00F0FF" filter="url(#glow)"/>
+  </g>
+
+  <!-- Tagline Badge -->
+  <rect x="50" y="40" width="180" height="32" rx="16" fill="#0A192F" stroke="#00F0FF" stroke-opacity="0.4"/>
+  <text x="140" y="61" font-family="monospace" font-size="12" fill="#00F0FF" text-anchor="middle" font-weight="bold">SME ENTERPRISE</text>
+</svg>

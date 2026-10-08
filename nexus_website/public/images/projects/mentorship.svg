@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg-mentorship" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14061a"/>
+      <stop offset="50%" stop-color="#280f33"/>
+      <stop offset="100%" stop-color="#421452"/>
+    </linearGradient>
+    <linearGradient id="purple-cyan-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5cdefe"/>
+      <stop offset="100%" stop-color="#45afe1"/>
+    </linearGradient>
+    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#bg-mentorship)"/>
+
+  <g filter="url(#card-shadow)">
+    <rect x="80" y="60" width="1040" height="680" rx="16" fill="#1b0a24" stroke="#5cdefe" stroke-opacity="0.3" stroke-width="1.5"/>
+    
+    <rect x="80" y="60" width="1040" height="48" rx="16" fill="#2d123b"/>
+    <circle cx="112" cy="84" r="6" fill="#ef4444"/>
+    <circle cx="132" cy="84" r="6" fill="#eab308"/>
+    <circle cx="99" cy="84" r="6" fill="#22c55e"/>
+    
+    <rect x="200" y="70" width="640" height="28" rx="8" fill="#14061a" stroke="#5cdefe" stroke-opacity="0.2"/>
+    <text x="220" y="89" font-family="sans-serif" font-size="12" fill="#5cdefe">🔒 https://mentorship.nexus.cm/pairings</text>
+
+    <!-- Top Nav -->
+    <rect x="80" y="108" width="1040" height="64" fill="#280f33"/>
+    <text x="120" y="147" font-family="sans-serif" font-weight="900" font-size="20" fill="#ffffff">MENTORSHIP MATCHING<tspan fill="#5cdefe"> SYSTEM</tspan></text>
+
+    <!-- Active Pairings Cards -->
+    <rect x="120" y="195" width="960" height="150" rx="12" fill="#2e133d" stroke="#5cdefe" stroke-opacity="0.3"/>
+    <circle cx="170" cy="270" r="32" fill="url(#purple-cyan-glow)"/>
+    <text x="220" y="255" font-family="sans-serif" font-weight="bold" font-size="18" fill="#ffffff">Senior Software Engineer ↔ Academy Graduate</text>
+    <text x="220" y="285" font-family="sans-serif" font-size="13" fill="#5cdefe">6-Month Cycle · Weekly 1-on-1 Sessions · Portfolio Review</text>
+    <rect x="940" y="250" width="110" height="34" rx="8" fill="#5cdefe" fill-opacity="0.2" stroke="#5cdefe"/>
+    <text x="965" y="271" font-family="sans-serif" font-size="11" font-weight="bold" fill="#5cdefe">ACTIVE</text>
+
+    <rect x="120" y="375" width="960" height="150" rx="12" fill="#2e133d" stroke="#5cdefe" stroke-opacity="0.3"/>
+    <circle cx="170" cy="450" r="32" fill="url(#purple-cyan-glow)"/>
+    <text x="220" y="435" font-family="sans-serif" font-weight="bold" font-size="18" fill="#ffffff">Lead UI/UX Designer ↔ Design Graduate</text>
+    <text x="220" y="465" font-family="sans-serif" font-size="13" fill="#5cdefe">Design Systems · Figma Workshops · Career Mentorship</text>
+    <rect x="940" y="430" width="110" height="34" rx="8" fill="#5cdefe" fill-opacity="0.2" stroke="#5cdefe"/>
+    <text x="965" y="451" font-family="sans-serif" font-size="11" font-weight="bold" fill="#5cdefe">ACTIVE</text>
+
+    <!-- Session Schedule Tracker -->
+    <rect x="120" y="555" width="960" height="150" rx="12" fill="#2e133d" stroke="#45afe1" stroke-opacity="0.2"/>
+    <text x="150" y="595" font-family="sans-serif" font-weight="bold" font-size="15" fill="#ffffff">Upcoming Mentorship Sessions This Week</text>
+  </g>
+</svg>

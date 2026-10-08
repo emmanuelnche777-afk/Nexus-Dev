@@ -1,0 +1,1012 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id                          String               @id @default(cuid())
+  email                       String               @unique
+  name                        String
+  active                      Boolean              @default(true)
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+  createdBy                   String?
+  deletedAt                   DateTime?
+  invitedAt                   DateTime?
+  invitedTokenExpiresAt       DateTime?
+  invitedTokenHash            String?
+  momoPayoutName              String?
+  momoPayoutNumber            String?
+  passwordHash                String?
+  passwordResetTokenExpiresAt DateTime?
+  passwordResetTokenHash      String?
+  phone                       String
+  salaryAmount                Decimal?
+  salaryCurrency              String?              @default("XAF")
+  status                      AdminStatus          @default(ACTIVE)
+  twoFactorEnabled            Boolean              @default(false)
+  twoFactorSecret             String?
+  role                        AdminRole            @default(SUPPORT_STAFF)
+  backupCodes                 Json?
+  bootstrappedFromIp          String?
+  bootstrappedAt              DateTime?
+  activityLogs                ActivityLog[]
+  receivedMessages            AdminMessage[]       @relation("ReceivedMessages")
+  sentMessages                AdminMessage[]       @relation("SentMessages")
+  sessions                    AdminSession[]
+  notifications               NotificationLog[]
+  newsletterCampaigns         NewsletterCampaign[]
+  assignedServiceOrders       ServiceOrder[]       @relation("TechHubOrderAssignee")
+
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model AdminSession {
+  id           String    @id @default(cuid())
+  userId       String
+  token        String    @unique
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now())
+  ipAddress    String?
+  lastActiveAt DateTime  @default(now())
+  userAgent    String?
+  user         AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model LoginAttempt {
+  id          String   @id @default(cuid())
+  identifier  String
+  attemptedAt DateTime @default(now())
+  success     Boolean
+  ipAddress   String?
+  userAgent   String?
+
+  @@index([identifier, attemptedAt])
+  @@index([attemptedAt])
+}
+
+model ApiRateLimitBucket {
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@id([key, windowStart])
+  @@index([windowStart])
+}
+
+model AdminMessage {
+  id          String    @id @default(cuid())
+  senderId    String
+  recipientId String
+  body        String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  recipient   AdminUser @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender      AdminUser @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, readAt])
+  @@index([senderId, recipientId])
+}
+
+model Program {
+  id                        String                            @id @default(cuid())
+  slug                      String                            @unique
+  title                     String
+  durationWeeks             Int                               @default(12)
+  price                     Int                               @default(0)
+  currency                  String                            @default("XAF")
+  thumbnailUrl              String?
+  shortDescription          String?
+  fullDescription           String?
+  targetAudience            String?
+  certification             String?
+  tools                     String[]                          @default([])
+  highlights                String[]                          @default([])
+  status                    String                            @default("active")
+  createdAt                 DateTime                          @default(now())
+  updatedAt                 DateTime                          @updatedAt
+  awards                    String[]                          @default([])
+  curriculumModules         Json                              @default("[]")
+  featured                  Boolean                           @default(false)
+  instructors               Json                              @default("[]")
+  overviewVideoUrl          String?
+  overviewVideoPublicId     String?
+  requirements              String[]                          @default([])
+  cohorts                   Cohort[]
+  payments                  Payment[]
+  registrations             Registration[]
+  students                  Student[]
+  privateEnrollmentRequests AcademyPrivateEnrollmentRequest[]
+
+  @@index([status])
+  @@index([slug])
+}
+
+model AcademyPrivateEnrollmentRequest {
+  id                String    @id @default(cuid())
+  programSlug       String
+  fullName          String
+  email             String
+  phone             String
+  preferredFormat   String
+  preferredSchedule String
+  message           String?
+  status            String    @default("new")
+  adminNotes        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  program           Program   @relation(fields: [programSlug], references: [slug], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([programSlug])
+  @@index([email])
+}
+
+model Cohort {
+  id                  String         @id
+  programId           String?
+  programSlug         String
+  name                String
+  period              String
+  status              String         @default("open")
+  startDate           DateTime
+  endDate             DateTime
+  applicationDeadline DateTime
+  maxStudents         Int            @default(30)
+  currentStudents     Int            @default(0)
+  location            String
+  schedule            String
+  price               Int            @default(0)
+  currency            String         @default("XAF")
+  description         String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  program             Program        @relation(fields: [programSlug], references: [slug], onDelete: Cascade)
+  registrations       Registration[]
+  students            Student[]
+
+  @@index([programSlug])
+  @@index([status])
+}
+
+model Registration {
+  id            String    @id
+  programId     String?
+  programSlug   String
+  cohortId      String?
+  fullName      String
+  email         String
+  phone         String
+  pathway       String?
+  motivation    String?
+  status        String    @default("new")
+  certificateId String?   @unique
+  verifiedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  payment       Payment?
+  cohort        Cohort?   @relation(fields: [cohortId], references: [id])
+  program       Program   @relation(fields: [programSlug], references: [slug], onDelete: Cascade)
+
+  @@index([email])
+  @@index([status])
+  @@index([programSlug])
+}
+
+model Student {
+  id                     String                        @id @default(cuid())
+  studentCode            String                        @unique
+  fullName               String
+  email                  String
+  phone                  String
+  programSlug            String
+  cohortId               String?
+  registrationDate       DateTime                      @default(now())
+  status                 String                        @default("Pending")
+  paymentStatus          String                        @default("Pending")
+  notes                  String?
+  createdBy              String                        @default("public")
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+  payments               Payment[]
+  program                Program                       @relation(fields: [programSlug], references: [slug], onDelete: Cascade)
+  cohort                 Cohort?                       @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  notificationDeliveries AcademyNotificationDelivery[]
+
+  @@index([studentCode])
+  @@index([email])
+  @@index([cohortId])
+}
+
+model AcademyNotificationDelivery {
+  id                String    @id @default(cuid())
+  studentId         String
+  template          String
+  channel           String
+  recipient         String
+  status            String    @default("pending")
+  attemptCount      Int       @default(0)
+  providerMessageId String?
+  error             String?
+  lastAttemptAt     DateTime?
+  sentAt            DateTime?
+  sentById          String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  student           Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, template, channel])
+  @@index([status, updatedAt])
+  @@index([studentId, updatedAt])
+}
+
+model Payment {
+  id             String          @id @default(cuid())
+  studentId      String?
+  registrationId String?         @unique
+  studentCode    String?
+  amount         Int
+  currency       String          @default("XAF")
+  reference      String?
+  status         String          @default("Pending")
+  notes          String?
+  verifiedBy     String?
+  verifiedAt     DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  programSlug    String?
+  method         PaymentProvider @default(MTN)
+  program        Program?        @relation(fields: [programSlug], references: [slug])
+  registration   Registration?   @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  student        Student?        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([studentCode])
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   @default("general")
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([order])
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String    @default("")
+  content     Json      @default("[]")
+  contentFr   Json      @default("[]")
+  author      String?
+  coverImage  String?
+  tags        String[]  @default([])
+  published   Boolean   @default(true)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    String    @default("general")
+  categoryFr  String?
+  date        String?
+  excerptFr   String?
+  featured    Boolean   @default(false)
+  readingTime String?
+  seo         Json?
+  titleFr     String?
+
+  @@index([published])
+  @@index([slug])
+  @@index([category])
+}
+
+model JourneyEntry {
+  id          String       @id @default(cuid())
+  date        String
+  title       String
+  description String
+  fullContent String?
+  status      String       @default("live")
+  category    String       @default("company")
+  priority    Int          @default(5)
+  tags        String[]     @default([])
+  media       Json         @default("[]")
+  projectName String?
+  phaseOrder  Int?
+  progress    Int?
+  outcome     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  socialPosts SocialPost[]
+
+  @@index([category])
+  @@index([status])
+  @@index([priority])
+}
+
+/// A public opportunity listing: something NEXUS is recruiting or advertising,
+/// that a member of the public may apply to.
+///
+/// Internal business-development fields (value, probability, expected value,
+/// contact, next steps) live on `Deal` instead. They were previously columns on
+/// this same row, which meant one table had to mean both "a job ad" and "a
+/// sponsorship negotiation" — and the public feed could not tell them apart.
+/// They remain here for now, unused, pending a follow-up migration to drop them.
+model Opportunity {
+  id            String                   @id @default(cuid())
+  title         String
+  description   String
+  type          String
+  location      String?
+  url           String?
+  deadline      DateTime?
+  status        String                   @default("open")
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  assignedTo    String?
+  autoCloseDate DateTime?
+  category      String                   @default("partnership")
+  closedAt      DateTime?
+  contactEmail  String?
+  contactName   String?
+  contactPhone  String?
+  expectedValue Int?
+  nextSteps     String[]                 @default([])
+  notes         String?
+  probability   Int?
+  source        String                   @default("website")
+  tags          String[]                 @default([])
+  value         Int?
+  /// Authoritative lifecycle. Prefer this over the legacy `status` column.
+  lifecycle     OpportunityStatus        @default(DRAFT)
+  publishedAt   DateTime?
+  deal          Deal?
+  applications  OpportunityApplication[]
+
+  @@index([type])
+  @@index([lifecycle])
+  @@index([createdAt])
+}
+
+/// Internal business-development record attached to a public listing: what it is
+/// worth, how likely it is, who owns chasing it, and who to call.
+///
+/// Never published. `app/api/opportunities/route.ts` selects an explicit field
+/// list and this model is not part of it, so no field here can reach the public
+/// feed.
+model Deal {
+  id            String       @id @default(cuid())
+  opportunityId String?      @unique
+  value         Int?
+  probability   Int?
+  expectedValue Int?
+  nextSteps     String[]     @default([])
+  tags          String[]     @default([])
+  contactName   String?
+  contactEmail  String?
+  contactPhone  String?
+  assignedToId  String?
+  notes         String?
+  source        String       @default("website")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([assignedToId])
+}
+
+/// Public "Join Us" pathway submissions (student / client / volunteer /
+/// mentor / partner / investor). Completely separate from the Academy
+/// Student/Registration/Payment pipeline and from the legacy
+/// PendingApplication table, which is never read by any admin surface.
+model PathwayInquiry {
+  id              String               @id @default(cuid())
+  pathway         String
+  fullName        String
+  email           String
+  phone           String?
+  /// Pathway-specific fields. The collected field set differs per pathway, so
+  /// these are stored as JSON rather than as one sparse column per field.
+  details         Json
+  status          PathwayInquiryStatus @default(NEW)
+  adminNotes      String?
+  responseMessage String?
+  respondedAt     DateTime?
+  reviewedAt      DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  ownerAssignedAt DateTime?
+  /// Staff member currently responsible. Null means it sits in the shared queue.
+  ownerId         String?
+  /// When the record entered its current status, for SLA queries.
+  stageEnteredAt  DateTime             @default(now())
+
+  @@index([status])
+  @@index([pathway])
+  @@index([email])
+  @@index([createdAt])
+  @@index([ownerId, status])
+  @@index([status, stageEnteredAt])
+}
+
+/// Applications submitted against a single Opportunity listing.
+///
+/// `onDelete: Restrict` is deliberate. This was `Cascade`, so deleting an
+/// Opportunity destroyed every applicant's name, email, phone, message and
+/// uploaded-document links with it — one admin click, and the applicant records
+/// were unrecoverable while the Cloudinary assets stayed orphaned. Restrict makes
+/// the database refuse the delete; the API turns that into a clear error and
+/// offers archive instead.
+model OpportunityApplication {
+  id              String                       @id @default(cuid())
+  opportunityId   String
+  fullName        String
+  email           String
+  phone           String?
+  message         String?
+  /// Cloudinary URLs for uploaded certificates / proof of work.
+  documentUrls    String[]                     @default([])
+  status          OpportunityApplicationStatus @default(NEW)
+  adminNotes      String?
+  responseMessage String?
+  respondedAt     DateTime?
+  reviewedAt      DateTime?
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+  ownerAssignedAt DateTime?
+  /// Staff member currently responsible. Null means it sits in the shared queue.
+  ownerId         String?
+  /// When the record entered its current status, for SLA queries.
+  stageEnteredAt  DateTime                     @default(now())
+  opportunity     Opportunity                  @relation(fields: [opportunityId], references: [id])
+
+  @@index([status])
+  @@index([opportunityId])
+  @@index([email])
+  @@index([createdAt])
+  @@index([ownerId, status])
+  @@index([status, stageEnteredAt])
+}
+
+model Service {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  tagline      String?
+  description  String
+  imageUrl     String?
+  iconKey      String   @default("Code2")
+  features     String[] @default([])
+  deliverables String[] @default([])
+  status       String   @default("active")
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model TechHubFeaturedWork {
+  id            String   @id @default(cuid())
+  title         String
+  titleFr       String?
+  category      String
+  categoryFr    String?
+  description   String
+  descriptionFr String?
+  features      String[] @default([])
+  featuresFr    String[] @default([])
+  imageUrl      String
+  linkUrl       String   @default("")
+  linkType      String   @default("website")
+  linkLabel     String?
+  linkLabelFr   String?
+  status        String   @default("draft")
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, sortOrder])
+}
+
+model ServiceOrder {
+  id                 String                @id @default(cuid())
+  serviceType        String
+  serviceTypeKey     String
+  clientName         String
+  clientEmail        String
+  clientPhone        String?
+  company            String?
+  description        String
+  budget             String?
+  timeline           String?
+  status             String                @default("new")
+  priority           String                @default("medium")
+  assignedTo         String?
+  assignedToId       String?
+  notes              String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  desiredTimeline    String?
+  quoteAmount        Int?
+  quoteCurrency      String                @default("XAF")
+  quoteDurationWeeks Int?
+  source             String                @default("web")
+  contracts          Contract[]
+  milestones         Milestone[]
+  conversations      TechHubConversation[]
+  assignee           AdminUser?            @relation("TechHubOrderAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([serviceTypeKey])
+  @@index([clientEmail])
+  @@index([assignedToId])
+}
+
+model Milestone {
+  id          String       @id @default(cuid())
+  orderId     String
+  title       String
+  description String?
+  status      String       @default("pending")
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  order       ServiceOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model AiVideo {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  videoUrl     String
+  thumbnailUrl String?
+  category     String   @default("tutorial")
+  duration     String?
+  tags         String[] @default([])
+  status       String   @default("published")
+  views        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+}
+
+model AiConversation {
+  id            String   @id
+  language      String   @default("en")
+  startedAt     DateTime @default(now())
+  lastMessageAt DateTime @default(now())
+  messageCount  Int      @default(0)
+  messages      Json     @default("[]")
+
+  @@index([lastMessageAt])
+  @@index([language])
+}
+
+model AiEscalation {
+  id             String    @id @default(cuid())
+  conversationId String
+  clientName     String
+  clientEmail    String
+  reason         String
+  aiMessages     Json      @default("[]")
+  status         String    @default("new")
+  assignedTo     String?
+  adminResponse  String?
+  respondedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AiKnowledge {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String   @default("general")
+  approved  Boolean  @default(false)
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([approved])
+}
+
+model AdminChatMessage {
+  id          String   @id @default(cuid())
+  sessionId   String
+  language    String   @default("en")
+  userMessage String
+  aiReply     String
+  hasImage    Boolean  @default(false)
+  timestamp   DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([timestamp])
+}
+
+model SocialPost {
+  id             String        @id @default(cuid())
+  platform       String
+  title          String
+  content        String
+  mediaUrl       String?
+  status         String        @default("draft")
+  scheduledAt    DateTime?
+  publishedAt    DateTime?
+  approvedAt     DateTime?
+  approvedBy     String?
+  journeyEntryId String?
+  tags           String[]      @default([])
+  createdBy      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  journeyEntry   JourneyEntry? @relation(fields: [journeyEntryId], references: [id], onDelete: SetNull)
+
+  @@unique([journeyEntryId, platform])
+  @@index([platform])
+  @@index([status])
+  @@index([journeyEntryId])
+}
+
+model LiveSupportSession {
+  id          String    @id @default(cuid())
+  clientName  String
+  clientEmail String
+  clientPhone String?
+  reason      String
+  adminName   String?
+  endedAt     DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([createdAt])
+}
+
+model ContactMessage {
+  id         String   @id
+  name       String
+  email      String
+  phone      String?
+  department String   @default("general")
+  subject    String
+  message    String
+  status     String   @default("new")
+  source     String   @default("contact-form")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status])
+  @@index([department, status, createdAt])
+  @@index([createdAt])
+  @@index([email])
+}
+
+model PartnerInquiry {
+  id            String                    @id
+  name          String
+  email         String
+  organization  String
+  type          String
+  message       String
+  status        String                    @default("new")
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  interest      String?
+  website       String?
+  adminNotes    String?
+  phone         String?
+  proposedValue Int?
+  reviewedAt    DateTime?
+  emailMessages PartnershipInquiryEmail[]
+
+  @@index([status])
+  @@index([type])
+}
+
+model PartnershipInquiryEmail {
+  id                String         @id @default(cuid())
+  inquiryId         String
+  direction         String         @default("outbound")
+  subject           String
+  body              String         @db.Text
+  deliveryStatus    String         @default("pending")
+  providerMessageId String?
+  deliveryError     String?        @db.Text
+  createdAt         DateTime       @default(now())
+  inquiry           PartnerInquiry @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, createdAt])
+  @@index([deliveryStatus])
+}
+
+model NewsletterSubscriber {
+  id        String   @id
+  email     String   @unique
+  status    String   @default("active")
+  source    String   @default("footer")
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model NewsletterCampaign {
+  id             String               @id @default(cuid())
+  subject        String
+  body           String               @db.Text
+  status         String               @default("draft")
+  recipientCount Int                  @default(0)
+  sentCount      Int                  @default(0)
+  failedCount    Int                  @default(0)
+  skippedCount   Int                  @default(0)
+  createdById    String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  completedAt    DateTime?
+  createdBy      AdminUser?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  deliveries     NewsletterDelivery[]
+
+  @@index([status, createdAt])
+  @@index([createdById])
+}
+
+model NewsletterDelivery {
+  id                        String             @id @default(cuid())
+  campaignId                String
+  email                     String
+  status                    String             @default("pending")
+  providerMessageId         String?
+  unsubscribeTokenEncrypted String?            @db.Text
+  unsubscribeTokenHash      String?            @unique
+  error                     String?            @db.Text
+  claimedAt                 DateTime?
+  sentAt                    DateTime?
+  createdAt                 DateTime           @default(now())
+  campaign                  NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, email])
+  @@index([campaignId, status, createdAt])
+  @@index([email])
+}
+
+model PendingApplication {
+  id         String   @id
+  name       String
+  email      String
+  phone      String?
+  role       String?
+  message    String?
+  status     String   @default("new")
+  adminNotes String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status])
+  @@index([email])
+}
+
+model LiveChat {
+  id           String   @id
+  visitorName  String
+  visitorEmail String
+  visitorPhone String?
+  messages     Json     @default("[]")
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+  @@index([updatedAt])
+}
+
+model NotificationLog {
+  id       String     @id
+  type     String
+  to       String
+  subject  String?
+  body     String?
+  status   String
+  result   Json?
+  error    String?
+  sentById String?
+  sentAt   DateTime   @default(now())
+  sentBy   AdminUser? @relation(fields: [sentById], references: [id])
+
+  @@index([type])
+  @@index([status])
+  @@index([sentAt])
+}
+
+model ActivityLog {
+  id        String     @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime   @default(now())
+  user      AdminUser? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+model SiteSettings {
+  id                         String   @id @default("singleton")
+  siteName                   String   @default("NEXUS")
+  tagline                    String?
+  contactEmail               String?
+  maintenanceMode            Boolean  @default(false)
+  maintenanceMessage         String?
+  maintenanceMessageFr       String?
+  metadata                   Json     @default("{}")
+  updatedAt                  DateTime @updatedAt
+  academyOverviewVideoPoster String?
+  academyOverviewVideoUrl    String?
+  academyOverviewVideoPublicId String?
+}
+
+/// A professional project contract generated for a Tech Hub client.
+/// Auto-created from a ServiceOrder; once signed by both parties it is locked
+/// (read-only: view / search / retrieve only).
+model Contract {
+  id                      String        @id @default(cuid())
+  orderId                 String?
+  clientName              String
+  clientEmail             String
+  clientPhone             String?
+  company                 String?
+  serviceType             String
+  serviceTypeKey          String
+  contractType            String
+  templateKey             String        @default("standard-project-agreement")
+  bodyTemplate            String
+  status                  String        @default("draft")
+  totalAmount             Int?
+  currency                String        @default("XAF")
+  depositPercent          Int?
+  depositAmount           Int?
+  milestones              String
+  scopeText               String?
+  bodyText                String
+  pdfUrl                  String?
+  signedPdfUrl            String?
+  signatureClientUrl      String?
+  signatureTechHubUrl     String?
+  signatureClientAt       DateTime?
+  signatureTechHubAt      DateTime?
+  signatureToken          String?
+  signatureTokenExpiresAt DateTime?
+  archivedAt              DateTime?
+  sentAt                  DateTime?
+  viewedAt                DateTime?
+  signedAt                DateTime?
+  expiresAt               DateTime?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  order                   ServiceOrder? @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([status])
+  @@index([clientEmail])
+  @@index([contractType])
+}
+
+/// A dedicated conversation session between the Tech Hub manager and one client.
+/// One session per ServiceOrder; created automatically when the admin starts
+/// contacting the client about their order.
+model TechHubConversation {
+  id            String           @id @default(cuid())
+  orderId       String
+  subject       String?
+  clientName    String
+  clientEmail   String
+  clientPhone   String?
+  company       String?
+  serviceType   String
+  status        String           @default("open")
+  archivedAt    DateTime?
+  lastMessageAt DateTime         @updatedAt
+  createdAt     DateTime         @default(now())
+  order         ServiceOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  messages      TechHubMessage[]
+
+  @@index([orderId])
+  @@index([status])
+  @@index([archivedAt])
+}
+
+/// A single message/note inside a TechHubConversation session.
+model TechHubMessage {
+  id             String              @id @default(cuid())
+  conversationId String
+  sender         String
+  senderName     String?
+  content        String
+  isInternal     Boolean             @default(false)
+  hasAttachment  Boolean             @default(false)
+  channel        String?
+  createdAt      DateTime            @default(now())
+  conversation   TechHubConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+/// Lifecycle of a public Opportunity listing.
+///
+/// Replaces the free-text `status` column, which the public feed compared with
+/// `status === "open"`: typing `Open` or `CLOSED` silently hid or leaked a
+/// listing. `DRAFT` is the default, so a row is never public until an admin
+/// explicitly publishes it — an internal sponsorship negotiation left at the
+/// old default of "open" could previously appear on /join-us.
+enum OpportunityStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ACADEMY_MANAGER
+  TECH_HUB_MANAGER
+  FOUNDATION_MANAGER
+  MENTORSHIP_COORDINATOR
+  CONTENT_EDITOR
+  SUPPORT_STAFF
+  NEWSLETTER_MANAGER
+  FINANCE
+}
+
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum PaymentProvider {
+  MTN
+  ORANGE
+}
+
+enum PathwayInquiryStatus {
+  NEW
+  REVIEWED
+  RESPONDED
+}
+
+enum OpportunityApplicationStatus {
+  NEW
+  UNDER_REVIEW
+  MATCHED
+  NOT_A_FIT
+}

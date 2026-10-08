@@ -1,0 +1,23 @@
+{
+  "siteName": "NEXUS",
+  "siteDescription": "",
+  "contactEmail": "nexustechnolgies7@gmail.com",
+  "supportEmail": "nexustechnolgies7@gmail.com",
+  "phone": "+237653137081",
+  "address": "Buea, Cameroon",
+  "newsletter": true,
+  "blog": true,
+  "aiAssistant": true,
+  "certificateVerification": true,
+  "maintenanceMode": false,
+  "maintenanceMessage": "We'll be back soon!",
+  "maintenanceMessageFr": "Nous serons de retour bientôt !",
+  "paymentInfo": {
+    "mtnNumber": "+237673746047",
+    "mtnLabel": "MTN Mobile Money",
+    "orangeNumber": "",
+    "orangeLabel": "Orange Money",
+    "instructions": "Pay via Mobile Money to the number above, then submit your payment proof during registration. Keep your transaction ID handy.",
+    "instructionsFr": "Payer via Mobile Money au numéro ci-dessous, puis soumettez votre preuve de paiement lors de l'inscription. Conservez votre ID de transaction."
+  }
+}

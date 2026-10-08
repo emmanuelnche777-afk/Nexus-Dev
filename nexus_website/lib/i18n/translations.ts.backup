@@ -1,0 +1,1567 @@
+export type Language = "en" | "fr";
+
+export interface TranslationKeys {
+  nav: {
+    home: string;
+    about: string;
+    divisions: string;
+    journey: string;
+    blog: string;
+    joinUs: string;
+    contact: string;
+    partnerWithUs: string;
+    ourDivisions: string;
+    language: string;
+    switchLanguage: string;
+  };
+  footer: {
+    tagline: string;
+    site: string;
+    resources: string;
+    legal: string;
+    privacyPolicy: string;
+    termsOfUse: string;
+    contactUs: string;
+    faq: string;
+    verifyRegistration: string;
+    governanceNote: string;
+    copyright: string;
+    builtWith: string;
+  };
+  splash: {
+    madeInCameroon: string;
+    builtForTheWorld: string;
+    poweredByNexus: string;
+    initializing: string;
+  };
+  divisions: {
+    academy: { name: string; tagline: string; desc: string };
+    techHub: { name: string; tagline: string; desc: string };
+    foundation: { name: string; tagline: string; desc: string };
+    mentorship: { name: string; tagline: string; desc: string };
+  };
+  home: {
+    badge: string;
+    heroTitle: string;
+    heroCountry: string;
+    heroSubtitle: string;
+    partnerBtn: string;
+    joinBtn: string;
+    explorePrograms: string;
+    gapEyebrow: string;
+    gapTitle: string;
+    gapDesc: string;
+    gapPoint1Title: string;
+    gapPoint1Text: string;
+    gapPoint2Title: string;
+    gapPoint2Text: string;
+    gapPoint3Title: string;
+    gapPoint3Text: string;
+    gapClosing: string;
+    ecosystemEyebrow: string;
+    ecosystemTitle: string;
+    ecosystemDesc: string;
+    learnMore: string;
+    whyEyebrow: string;
+    whyTitle: string;
+    whyDesc: string;
+    whyPoint1Title: string;
+    whyPoint1Text: string;
+    whyPoint2Title: string;
+    whyPoint2Text: string;
+    whyPoint3Title: string;
+    whyPoint3Text: string;
+    whyPoint4Title: string;
+    whyPoint4Text: string;
+    whyPoint5Title: string;
+    whyPoint5Text: string;
+    peopleEyebrow: string;
+    peopleTitle: string;
+    peopleDesc: string;
+    meetFounders: string;
+    seeJourney: string;
+    liveEyebrow: string;
+    liveTitle: string;
+    liveDesc: string;
+    latestMilestone: string;
+    milestoneTitle: string;
+    milestoneDesc: string;
+    openTimeline: string;
+    fromBlog: string;
+    blogHighlightTitle: string;
+    blogHighlightDesc: string;
+    readPost: string;
+    ctaTitle: string;
+    ctaDesc: string;
+  };
+  about: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    description: string;
+    storyEyebrow: string;
+    storyTitle: string;
+    storyP1: string;
+    storyP2: string;
+    storyP3: string;
+    storyP4: string;
+    purposeEyebrow: string;
+    purposeTitle: string;
+    missionTitle: string;
+    missionText: string;
+    visionTitle: string;
+    visionText: string;
+    directionTitle: string;
+    directionText: string;
+    identityEyebrow: string;
+    identityTitle: string;
+    identityDesc: string;
+    fact1Label: string;
+    fact1Value: string;
+    fact2Label: string;
+    fact2Value: string;
+    fact3Label: string;
+    fact3Value: string;
+    fact4Label: string;
+    fact4Value: string;
+    fact5Label: string;
+    fact5Value: string;
+    whatWeDoEyebrow: string;
+    whatWeDoTitle: string;
+    whatWeDoDesc: string;
+    wd1Title: string;
+    wd1Text: string;
+    wd2Title: string;
+    wd2Text: string;
+    wd3Title: string;
+    wd3Text: string;
+    wd4Title: string;
+    wd4Text: string;
+    wd5Title: string;
+    wd5Text: string;
+    wd6Title: string;
+    wd6Text: string;
+    valuesEyebrow: string;
+    valuesTitle: string;
+    valuesDesc: string;
+    val1Name: string;
+    val1Text: string;
+    val2Name: string;
+    val2Text: string;
+    val3Name: string;
+    val3Text: string;
+    val4Name: string;
+    val4Text: string;
+    val5Name: string;
+    val5Text: string;
+    govTitle: string;
+    govText: string;
+    teamEyebrow: string;
+    teamTitle: string;
+    teamDesc: string;
+    role1Title: string;
+    role1Text: string;
+    role2Title: string;
+    role2Text: string;
+    role3Title: string;
+    role3Text: string;
+    role4Title: string;
+    role4Text: string;
+    role5Title: string;
+    role5Text: string;
+    ctaTitle: string;
+    ctaDesc: string;
+  };
+  divisionsPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    overviewEyebrow: string;
+    overviewTitle: string;
+    overviewDesc: string;
+    academyTagline: string;
+    academyDesc: string;
+    techHubTagline: string;
+    techHubDesc: string;
+    foundationTagline: string;
+    foundationDesc: string;
+    mentorshipTagline: string;
+    mentorshipDesc: string;
+    exploreBtn: string;
+    systemEyebrow: string;
+    systemTitle: string;
+    systemDesc: string;
+    s1Title: string;
+    s1Text: string;
+    s2Title: string;
+    s2Text: string;
+    s3Title: string;
+    s3Text: string;
+    ctaTitle: string;
+    ctaDesc: string;
+  };
+  academyPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    whatEyebrow: string;
+    whatTitle: string;
+    whatDesc: string;
+    f1Title: string;
+    f1Text: string;
+    f2Title: string;
+    f2Text: string;
+    f3Title: string;
+    f3Text: string;
+    cohortEyebrow: string;
+    cohortTitle: string;
+    cohortDesc: string;
+    tableProgram: string;
+    tableCohort: string;
+    tableStatus: string;
+    cohort1Name: string;
+    cohort1Label: string;
+    cohort1Status: string;
+    cohortNote: string;
+    programGraphicDesign: string;
+    programUiUxDesign: string;
+    programSoftwareDevelopment: string;
+    programAiAutomation: string;
+    verifyBadge: string;
+    verifyTitle: string;
+    verifyText: string;
+    verifyBtn: string;
+    ctaTitle: string;
+    ctaDesc: string;
+  };
+  techHubPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    servicesEyebrow: string;
+    servicesTitle: string;
+    servicesDesc: string;
+    s1Title: string;
+    s1Text: string;
+    s2Title: string;
+    s2Text: string;
+    s3Title: string;
+    s3Text: string;
+    s4Title: string;
+    s4Text: string;
+    approachEyebrow: string;
+    approachTitle: string;
+    approachDesc: string;
+    a1Title: string;
+    a1Text: string;
+    a2Title: string;
+    a2Text: string;
+    a3Title: string;
+    a3Text: string;
+    targetSmes: string;
+    targetNgos: string;
+    targetFintechs: string;
+    targetMomoOperators: string;
+    ctaTitle: string;
+    ctaDesc: string;
+  };
+  foundationPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    pillarsEyebrow: string;
+    pillarsTitle: string;
+    pillarsDesc: string;
+    p1Title: string;
+    p1Text: string;
+    p2Title: string;
+    p2Text: string;
+    p3Title: string;
+    p3Text: string;
+    impactEyebrow: string;
+    impactTitle: string;
+    impactDesc: string;
+    i1Num: string;
+    i1Title: string;
+    i1Text: string;
+    i2Num: string;
+    i2Title: string;
+    i2Text: string;
+    i3Num: string;
+    i3Title: string;
+    i3Text: string;
+    ctaTitle: string;
+    ctaDesc: string;
+  };
+  mentorshipPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    howEyebrow: string;
+    howTitle: string;
+    howDesc: string;
+    h1Title: string;
+    h1Text: string;
+    h2Title: string;
+    h2Text: string;
+    h3Title: string;
+    h3Text: string;
+    whoEyebrow: string;
+    whoTitle: string;
+    whoDesc: string;
+    w1Title: string;
+    w1Text: string;
+    w2Title: string;
+    w2Text: string;
+    ctaTitle: string;
+    ctaDesc: string;
+  };
+  contactPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    getInTouchEyebrow: string;
+    getInTouchTitle: string;
+    getInTouchDesc: string;
+    directTitle: string;
+    formTitle: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    divisionLabel: string;
+    selectDivision: string;
+    generalInquiry: string;
+    messageLabel: string;
+    messagePlaceholder: string;
+    sendBtn: string;
+    sentSuccess: string;
+    whatsapp: string;
+    email: string;
+    phone: string;
+    chatOnWhatsApp: string;
+  };
+  journeyPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    timelineEyebrow: string;
+    timelineTitle: string;
+    timelineDesc: string;
+    m1Title: string;
+    m1Desc: string;
+    m2Title: string;
+    m2Desc: string;
+    m3Title: string;
+    m3Desc: string;
+    m4Title: string;
+    m4Desc: string;
+  };
+  blogPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    readTime: string;
+    readMore: string;
+    backToBlog: string;
+  };
+  faqPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    catAll: string;
+    catGeneral: string;
+    catAcademy: string;
+    catTechHub: string;
+    catFoundation: string;
+    catMentorship: string;
+    q1Question: string;
+    q2Question: string;
+    q3Question: string;
+    q4Question: string;
+    q5Question: string;
+    q6Question: string;
+    q7Question: string;
+    stillQuestions: string;
+    contactSupport: string;
+  };
+  joinUsPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    whyJoinEyebrow: string;
+    whyJoinTitle: string;
+    whyJoinDesc: string;
+    b1Title: string;
+    b1Text: string;
+    b2Title: string;
+    b2Text: string;
+    b3Title: string;
+    b3Text: string;
+    openRolesEyebrow: string;
+    openRolesTitle: string;
+    openRolesDesc: string;
+    r1Title: string;
+    r1Division: string;
+    r1Desc: string;
+    r2Title: string;
+    r2Division: string;
+    r2Desc: string;
+    r3Title: string;
+    r3Division: string;
+    r3Desc: string;
+    applyBtn: string;
+  };
+  partnerPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    waysEyebrow: string;
+    waysTitle: string;
+    waysDesc: string;
+    w1Title: string;
+    w1Text: string;
+    w2Title: string;
+    w2Text: string;
+    w3Title: string;
+    w3Text: string;
+    formTitle: string;
+    orgNameLabel: string;
+    orgPlaceholder: string;
+    contactNameLabel: string;
+    contactPlaceholder: string;
+    emailLabel: string;
+    typeLabel: string;
+    typeSelect: string;
+    tCorporate: string;
+    tEducational: string;
+    tGovernment: string;
+    tNgo: string;
+    tIndividual: string;
+    messageLabel: string;
+    messagePlaceholder: string;
+    submitBtn: string;
+    sentSuccess: string;
+  };
+  verifyPage: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    searchPlaceholder: string;
+    verifyBtn: string;
+    howTitle: string;
+    howText: string;
+    sampleCode: string;
+    noResult: string;
+    validResult: string;
+    registrationId: string;
+  };
+  legalPage: {
+    termsTitle: string;
+    termsSubtitle: string;
+    privacyTitle: string;
+    privacySubtitle: string;
+    lastUpdated: string;
+    termsIntro: string;
+    termsAcceptanceTitle: string;
+    termsAcceptanceText: string;
+    termsContentTitle: string;
+    termsContentText: string;
+    termsEnrollmentTitle: string;
+    termsEnrollmentText: string;
+    termsResponsibilityTitle: string;
+    termsResponsibilityText: string;
+    termsGuaranteeTitle: string;
+    termsGuaranteeText: string;
+    termsChangesTitle: string;
+    termsChangesText: string;
+    privacyIntro: string;
+    pCollectTitle: string;
+    pCollectText: string;
+    pUseTitle: string;
+    pUseText: string;
+    pEnrollTitle: string;
+    pEnrollText: string;
+    pSecurityTitle: string;
+    pSecurityText: string;
+    pRightsTitle: string;
+    pRightsText: string;
+    pContactTitle: string;
+    pContactText: string;
+  };
+  notFoundPage: {
+    title: string;
+    subtitle: string;
+    backBtn: string;
+  };
+  common: {
+    backToHome: string;
+    submit: string;
+    loading: string;
+    success: string;
+    error: string;
+  };
+}
+
+export const translations: Record<Language, TranslationKeys> = {
+  en: {
+    nav: {
+      home: "Home",
+      about: "About",
+      divisions: "Divisions",
+      journey: "Journey",
+      blog: "Blog",
+      joinUs: "Join Us",
+      contact: "Contact",
+      partnerWithUs: "Partner With Us",
+      ourDivisions: "Our Divisions",
+      language: "EN",
+      switchLanguage: "FR",
+    },
+    footer: {
+      tagline: "NEXUS is Cameroon's emerging technology company. Four divisions, one mission. Built in 2026. Learn. Build. Impact.",
+      site: "Site",
+      resources: "Resources",
+      legal: "Legal",
+      privacyPolicy: "Privacy Policy",
+      termsOfUse: "Terms of Use",
+      contactUs: "Contact Us",
+      faq: "Frequently Asked Questions (FAQ)",
+      verifyRegistration: "Verify Registration",
+      governanceNote: "Remote-first · Cameroon. Governed by our Constitution & Code of Conduct.",
+      copyright: "All rights reserved.",
+      builtWith: "Built with integrity in Cameroon.",
+    },
+    splash: {
+      madeInCameroon: "Made in Cameroon",
+      builtForTheWorld: "Built for the World",
+      poweredByNexus: "Powered by NEXUS",
+      initializing: "Initialising secure environment…",
+    },
+    divisions: {
+      academy: {
+        name: "NEXUS Academy",
+        tagline: "Practical tech training, cohort-based.",
+        desc: "Equipping young Cameroonians with industry-relevant digital skills through intensive, hands-on cohorts.",
+      },
+      techHub: {
+        name: "NEXUS Tech Hub",
+        tagline: "Services, products & client work.",
+        desc: "Delivering world-class software development, cloud infrastructure, and technical consulting for global and local clients.",
+      },
+      foundation: {
+        name: "NEXUS Foundation",
+        tagline: "Community impact & digital literacy.",
+        desc: "Fostering digital trust, combating online fraud, and bridging the tech literacy gap across Cameroonian communities.",
+      },
+      mentorship: {
+        name: "NEXUS Mentorship",
+        tagline: "Structured people development.",
+        desc: "Connecting rising tech talent with experienced industry leaders for career guidance, leadership, and professional growth.",
+      },
+    },
+    home: {
+      badge: "Remote-first · Cameroon",
+      heroTitle: "Building digital trust for",
+      heroCountry: "Cameroon",
+      heroSubtitle: "NEXUS is empowering the next generation of Cameroonian technologists to learn hands-on, build meaningful projects, and solve the problems that matter most.",
+      partnerBtn: "Partner With Us",
+      joinBtn: "Join the Team",
+      explorePrograms: "Explore Our Programs",
+      gapEyebrow: "The gap",
+      gapTitle: "The gap between education and real impact",
+      gapDesc: "Young Cameroonians are talented and ambitious, but the bridge between what they learn in school and what the real world demands barely exists.",
+      gapPoint1Title: "Theory without practice",
+      gapPoint1Text: "Students graduate with degrees but lack the hands-on skills employers and communities need. Practical training changes that.",
+      gapPoint2Title: "Untapped potential",
+      gapPoint2Text: "Cameroon has a young, connected, ambitious population, but too few structured pathways to turn talent into real-world impact.",
+      gapPoint3Title: "Problems waiting for solutions",
+      gapPoint3Text: "From local businesses to public services, real problems persist because the people who could solve them haven't been given the tools.",
+      gapClosing: "NEXUS exists to close this gap by learning practical skills, building real solutions, and creating lasting impact in our communities.",
+      ecosystemEyebrow: "One ecosystem",
+      ecosystemTitle: "Four divisions, one mission",
+      ecosystemDesc: "Each division of NEXUS solves a different piece of the same problem.",
+      learnMore: "Learn more",
+      whyEyebrow: "Why NEXUS",
+      whyTitle: "Why NEXUS",
+      whyDesc: "We built NEXUS to be as serious as it is ambitious.",
+      whyPoint1Title: "Remote-first by design",
+      whyPoint1Text: "Built to work from anywhere in Cameroon, and beyond, so the best talent and the biggest impact aren't limited by geography.",
+      whyPoint2Title: "Community-driven",
+      whyPoint2Text: "We believe technology should serve the people who need it most. NEXUS channels engineering talent toward solving everyday challenges: protecting communities online, creating opportunities, and building tools that matter.",
+      whyPoint3Title: "Learning through doing",
+      whyPoint3Text: "Growth at NEXUS isn't theoretical. Every cohort, every project, every community initiative is hands-on, built to teach, challenge, and develop real skills that last.",
+      whyPoint4Title: "Innovation at the core",
+      whyPoint4Text: "NEXUS encourages its members to think beyond employment. We build products, explore new ideas, and foster an entrepreneurial spirit that turns local problems into tech-driven solutions.",
+      whyPoint5Title: "Connected across Cameroon",
+      whyPoint5Text: "Our team spans Bamenda, Buea, and beyond, working remotely with a shared purpose. Distance doesn't divide us; it proves that great technology can come from anywhere.",
+      peopleEyebrow: "The team",
+      peopleTitle: "Built by a team that cares",
+      peopleDesc: "A growing team of young Cameroonian engineers, designers, and community builders, united by one mission: building technology that solves real problems.",
+      meetFounders: "Learn about us",
+      seeJourney: "See our journey",
+      liveEyebrow: "Live from NEXUS",
+      liveTitle: "What's happening now",
+      liveDesc: "Fresh updates from our public journey: milestones and announcements, newest first.",
+      latestMilestone: "Latest milestone",
+      milestoneTitle: "NEXUS public site skeleton is live",
+      milestoneDesc: "Phase 1 of the website is up. The foundation is in place and the ecosystem is taking shape.",
+      openTimeline: "Open the timeline",
+      fromBlog: "From the blog",
+      blogHighlightTitle: "Why Cameroon needs a digital trust movement",
+      blogHighlightDesc: "The problem behind every division of NEXUS, and the work we have ahead of us.",
+      readPost: "Read the post",
+      ctaTitle: "Ready to build digital trust with us?",
+      ctaDesc: "Whether you want to learn with us, partner on projects, or simply be part of a growing tech community, there's a place for you.",
+    },
+    about: {
+      eyebrow: "About NEXUS",
+      title: "About NEXUS",
+      subtitle: "Building the next generation of Cameroonian technologists.",
+      description: "Empowering young Cameroonians to turn knowledge into technology that matters.",
+      storyEyebrow: "Our story",
+      storyTitle: "Who we are and how we started",
+      storyP1: "NEXUS was founded by a group of young Cameroonian engineers from Bamenda and Buea who saw a disconnect. Talented people, growing demand for technology, but very few structured pathways to bridge the two.",
+      storyP2: "We started with a question: what if young Cameroonians had a community where they could learn practical skills, build real products, and work together to solve the problems they see every day, from small business challenges to community safety?",
+      storyP3: "That question became NEXUS. What started as a shared idea between engineers quickly grew into a four-division company training, building, serving clients, protecting communities, and mentoring the next generation.",
+      storyP4: "Today, we operate fully remote from Bamenda and Buea, growing steadily, solving real problems, and proving that world-class technology can come from right here in Cameroon.",
+      purposeEyebrow: "Our purpose",
+      purposeTitle: "Why we exist and where we're going",
+      missionTitle: "Our mission",
+      missionText: "To bridge the gap between potential and opportunity in Cameroon by training talent, building technology, serving businesses and communities, and creating a structured environment where young technologists thrive.",
+      visionTitle: "Our vision",
+      visionText: "A Cameroon where technology is built locally to solve local problems where young engineers have the skills, the platforms, and the support to create solutions that serve businesses, communities, and the nation.",
+      directionTitle: "Where we're going",
+      directionText: "We are building toward a future where NEXUS is a leading technology company in Cameroon, delivering world-class services, training the next generation of engineers, partnering with government and institutions, and building digital solutions that move the country forward.",
+      identityEyebrow: "About NEXUS",
+      identityTitle: "Who we are at a glance",
+      identityDesc: "NEXUS is a Cameroonian technology company with four divisions: training, engineering, community impact, and mentorship, working together to build a better digital future for Cameroon.",
+      fact1Label: "Founded",
+      fact1Value: "2026",
+      fact2Label: "Headquarters",
+      fact2Value: "Remote-first (Bamenda & Buea)",
+      fact3Label: "Type",
+      fact3Value: "Technology company",
+      fact4Label: "Divisions",
+      fact4Value: "4 active divisions",
+      fact5Label: "Motto",
+      fact5Value: "Learn. Build. Impact.",
+      whatWeDoEyebrow: "What we do",
+      whatWeDoTitle: "Technology that serves Cameroon",
+      whatWeDoDesc: "NEXUS operates across four divisions: each solving a different piece of the same challenge: using technology to create real impact.",
+      wd1Title: "Training the next generation",
+      wd1Text: "Cohort-based programs that equip young Cameroonians with practical, job-ready skills in software development, cybersecurity, design, and AI.",
+      wd2Title: "Building software & products",
+      wd2Text: "From web applications to mobile platforms, we design and build digital solutions for clients and communities.",
+      wd3Title: "Serving businesses & organizations",
+      wd3Text: "We partner with SMEs, startups, NGOs, and institutions to deliver reliable technology services, from consulting to full-stack development.",
+      wd4Title: "Partnering with government",
+      wd4Text: "We work with public institutions to build digital solutions that strengthen governance, improve services, and serve citizens.",
+      wd5Title: "Protecting communities",
+      wd5Text: "Through public education campaigns, digital safety workshops, and awareness initiatives, we help Cameroonians navigate the digital world safely.",
+      wd6Title: "Mentoring future leaders",
+      wd6Text: "Connecting emerging talent with experienced professionals for structured career guidance, skill development, and leadership growth.",
+      valuesEyebrow: "Our values",
+      valuesTitle: "What guides us",
+      valuesDesc: "The principles that shape how we learn, build, and work together.",
+      val1Name: "Integrity",
+      val1Text: "We do what we say, in our code, our training, and how we treat each other.",
+      val2Name: "Practicality",
+      val2Text: "We value skills you can apply today over theory you might use someday.",
+      val3Name: "Community",
+      val3Text: "We measure success by the impact we create in Cameroonian communities, not by numbers on a screen.",
+      val4Name: "Collaboration",
+      val4Text: "We grow by working together, sharing ideas, solving problems, and building as a team.",
+      val5Name: "Excellence",
+      val5Text: "Remote work doesn't mean lower standards. We hold ourselves to world-class work.",
+      govTitle: "How we operate",
+      govText: "NEXUS is built on structure and shared responsibility. Our team follows clear processes, communicates openly, and holds itself to high standards, because building trust means being accountable.",
+      teamEyebrow: "Who we are",
+      teamTitle: "The NEXUS Team",
+      teamDesc: "We are a remote collective of young Cameroonian technologists. From Bamenda to Buea, our engineers, designers, and community builders work together to bridge the gap between education and real-world impact.",
+      role1Title: "Chief Executive",
+      role1Text: "Drives strategy, training, and engineering across the NEXUS ecosystem, ensuring every initiative creates real impact.",
+      role2Title: "Chief Operations",
+      role2Text: "Ensures governance, accountability, and smooth operations across all divisions, keeping NEXUS running with structure and purpose.",
+      role3Title: "Engineering",
+      role3Text: "Builds software, cloud infrastructure, and digital solutions for clients and communities, turning ideas into working products.",
+      role4Title: "Training",
+      role4Text: "Designs and delivers hands-on cohort programs that equip students with practical, job-ready tech skills.",
+      role5Title: "Community",
+      role5Text: "Manages outreach, mentorship, and digital safety campaigns, connecting NEXUS to the people and communities we serve.",
+      ctaTitle: "Want to be part of the story?",
+      ctaDesc: "Whether you want to learn with us, partner on projects, or simply be part of a growing tech community, there's a place for you.",
+    },
+    divisionsPage: {
+      eyebrow: "Our Divisions",
+      title: "One ecosystem, four focused arms.",
+      description: "NEXUS operates across four distinct divisions, each solving a critical piece of the digital trust and capability gap in Cameroon.",
+      overviewEyebrow: "Division breakdown",
+      overviewTitle: "Explore the NEXUS ecosystem",
+      overviewDesc: "Select any division below to learn about its mission, programs, and team.",
+      academyTagline: "Practical tech training, cohort-based.",
+      academyDesc: "Cohorts focused on software engineering, cybersecurity, product design, and digital safety. Hands-on projects over passive lectures.",
+      techHubTagline: "Services, products & client work.",
+      techHubDesc: "Engineering team delivering client projects, internal products, and technical consulting. Income generated supports our public programs.",
+      foundationTagline: "Community impact & digital literacy.",
+      foundationDesc: "Our non-profit arm tackling misinformation, Mobile Money scams, school outreach, and public digital safety campaigns across Cameroon.",
+      mentorshipTagline: "Structured people development.",
+      mentorshipDesc: "Connecting rising tech talent with experienced industry mentors. Structured 1-on-1 guidance, portfolio reviews, and career pathing.",
+      exploreBtn: "Explore division",
+      systemEyebrow: "How it works together",
+      systemTitle: "An integrated model for impact",
+      systemDesc: "The four divisions feed into each other to create a self-sustaining ecosystem.",
+      s1Title: "Train in Academy",
+      s1Text: "Students learn real skills in hands-on cohorts.",
+      s2Title: "Build in Tech Hub",
+      s2Text: "Graduates apply skills to real client products and services.",
+      s3Title: "Protect in Foundation & Mentorship",
+      s3Text: "Mentors guide leaders while Foundation protects the public.",
+      ctaTitle: "Want to get involved in a division?",
+      ctaDesc: "Whether you want to learn, hire our team, volunteer for impact, or become a mentor, there's a place for you.",
+    },
+    academyPage: {
+      eyebrow: "NEXUS Academy",
+      title: "Practical tech training for Cameroon's next generation.",
+      description: "Hands-on, cohort-based training in software engineering, cybersecurity, and digital safety, designed to turn ambitious Cameroonians into capable builders.",
+      whatEyebrow: "What makes us different",
+      whatTitle: "Training built for real outcomes",
+      whatDesc: "We don't teach theory for exams. We build skills for careers.",
+      f1Title: "Cohort-based learning",
+      f1Text: "Learn alongside motivated peers in structured, timed cohorts with dedicated mentors.",
+      f2Title: "Real-world projects",
+      f2Text: "Build production-grade applications and security tools that go into your portfolio.",
+      f3Title: "Official verification",
+      f3Text: "Every graduate receives a verifiable registration ID that employers and partners can confirm online.",
+      cohortEyebrow: "Upcoming cohorts",
+      cohortTitle: "Join an upcoming training program",
+      cohortDesc: "Applications open soon for our next intensive cohorts.",
+      tableProgram: "Program",
+      tableCohort: "Cohort",
+      tableStatus: "Status",
+      cohort1Name: "Software Development",
+      cohort1Label: "Cohort 1",
+      cohort1Status: "Open",
+      cohortNote: "New cohorts open as seats fill.",
+      programGraphicDesign: "Graphic Design",
+      programUiUxDesign: "UI/UX Design",
+      programSoftwareDevelopment: "Software Development",
+      programAiAutomation: "AI Automation",
+      verifyBadge: "Employer Tool",
+      verifyTitle: "Verify student & graduate certificates",
+      verifyText: "Use our public verification tool to confirm the authenticity of any NEXUS Academy certificate or registration ID.",
+      verifyBtn: "Open verification tool",
+      ctaTitle: "Ready to start your tech journey?",
+      ctaDesc: "Apply for our next cohort or join our community to get notified when applications open.",
+    },
+    techHubPage: {
+      eyebrow: "NEXUS Tech Hub",
+      title: "Engineering services & digital products built in Cameroon.",
+      description: "Our commercial arm provides software development, cloud solutions, and technical consulting to local and international clients, powering our public mission.",
+      servicesEyebrow: "What we build",
+      servicesTitle: "Engineering services for ambitious organizations",
+      servicesDesc: "We bring modern software practices and deep local context to every project.",
+      s1Title: "Custom Web & Mobile Apps",
+      s1Text: "Full-stack web applications and cross-platform mobile apps built with React, Next.js, and modern cloud architecture.",
+      s2Title: "Cloud & Infrastructure",
+      s2Text: "Secure cloud deployment, CI/CD pipelines, and server architecture tailored for reliability and performance.",
+      s3Title: "Digital Security Audits",
+      s3Text: "Vulnerability assessments, code reviews, and security hardening to protect client systems from fraud and breaches.",
+      s4Title: "Technical Consulting",
+      s4Text: "Architecture guidance, digital transformation strategy, and technical advisory for startups and established enterprises.",
+      approachEyebrow: "Our approach",
+      approachTitle: "Why work with NEXUS Tech Hub",
+      approachDesc: "We combine international technical standards with local execution.",
+      a1Title: "Remote-first agility",
+      a1Text: "Distributed team working asynchronously with high communication standards.",
+      a2Title: "Reinvested profits",
+      a2Text: "Revenue from Tech Hub directly funds our free Foundation literacy programs.",
+      a3Title: "Vetted talent",
+      a3Text: "Built from top graduates of NEXUS Academy under senior technical leadership.",
+      targetSmes: "SMEs",
+      targetNgos: "NGOs",
+      targetFintechs: "Fintechs",
+      targetMomoOperators: "MoMo Operators",
+      ctaTitle: "Have a project in mind?",
+      ctaDesc: "Let's discuss how NEXUS Tech Hub can build your software solution.",
+    },
+    foundationPage: {
+      eyebrow: "NEXUS Foundation",
+      title: "Protecting communities & building digital trust.",
+      description: "Our non-profit arm leads public awareness campaigns against Mobile Money scams, fights online misinformation, and teaches digital safety across Cameroon.",
+      pillarsEyebrow: "Key initiatives",
+      pillarsTitle: "Protecting citizens where they are exposed",
+      pillarsDesc: "We focus on the digital safety issues impacting ordinary Cameroonians daily.",
+      p1Title: "Mobile Money Scam Prevention",
+      p1Text: "Public education campaigns explaining common MoMo and Orange Money phishing tactics and how to avoid them.",
+      p2Title: "Misinformation Awareness",
+      p2Text: "Fact-checking literacy workshops and tools to help communities verify news before sharing.",
+      p3Title: "Youth & School Outreach",
+      p3Text: "Interactive digital safety sessions in secondary schools and universities across Cameroon.",
+      impactEyebrow: "Our impact goal",
+      impactTitle: "Measuring safety in numbers",
+      impactDesc: "We track our work by the real people we inform and protect.",
+      i1Num: "10,000+",
+      i1Title: "Cameroonians reached",
+      i1Text: "Through community workshops, flyers, and digital safety guides.",
+      i2Num: "50+",
+      i2Title: "School sessions",
+      i2Text: "Teaching students how to protect their personal data and navigate social media safely.",
+      i3Num: "100%",
+      i3Title: "Open community access",
+      i3Text: "All Foundation guides, materials, and tools are free for the public forever.",
+      ctaTitle: "Support our community mission",
+      ctaDesc: "Partner with NEXUS Foundation or volunteer for our next digital safety campaign.",
+    },
+    mentorshipPage: {
+      eyebrow: "NEXUS Mentorship",
+      title: "Guiding the next generation of Cameroonian leaders.",
+      description: "Connecting emerging tech talent with experienced industry mentors for structured 1-on-1 career guidance, technical growth, and leadership development.",
+      howEyebrow: "Program structure",
+      howTitle: "Mentorship built on accountability",
+      howDesc: "We match mentees with mentors for structured 6-month mentorship cycles.",
+      h1Title: "1-on-1 Guidance",
+      h1Text: "Regular bi-weekly sessions focused on career planning, technical skill gaps, and professional growth.",
+      h2Title: "Portfolio & Code Reviews",
+      h2Text: "Direct feedback on projects, resume building, and job interview preparation from active industry pros.",
+      h3Title: "Leadership Pathway",
+      h3Text: "Mentees are groomed to become mentors for future cohorts, creating a lasting cycle of leadership.",
+      whoEyebrow: "Who it's for",
+      whoTitle: "Connecting aspiring builders with proven leaders",
+      whoDesc: "Tailored tracks for both mentees seeking growth and mentors wanting to give back.",
+      w1Title: "For Mentees",
+      w1Text: "Academy graduates, junior developers, and aspiring tech professionals seeking clear career direction.",
+      w2Title: "For Mentors",
+      w2Text: "Senior engineers, product managers, and tech leaders looking to guide Cameroonian talent.",
+      ctaTitle: "Ready to give back or grow?",
+      ctaDesc: "Apply to become a mentor or mentee in our upcoming mentorship cycle.",
+    },
+    contactPage: {
+      eyebrow: "Contact Us",
+      title: "Let's build together.",
+      description: "Have a question, partnership proposal, or want to get involved? Reach out to the NEXUS team.",
+      getInTouchEyebrow: "Get in touch",
+      getInTouchTitle: "We'd love to hear from you",
+      getInTouchDesc: "Send us a message and our team will get back to you within 24–48 hours.",
+      directTitle: "Direct Contact Information",
+      formTitle: "Send Us a Message",
+      nameLabel: "Your Name",
+      namePlaceholder: "e.g. Marie Ngu",
+      emailLabel: "Email Address",
+      emailPlaceholder: "marie@example.cm",
+      divisionLabel: "Topic / Division",
+      selectDivision: "Select a topic...",
+      generalInquiry: "General Inquiry",
+      messageLabel: "Your Message",
+      messagePlaceholder: "How can we help you?",
+      sendBtn: "Send Message",
+      sentSuccess: "Thank you! Your message has been sent successfully.",
+      whatsapp: "WhatsApp",
+      email: "Email",
+      phone: "Phone",
+      chatOnWhatsApp: "Chat on WhatsApp",
+    },
+    journeyPage: {
+      eyebrow: "NEXUS Journey",
+      title: "Our public timeline & milestones.",
+      description: "We believe in building in public. Follow our progress as we establish NEXUS and grow our ecosystem across Cameroon.",
+      timelineEyebrow: "Public Roadmap",
+      timelineTitle: "Where we've been & where we're going",
+      timelineDesc: "Key milestones in the founding and development of NEXUS.",
+      m1Title: "NEXUS Concept & Governance Drafted",
+      m1Desc: "Co-founders Emzie and Lesley drafted the Constitution, Code of Conduct, and 4-division framework.",
+      m2Title: "NEXUS Official Branding & Site Launch",
+      m2Desc: "Phase 1 public web platform launched, establishing our digital presence and public verification portal.",
+      m3Title: "NEXUS Academy Cohort 1 Launch",
+      m3Desc: "First hands-on training cohort opening for software development and cybersecurity students.",
+      m4Title: "NEXUS Foundation MoMo Safety Campaign",
+      m4Desc: "Launch of nationwide public awareness campaign targeting Mobile Money scam prevention.",
+    },
+    blogPage: {
+      eyebrow: "NEXUS Blog",
+      title: "Insights, announcements & updates.",
+      description: "Thoughts from our co-founders, recaps of our public journey, and deep dives into digital trust in Cameroon.",
+      readTime: "min read",
+      readMore: "Read article",
+      backToBlog: "Back to all articles",
+    },
+    faqPage: {
+      eyebrow: "FAQ",
+      title: "Frequently Asked Questions.",
+      description: "Find clear answers to common questions about NEXUS, our divisions, training cohorts, and governance.",
+      catAll: "All Questions",
+      catGeneral: "General",
+      catAcademy: "Academy",
+      catTechHub: "Tech Hub",
+      catFoundation: "Foundation",
+      catMentorship: "Mentorship",
+      q1Question: "What is NEXUS?",
+      q2Question: "How does NEXUS Academy training work?",
+      q3Question: "What services does NEXUS Tech Hub provide?",
+      q4Question: "What is the mission of NEXUS Foundation?",
+      q5Question: "How does NEXUS Mentorship work?",
+      q6Question: "How can I verify an Academy registration?",
+      q7Question: "How can my organization partner with NEXUS?",
+      stillQuestions: "Still have questions?",
+      contactSupport: "Feel free to contact our team anytime.",
+    },
+    joinUsPage: {
+      eyebrow: "Join NEXUS",
+      title: "Build the digital future of Cameroon with us.",
+      description: "We are always looking for passionate builders, trainers, community leaders, and volunteers to join our team.",
+      whyJoinEyebrow: "Why join us",
+      whyJoinTitle: "What it's like to work at NEXUS",
+      whyJoinDesc: "We offer a supportive, remote-first environment focused on real impact.",
+      b1Title: "100% Remote-first",
+      b1Text: "Work from anywhere in Cameroon with flexible schedules and asynchronous workflows.",
+      b2Title: "Purpose-driven work",
+      b2Text: "Every line of code and campaign directly protects and empowers Cameroonian citizens.",
+      b3Title: "Growth & Governance",
+      b3Text: "Clear career progression guided by our Constitution, Code of Conduct, and mentorship.",
+      openRolesEyebrow: "Opportunities",
+      openRolesTitle: "Current open positions & volunteer roles",
+      openRolesDesc: "Find a role where your skills can make a difference.",
+      r1Title: "Technical Instructor",
+      r1Division: "NEXUS Academy",
+      r1Desc: "Lead practical cohorts in Web Development or Cybersecurity. Part-time remote.",
+      r2Title: "Community Coordinator",
+      r2Division: "NEXUS Foundation",
+      r2Desc: "Organize school outreach and digital literacy workshops across regions. Volunteer/Part-time.",
+      r3Title: "Senior Full-Stack Engineer",
+      r3Division: "NEXUS Tech Hub",
+      r3Desc: "Build client products and internal tools using React, Next.js, and Node.js. Remote.",
+      applyBtn: "Apply for this role",
+    },
+    partnerPage: {
+      eyebrow: "Partner With Us",
+      title: "Collaborate with NEXUS for lasting impact.",
+      description: "We partner with organizations, institutions, tech companies, and NGOs to advance digital trust, skill building, and security in Cameroon.",
+      waysEyebrow: "Partnership models",
+      waysTitle: "Ways we can work together",
+      waysDesc: "We tailor partnerships to align mutual goals and maximize public benefit.",
+      w1Title: "Corporate & Hiring Partner",
+      w1Text: "Hire top-vetted software engineers and cybersecurity talent directly from NEXUS Academy cohorts.",
+      w2Title: "Foundation & Impact Partner",
+      w2Text: "Sponsor digital safety campaigns, Mobile Money fraud prevention, and school outreach programs.",
+      w3Title: "Technical & Project Partner",
+      w3Text: "Contract NEXUS Tech Hub for software development, cloud infrastructure, or security auditing.",
+      formTitle: "Partnership Inquiry Form",
+      orgNameLabel: "Organization Name",
+      orgPlaceholder: "e.g. Acme Tech Ltd",
+      contactNameLabel: "Contact Person",
+      contactPlaceholder: "e.g. Jean Dupont",
+      emailLabel: "Email Address",
+      typeLabel: "Organization Type",
+      typeSelect: "Select type...",
+      tCorporate: "Corporate / Company",
+      tEducational: "Educational Institution",
+      tGovernment: "Government / Agency",
+      tNgo: "NGO / Non-Profit",
+      tIndividual: "Individual Sponsor",
+      messageLabel: "How would you like to partner?",
+      messagePlaceholder: "Describe your organization and proposed collaboration...",
+      submitBtn: "Submit Partnership Inquiry",
+      sentSuccess: "Thank you! Our partnership team will reach out shortly.",
+    },
+    verifyPage: {
+      eyebrow: "Verification Portal",
+      title: "Verify NEXUS Academy Certificates & Registration IDs.",
+      description: "Public tool for employers, partners, and institutions to confirm student registrations and certificate authenticity.",
+      searchPlaceholder: "Enter Registration ID (e.g. NX-AC-2026-001)...",
+      verifyBtn: "Verify ID",
+      howTitle: "How verification works",
+      howText: "Every NEXUS Academy student is assigned a unique Registration ID upon enrollment. Enter the ID above to view verified records.",
+      sampleCode: "Try sample code: NX-AC-2026-001",
+      noResult: "No verified record found for this ID. Please check the number and try again.",
+      validResult: "Verified Record Found",
+      registrationId: "Registration ID",
+    },
+    legalPage: {
+      termsTitle: "Terms of Use",
+      termsSubtitle: "Rules and terms governing the use of NEXUS websites, platforms, and services.",
+      privacyTitle: "Privacy Policy",
+      privacySubtitle: "How NEXUS collects, protects, and handles your personal information.",
+      lastUpdated: "Last updated: August 2026",
+      termsIntro: "The terms that govern your use of the NEXUS website and services.",
+      termsAcceptanceTitle: "Acceptance",
+      termsAcceptanceText: "By using this website, you agree to these terms. If you do not agree, please do not use the site.",
+      termsContentTitle: "Use of content",
+      termsContentText: "Content on this site, including text, images, and branding, is the property of NEXUS unless otherwise stated. You may not reproduce it without permission.",
+      termsEnrollmentTitle: "Academy enrollment",
+      termsEnrollmentText: "Enrollment in NEXUS Academy programs is subject to cohort availability. Payment is collected via Mobile Money, and each completed enrollment receives a Registration ID. Refunds and cancellations follow a formal application process.",
+      termsResponsibilityTitle: "Your responsibilities",
+      termsResponsibilityText: "You agree to provide accurate information in any form you submit and to use the site in a lawful manner. Attempting to access restricted areas or disrupt the site is prohibited.",
+      termsGuaranteeTitle: "No guarantee",
+      termsGuaranteeText: "We work hard to keep this site accurate and reliable, but we provide it \"as is\" and make no warranties beyond what the law requires.",
+      termsChangesTitle: "Changes to these terms",
+      termsChangesText: "We may update these terms from time to time. Continued use of the site after changes means you accept the updated terms.",
+      privacyIntro: "How NEXUS collects, uses, and protects your personal information, in line with Cameroon's cybersecurity and data protection legislation (Law No. 2010/012).",
+      pCollectTitle: "Information we collect",
+      pCollectText: "We collect only what you choose to share with us: your name, email address, phone number, and any details you include in a message, application, or enrollment form.",
+      pUseTitle: "How we use it",
+      pUseText: "Your information is used solely to respond to your inquiry, process your application, manage your enrollment, and improve NEXUS's services. We do not sell, rent, or trade your personal information.",
+      pEnrollTitle: "Enrollment and verification",
+      pEnrollText: "Academy enrollment records include payment status and a unique Registration ID. Our public verification page displays only non-sensitive details, name, program, and status.",
+      pSecurityTitle: "Data security",
+      pSecurityText: "We protect your data with appropriate technical and organizational measures, and we handle it responsibly in line with Cameroonian law.",
+      pRightsTitle: "Your rights",
+      pRightsText: "You may request access to, correction of, or deletion of your personal information at any time by contacting us. We'll respond promptly.",
+      pContactTitle: "Contact",
+      pContactText: "Questions about this policy? Reach us via the contact page, by email, or on WhatsApp, we're happy to explain.",
+    },
+    notFoundPage: {
+      title: "Page Not Found",
+      subtitle: "The page you are looking for doesn't exist or has been moved.",
+      backBtn: "Return to Homepage",
+    },
+    common: {
+      backToHome: "Back to Home",
+      submit: "Submit",
+      loading: "Loading...",
+      success: "Success!",
+      error: "An error occurred.",
+    },
+  },
+  fr: {
+    nav: {
+      home: "Accueil",
+      about: "À propos",
+      divisions: "Divisions",
+      journey: "Parcours",
+      blog: "Blog",
+      joinUs: "Rejoignez-nous",
+      contact: "Contact",
+      partnerWithUs: "Devenir Partenaire",
+      ourDivisions: "Nos Divisions",
+      language: "FR",
+      switchLanguage: "EN",
+    },
+    footer: {
+      tagline: "NEXUS est la jeune entreprise technologique du Cameroun, quatre divisions, une mission. Fondée en 2026. Apprendre. Construire. Impacter.",
+      site: "Site",
+      resources: "Ressources",
+      legal: "Mentions Légales",
+      privacyPolicy: "Politique de Confidentialité",
+      termsOfUse: "Conditions d'Utilisation",
+      contactUs: "Contactez-nous",
+      faq: "Foire Aux Questions (FAQ)",
+      verifyRegistration: "Vérifier une Inscription",
+      governanceNote: "100% à distance · Cameroun. Régie par notre Constitution et Code de Conduite.",
+      copyright: "Tous droits réservés.",
+      builtWith: "Conçu avec intégrité au Cameroun.",
+    },
+    splash: {
+      madeInCameroon: "Conçu au Cameroun",
+      builtForTheWorld: "Construit pour le Monde",
+      poweredByNexus: "Propulsé par NEXUS",
+      initializing: "Initialisation de l'environnement sécurisé…",
+    },
+    divisions: {
+      academy: {
+        name: "NEXUS Academy",
+        tagline: "Formation technologique pratique par cohortes.",
+        desc: "Doter les jeunes Camerounais de compétences numériques adaptées au marché grâce à des cohortes intensives et pratiques.",
+      },
+      techHub: {
+        name: "NEXUS Tech Hub",
+        tagline: "Services, produits et projets clients.",
+        desc: "Fournir des services de développement logiciel de pointe, d'infrastructure cloud et de conseil technique aux clients locaux et internationaux.",
+      },
+      foundation: {
+        name: "NEXUS Foundation",
+        tagline: "Impact communautaire et sensibilisation numérique.",
+        desc: "Promouvoir la confiance numérique, lutter contre la fraude en ligne et réduire la fracture numérique au sein des communautés camerounaises.",
+      },
+      mentorship: {
+        name: "NEXUS Mentorship",
+        tagline: "Développement structuré du potentiel humain.",
+        desc: "Connecter les talents émergents en tech avec des leaders expérimentés pour l'orientation de carrière et l'évolution professionnelle.",
+      },
+    },
+    home: {
+      badge: "100% à distance · Cameroun",
+      heroTitle: "Bâtir la confiance numérique pour le",
+      heroCountry: "Cameroun",
+      heroSubtitle: "NEXUS donne aux prochains technologues camerounais les moyens d'apprendre concrètement, de créer des projets significatifs et de résoudre les problèmes qui comptent le plus.",
+      partnerBtn: "Devenir Partenaire",
+      joinBtn: "Rejoindre l'Équipe",
+      explorePrograms: "Découvrir nos programmes",
+      gapEyebrow: "Le constat",
+      gapTitle: "Le fossé entre éducation et impact réel",
+      gapDesc: "Les jeunes Camerounais sont talentueux et ambitieux, mais le pont entre ce qu'ils apprennent à l'école et ce que le monde réel exige existe à peine.",
+      gapPoint1Title: "Théorie sans pratique",
+      gapPoint1Text: "Les étudiants obtiennent leur diplôme mais manquent de compétences pratiques. Une formation concrète change la donne.",
+      gapPoint2Title: "Potentiel inexploité",
+      gapPoint2Text: "Le Cameroun dispose d'une population jeune, connectée et ambitieuse, mais trop peu de parcours structurés pour transformer le talent en impact réel.",
+      gapPoint3Title: "Des problèmes qui attendent des solutions",
+      gapPoint3Text: "Des entreprises locales aux services publics, des problèmes concrets persistent parce que ceux qui pourraient les résoudre n'ont pas les outils.",
+      gapClosing: "NEXUS existe pour combler ce fossé, en apprenant des compétences concrètes, en construisant des solutions réelles et en créant un impact durable dans nos communautés.",
+      ecosystemEyebrow: "Un seul écosystème",
+      ecosystemTitle: "Quatre divisions, une seule mission",
+      ecosystemDesc: "Chaque division de NEXUS résout une facette différente du même défi.",
+      learnMore: "En savoir plus",
+      whyEyebrow: "Pourquoi NEXUS",
+      whyTitle: "Pourquoi NEXUS",
+      whyDesc: "Nous avons bâti NEXUS pour être aussi rigoureux que ambitieux.",
+      whyPoint1Title: "Pensé pour le travail à distance",
+      whyPoint1Text: "Conçu pour fonctionner partout au Cameroun, et au-delà, afin que le talent et l'impact ne soient pas limités par la géographie.",
+      whyPoint2Title: "Porté par la communauté",
+      whyPoint2Text: "Nous croyons que la technologie doit servir ceux qui en ont le plus besoin. NEXUS canalise le talent technique vers la résolution de défis quotidiens, protéger les communautés en ligne, créer des opportunités et construire des outils qui comptent.",
+      whyPoint3Title: "Apprendre en pratiquant",
+      whyPoint3Text: "La croissance chez NEXUS n'est pas théorique. Chaque cohorte, chaque projet, chaque initiative communautaire est pratique, conçu pour enseigner, défier et développer de vraies compétences durables.",
+      whyPoint4Title: "L'innovation au cœur",
+      whyPoint4Text: "NEXUS encourage ses membres à aller au-delà de l'emploi, nous créons des produits, explorons de nouvelles idées et cultivons un esprit entrepreneurial qui transforme les problèmes locaux en solutions technologiques.",
+      whyPoint5Title: "Connectés à travers le Cameroun",
+      whyPoint5Text: "Notre équipe s'étend de Bamenda à Buea et au-delà, travaillant à distance avec un objectif commun. La distance ne nous divise pas ; elle prouve que la grande technologie peut venir de n'importe où.",
+      peopleEyebrow: "L'équipe",
+      peopleTitle: "Construit par une équipe qui s'en soucie",
+      peopleDesc: "Une équipe croissante de jeunes ingénieurs, designers et bâtisseurs communautaires camerounais, unis par une mission : construire des technologies qui résolvent de vrais problèmes.",
+      meetFounders: "Découvrir l'équipe",
+      seeJourney: "Découvrir notre parcours",
+      liveEyebrow: "En direct de NEXUS",
+      liveTitle: "Ce qui se passe en ce moment",
+      liveDesc: "Dernières mises à jour de notre aventure publique, étapes clés et annonces récentes.",
+      latestMilestone: "Dernière étape franchie",
+      milestoneTitle: "Le site officiel NEXUS est en ligne",
+      milestoneDesc: "La Phase 1 du site web est lancée, la fondation est posée et l'écosystème prend forme.",
+      openTimeline: "Voir la chronologie",
+      fromBlog: "Extrait du blog",
+      blogHighlightTitle: "Pourquoi le Cameroun a besoin d'un mouvement de confiance numérique",
+      blogHighlightDesc: "Le défi derrière chaque division de NEXUS, et le travail passionnant qui nous attend.",
+      readPost: "Lire l'article",
+      ctaTitle: "Prêt à bâtir la confiance numérique avec nous ?",
+      ctaDesc: "Que vous souhaitiez apprendre avec nous, collaborer sur des projets, ou simplement faire partie d'une communauté tech en croissance, vous avez votre place.",
+    },
+    about: {
+      eyebrow: "À propos de NEXUS",
+      title: "À propos de NEXUS",
+      subtitle: "Bâtir la prochaine génération de technologues camerounais.",
+      description: "Donner aux jeunes Camerounais les moyens de transformer leurs connaissances en technologies qui comptent.",
+      storyEyebrow: "Notre histoire",
+      storyTitle: "Qui nous sommes et comment tout a commencé",
+      storyP1: "NEXUS a été fondé par un groupe de jeunes ingénieurs camerounais de Bamenda et Buea qui ont constaté un décalage, des gens talentueux, une forte demande de technologie, mais très peu de passerelles structurées pour relier les deux.",
+      storyP2: "Nous avons commencé par une question : et si les jeunes Camerounais avaient une communauté où ils pourraient apprendre des compétences pratiques, créer de vrais produits et travailler ensemble pour résoudre les problèmes qu'ils observent chaque jour, des défis des petites entreprises à la sécurité communautaire ?",
+      storyP3: "Cette question est devenue NEXUS. Ce qui a commencé comme une idée partagée entre ingénieurs est rapidement devenu une entreprise à quatre divisions, former, construire, servir les clients, protéger les communautés et mentorer la prochaine génération.",
+      storyP4: "Aujourd'hui, nous opérons entièrement à distance depuis Bamenda et Buea, en croissance constante, en résolvant de vrais problèmes et en prouvant que la technologie de niveau mondial peut venir d'ici, du Cameroun.",
+      purposeEyebrow: "Notre raison d'être",
+      purposeTitle: "Pourquoi nous existons et où nous allons",
+      missionTitle: "Notre mission",
+      missionText: "Combler le fossé entre potentiel et opportunité au Cameroun, en formant les talents, en construisant des technologies, en servant les entreprises et les communautés, et en créant un environnement structuré où les jeunes technologues s'épanouissent.",
+      visionTitle: "Notre vision",
+      visionText: "Un Cameroun où la technologie est construite localement pour résoudre des problèmes locaux, où les jeunes ingénieurs ont les compétences, les plateformes et le soutien pour créer des solutions qui servent les entreprises, les communautés et la nation.",
+      directionTitle: "Où nous allons",
+      directionText: "Nous construisons un avenir où NEXUS sera une entreprise technologique de référence au Cameroun, offrant des services de niveau mondial, formant la prochaine génération d'ingénieurs, collaborant avec le gouvernement et les institutions, et développant des solutions numériques qui font avancer le pays.",
+      identityEyebrow: "À propos de NEXUS",
+      identityTitle: "Qui nous sommes en un coup d'œil",
+      identityDesc: "NEXUS est une entreprise technologique camerounaise à quatre divisions, formation, ingénierie, impact communautaire et mentorat, travaillant ensemble pour bâtir un meilleur avenir numérique pour le Cameroun.",
+      fact1Label: "Fondée",
+      fact1Value: "2026",
+      fact2Label: "Siège",
+      fact2Value: "À distance (Bamenda et Buea)",
+      fact3Label: "Type",
+      fact3Value: "Entreprise technologique",
+      fact4Label: "Divisions",
+      fact4Value: "4 divisions actives",
+      fact5Label: "Devise",
+      fact5Value: "Apprendre. Construire. Impacter.",
+      whatWeDoEyebrow: "Ce que nous faisons",
+      whatWeDoTitle: "La technologie qui sert le Cameroun",
+      whatWeDoDesc: "NEXUS opère à travers quatre divisions, chacune résolvant un aspect du même défi : utiliser la technologie pour créer un impact réel.",
+      wd1Title: "Former la prochaine génération",
+      wd1Text: "Des programmes par cohortes qui équipent les jeunes Camerounais de compétences pratiques et immédiatement applicables en développement, cybersécurité, design et IA.",
+      wd2Title: "Développer des logiciels et produits",
+      wd2Text: "Des applications web aux plateformes mobiles, nous concevons et développons des solutions numériques pour les clients et les communautés.",
+      wd3Title: "Servir les entreprises et organisations",
+      wd3Text: "Nous collaborons avec des PME, startups, ONG et institutions pour fournir des services technologiques fiables, du conseil au développement complet.",
+      wd4Title: "Collaborer avec le gouvernement",
+      wd4Text: "Nous travaillons avec les institutions publiques pour développer des solutions numériques qui renforcent la gouvernance, améliorent les services et servent les citoyens.",
+      wd5Title: "Protéger les communautés",
+      wd5Text: "À travers des campagnes d'éducation publique, des ateliers de sécurité numérique et des initiatives de sensibilisation, nous aidons les Camerounais à naviguer dans le monde numérique en toute sécurité.",
+      wd6Title: "Mentorer les futurs leaders",
+      wd6Text: "Connecter les talents émergents avec des professionnels expérimentés pour un accompagnement de carrière structuré, le développement de compétences et le leadership.",
+      valuesEyebrow: "Nos valeurs",
+      valuesTitle: "Ce qui nous guide",
+      valuesDesc: "Les principes qui façonnent notre façon d'apprendre, de construire et de travailler ensemble.",
+      val1Name: "Intégrité",
+      val1Text: "Nous faisons ce que nous disons, dans notre code, notre formation et la façon dont nous traitons les uns les autres.",
+      val2Name: "Pragmatisme",
+      val2Text: "Nous valorisons les compétences applicables aujourd'hui plutôt que la théorie que l'on pourrait utiliser un jour.",
+      val3Name: "Communauté",
+      val3Text: "Nous mesurons notre succès à l'impact que nous créons dans les communautés camerounaises, pas aux chiffres sur un écran.",
+      val4Name: "Collaboration",
+      val4Text: "Nous grandissons en travaillant ensemble, en partageant des idées, en résolvant des problèmes et en construisant en équipe.",
+      val5Name: "Excellence",
+      val5Text: "Le travail à distance ne signifie pas des standards plus bas. Nous visons un travail de niveau mondial.",
+      govTitle: "Comment nous fonctionnons",
+      govText: "NEXUS est bâti sur la structure et la responsabilité partagée. Notre équipe suit des processus clairs, communique ouvertement et se tient à des standards élevés, parce que bâtir la confiance signifie être responsable.",
+      teamEyebrow: "Qui nous sommes",
+      teamTitle: "L'équipe NEXUS",
+      teamDesc: "Nous sommes un collectif de jeunes technologues camerounais à distance. De Bamenda à Buea, nos ingénieurs, designers et bâtisseurs communautaires travaillent ensemble pour combler le fossé entre éducation et impact réel.",
+      role1Title: "Directeur Général",
+      role1Text: "Pilote la stratégie, la formation et l'ingénierie de l'écosystème NEXUS, en veillant à ce que chaque initiative crée un impact réel.",
+      role2Title: "Directeur des Opérations",
+      role2Text: "Assure la gouvernance, la responsabilité et le bon fonctionnement de toutes les divisions, avec structure et objectif.",
+      role3Title: "Ingénierie",
+      role3Text: "Développe des logiciels, des infrastructures cloud et des solutions numériques, transformant les idées en produits fonctionnels.",
+      role4Title: "Formation",
+      role4Text: "Conçoit et dispense des programmes pratiques qui équipent les étudiants de compétences tech concrètes et immédiatement applicables.",
+      role5Title: "Communauté",
+      role5Text: "Gère la sensibilisation, le mentorat et les campagnes de sécurité numérique, connectant NEXUS aux personnes et communautés que nous servons.",
+      ctaTitle: "Envie de prendre part à l'aventure ?",
+      ctaDesc: "Que vous souhaitiez apprendre avec nous, collaborer sur des projets, ou simplement faire partie d'une communauté tech en croissance, vous avez votre place.",
+    },
+    divisionsPage: {
+      eyebrow: "Nos Divisions",
+      title: "Un écosystème, quatre piliers spécialisés.",
+      description: "NEXUS opère à travers quatre divisions distinctes, chacune résolvant un défi clé de la confiance numérique et des compétences au Cameroun.",
+      overviewEyebrow: "Aperçu des divisions",
+      overviewTitle: "Explorez l'écosystème NEXUS",
+      overviewDesc: "Sélectionnez une division ci-dessous pour découvrir sa mission, ses programmes et son équipe.",
+      academyTagline: "Formation technologique pratique par cohortes.",
+      academyDesc: "Cohortes axées sur l'ingénierie logicielle, la cybersécurité, le design produit et la sécurité numérique. Des projets réels plutôt que des cours théoriques.",
+      techHubTagline: "Services, produits et projets clients.",
+      techHubDesc: "Équipe d'ingénierie livrant des projets clients, des produits internes et du conseil technique. Les revenus générés financent nos programmes sociaux.",
+      foundationTagline: "Impact communautaire et sensibilisation numérique.",
+      foundationDesc: "Notre branche à but non lucratif luttant contre la désinformation, les fraudes Mobile Money, et animant des ateliers de sécurité numérique.",
+      mentorshipTagline: "Développement structuré du potentiel humain.",
+      mentorshipDesc: "Mise en relation des talents émergents avec des mentors expérimentés de l'industrie. Orientation 1-sur-1 et revue de projets.",
+      exploreBtn: "Découvrir la division",
+      systemEyebrow: "Fonctionnement intégré",
+      systemTitle: "Un modèle synergique pour un impact maximal",
+      systemDesc: "Les quatre divisions s'alimentent mutuellement pour créer un écosystème autonome et durable.",
+      s1Title: "Se former à l'Academy",
+      s1Text: "Les étudiants acquièrent de vraies compétences dans des cohortes pratiques.",
+      s2Title: "Créer au Tech Hub",
+      s2Text: "Les diplômés appliquent leurs compétences sur des produits clients réels.",
+      s3Title: "Protéger avec Foundation & Mentorship",
+      s3Text: "Les mentors guident les futurs leaders tandis que la Fondation protège le grand public.",
+      ctaTitle: "Souhaitez-vous vous impliquer dans une division ?",
+      ctaDesc: "Que vous vouliez apprendre, faire appel à nos services, être bénévole ou devenir mentor, vous êtes le bienvenu.",
+    },
+    academyPage: {
+      eyebrow: "NEXUS Academy",
+      title: "Formation technologique pratique pour la nouvelle génération camerounaise.",
+      description: "Formations intensives par cohortes en ingénierie logicielle, cybersécurité et hygiène numérique, conçues pour former des bâtisseurs accomplis.",
+      whatEyebrow: "Ce qui nous distingue",
+      whatTitle: "Une formation axée sur des résultats réels",
+      whatDesc: "Nous n'enseignons pas de la théorie pour des examens. Nous développons des compétences pour le marché de l'emploi.",
+      f1Title: "Apprentissage par cohortes",
+      f1Text: "Apprenez aux côtés de pairs motivés dans des cohortes structurées avec des mentors dédiés.",
+      f2Title: "Projets réels de niveau professionnel",
+      f2Text: "Développez des applications et des outils de sécurité prêts à être intégrés dans votre portfolio.",
+      f3Title: "Vérification officielle",
+      f3Text: "Chaque diplômé reçoit un identifiant de registre vérifiable en ligne par les employeurs et partenaires.",
+      cohortEyebrow: "Prochaines cohortes",
+      cohortTitle: "Rejoignez un programme de formation à venir",
+      cohortDesc: "Les candidatures ouvriront bientôt pour nos prochaines cohortes intensives.",
+      tableProgram: "Programme",
+      tableCohort: "Cohorte",
+      tableStatus: "Statut",
+      cohort1Name: "Développement Logiciel",
+      cohort1Label: "Cohorte 1",
+      cohort1Status: "Ouvert",
+      cohortNote: "De nouvelles cohortes s'ouvrent au fur et à mesure que les places se remplissent.",
+      programGraphicDesign: "Design Graphique",
+      programUiUxDesign: "Design UI/UX",
+      programSoftwareDevelopment: "Développement Logiciel",
+      programAiAutomation: "Automatisation IA",
+      verifyBadge: "Outil Employeurs",
+      verifyTitle: "Vérifier les certificats et inscriptions des étudiants",
+      verifyText: "Utilisez notre outil public de vérification pour confirmer l'authenticité de n'importe quel certificat NEXUS Academy.",
+      verifyBtn: "Ouvrir l'outil de vérification",
+      ctaTitle: "Prêt à démarrer votre carrière dans la tech ?",
+      ctaDesc: "Postulez pour notre prochaine cohorte ou rejoignez notre communauté pour être informé des ouvertures.",
+    },
+    techHubPage: {
+      eyebrow: "NEXUS Tech Hub",
+      title: "Services d'ingénierie et produits numériques conçus au Cameroun.",
+      description: "Notre branche commerciale fournit du développement logiciel, des solutions cloud et du conseil technique aux entreprises locales et internationales.",
+      servicesEyebrow: "Nos réalisations",
+      servicesTitle: "Services d'ingénierie pour organisations ambitieuses",
+      servicesDesc: "Nous apportons les meilleurs standards logiciels modernes et une fine connaissance du contexte local.",
+      s1Title: "Applications Web & Mobiles sur mesure",
+      s1Text: "Applications web full-stack et applications mobiles multiplateformes développées avec React, Next.js et des architectures cloud modernes.",
+      s2Title: "Cloud & Infrastructure",
+      s2Text: "Déploiement cloud sécurisé, pipelines CI/CD et architectures serveurs optimisées pour la fiabilité et la performance.",
+      s3Title: "Audits de Sécurité Numérique",
+      s3Text: "Évaluation de vulnérabilités, revues de code et renforcement de la sécurité pour protéger vos systèmes contre les fraudes.",
+      s4Title: "Conseil Technique & Stratégie",
+      s4Text: "Accompagnement en architecture, transformation numérique et conseil technique pour startups et grandes entreprises.",
+      approachEyebrow: "Notre approche",
+      approachTitle: "Pourquoi collaborer avec NEXUS Tech Hub",
+      approachDesc: "Nous combinons normes techniques internationales et excellence d'exécution locale.",
+      a1Title: "Agilité 100% à distance",
+      a1Text: "Une équipe distribuée travaillant de manière fluide avec une excellente communication.",
+      a2Title: "Bénéfices réinvestis",
+      a2Text: "Les revenus du Tech Hub financent directement nos campagnes gratuites de sensibilisation communautaire.",
+      a3Title: "Talents qualifiés",
+      a3Text: "Équipe composée des meilleurs diplômés de la NEXUS Academy sous la supervision de seniors expérimentés.",
+      targetSmes: "PME",
+      targetNgos: "ONG",
+      targetFintechs: "Fintechs",
+      targetMomoOperators: "Opérateurs MoMo",
+      ctaTitle: "Vous avez un projet en tête ?",
+      ctaDesc: "Discutons de la manière dont NEXUS Tech Hub peut concrétiser vos idées technologiques.",
+    },
+    foundationPage: {
+      eyebrow: "NEXUS Foundation",
+      title: "Protéger les communautés et bâtir la confiance numérique.",
+      description: "Notre branche à but non lucratif mène des campagnes de sensibilisation aux arnaques Mobile Money, lutte contre la désinformation et enseigne la sécurité numérique.",
+      pillarsEyebrow: "Nos initiatives clés",
+      pillarsTitle: "Protéger les citoyens là où ils sont vulnérables",
+      pillarsDesc: "Nous ciblons les enjeux de sécurité numérique qui touchent le quotidien des Camerounais.",
+      p1Title: "Prévention des Arnaques Mobile Money",
+      p1Text: "Campagnes d'information publiques expliquant les techniques de piratage MoMo et Orange Money et les bons réflexes.",
+      p2Title: "Sensibilisation à la Désinformation",
+      p2Text: "Ateliers d'éducation aux médias et outils pratiques pour aider les citoyens à vérifier les informations.",
+      p3Title: "Sensibilisation en milieu scolaire",
+      p3Text: "Sessions interactives de sécurité numérique dans les lycées et universités à travers le Cameroun.",
+      impactEyebrow: "Notre objectif d'impact",
+      impactTitle: "Mesurer la sécurité par des chiffres réels",
+      impactDesc: "Nous évaluons notre action au nombre de personnes informées et protégées.",
+      i1Num: "10 000+",
+      i1Title: "Camerounais sensibilisés",
+      i1Text: "À travers nos ateliers communautaires, guides et dépliants de sécurité numérique.",
+      i2Num: "50+",
+      i2Title: "Sessions scolaires",
+      i2Text: "Pour enseigner aux élèves comment protéger leurs données personnelles et naviguer sur les réseaux en sécurité.",
+      i3Num: "100%",
+      i3Title: "Accès gratuit pour tous",
+      i3Text: "Tous les guides et outils de la Fondation restent gratuits et accessibles à tous, pour toujours.",
+      ctaTitle: "Soutenez notre mission communautaire",
+      ctaDesc: "Devenez partenaire de NEXUS Foundation ou engagez-vous comme bénévole pour notre prochaine campagne.",
+    },
+    mentorshipPage: {
+      eyebrow: "NEXUS Mentorship",
+      title: "Guider la nouvelle génération de leaders technologiques.",
+      description: "Mettre en relation les talents émergents de la tech avec des mentors expérimentés pour un accompagnement individuel structuré et une évolution de carrière.",
+      howEyebrow: "Structure du programme",
+      howTitle: "Un mentorat basé sur l'engagement réciproque",
+      howDesc: "Nous associons mentors et mentorés pour des cycles de mentorat structurés de 6 mois.",
+      h1Title: "Accompagnement Individuel (1-sur-1)",
+      h1Text: "Sessions bimensuelles axées sur la planification de carrière, le renforcement technique et le leadership.",
+      h2Title: "Revue de Portfolio & de Code",
+      h2Text: "Conseils directs sur les projets, la rédaction de CV et la préparation aux entretiens par des experts du secteur.",
+      h3Title: "Parcours vers le Leadership",
+      h3Text: "Les mentorés sont préparés à devenir mentors à leur tour, créant ainsi un cercle vertueux durable.",
+      whoEyebrow: "À qui s'adresse le programme",
+      whoTitle: "Connecter les futurs bâtisseurs avec des leaders confirmés",
+      whoDesc: "Des parcours adaptés tant pour les mentorés en quête de progression que pour les mentors souhaitant transmettre.",
+      w1Title: "Pour les Mentorés",
+      w1Text: "Diplômés d'Academy, développeurs juniors et passionnés de tech recherchant une orientation professionnelle claire.",
+      w2Title: "Pour les Mentors",
+      w2Text: "Ingénieurs seniors, managers produit et leaders tech désireux de faire grandir les talents camerounais.",
+      ctaTitle: "Prêt à transmettre votre savoir ou à progresser ?",
+      ctaDesc: "Postulez pour devenir mentor ou mentoré lors de notre prochain cycle de recrutement.",
+    },
+    contactPage: {
+      eyebrow: "Contactez-nous",
+      title: "Construisons ensemble.",
+      description: "Une question, une proposition de partenariat ou envie de vous engager ? Contactez l'équipe NEXUS.",
+      getInTouchEyebrow: "Prenez contact",
+      getInTouchTitle: "Nous serions ravis de vous lire",
+      getInTouchDesc: "Envoyez-nous un message et notre équipe vous répondra sous 24 à 48 heures.",
+      directTitle: "Coordonnées Directes",
+      formTitle: "Envoyez-nous un Message",
+      nameLabel: "Votre Nom",
+      namePlaceholder: "ex. Marie Ngu",
+      emailLabel: "Adresse Email",
+      emailPlaceholder: "marie@example.cm",
+      divisionLabel: "Sujet / Division",
+      selectDivision: "Sélectionnez un sujet...",
+      generalInquiry: "Demande Générale",
+      messageLabel: "Votre Message",
+      messagePlaceholder: "Comment pouvons-nous vous aider ?",
+      sendBtn: "Envoyer le Message",
+      sentSuccess: "Merci ! Votre message a été envoyé avec succès.",
+      whatsapp: "WhatsApp",
+      email: "Email",
+      phone: "Téléphone",
+      chatOnWhatsApp: "Discuter sur WhatsApp",
+    },
+    journeyPage: {
+      eyebrow: "Parcours NEXUS",
+      title: "Notre chronologie publique et nos étapes clés.",
+      description: "Nous croyons en la transparence. Suivez notre progression au fur et à mesure que nous développons NEXUS au Cameroun.",
+      timelineEyebrow: "Feuille de Route Publique",
+      timelineTitle: "D'où nous venons et où nous allons",
+      timelineDesc: "Étapes clés de la fondation et du développement de NEXUS.",
+      m1Title: "Conception & Rédaction de la Gouvernance",
+      m1Desc: "Les cofondateurs Emzie et Lesley rédigent la Constitution, le Code de Conduite et le cadre des 4 divisions.",
+      m2Title: "Lancement de la Marque & du Site Officiel",
+      m2Desc: "Lancement de la Phase 1 de la plateforme web, établissant notre présence numérique et l'outil de vérification.",
+      m3Title: "Lancement de la Cohorte 1 de NEXUS Academy",
+      m3Desc: "Ouverture de la première cohorte de formation pratique en développement logiciel et cybersécurité.",
+      m4Title: "Campagne de Sécurité MoMo par la Fondation",
+      m4Desc: "Lancement d'une campagne nationale de sensibilisation à la prévention des arnaques Mobile Money.",
+    },
+    blogPage: {
+      eyebrow: "Blog NEXUS",
+      title: "Analyses, annonces et actualités.",
+      description: "Réflexions de nos cofondateurs, retours sur notre aventure et décryptages de la confiance numérique au Cameroun.",
+      readTime: "min de lecture",
+      readMore: "Lire l'article",
+      backToBlog: "Retour à tous les articles",
+    },
+    faqPage: {
+      eyebrow: "FAQ",
+      title: "Foire Aux Questions.",
+      description: "Trouvez des réponses claires aux questions fréquentes sur NEXUS, nos divisions, nos cohortes et notre gouvernance.",
+      catAll: "Toutes les Questions",
+      catGeneral: "Général",
+      catAcademy: "Academy",
+      catTechHub: "Tech Hub",
+      catFoundation: "Foundation",
+      catMentorship: "Mentorship",
+      q1Question: "Qu'est-ce que NEXUS ?",
+      q2Question: "Comment fonctionne la formation de NEXUS Academy ?",
+      q3Question: "Quels services propose NEXUS Tech Hub ?",
+      q4Question: "Quelle est la mission de NEXUS Foundation ?",
+      q5Question: "Comment fonctionne le programme de mentorat NEXUS ?",
+      q6Question: "Comment puis-je vérifier une inscription Academy ?",
+      q7Question: "Mon organisation peut-elle devenir partenaire de NEXUS ?",
+      stillQuestions: "Vous avez encore des questions ?",
+      contactSupport: "N'hésitez pas à contacter notre équipe à tout moment.",
+    },
+    joinUsPage: {
+      eyebrow: "Rejoindre NEXUS",
+      title: "Construisez l'avenir numérique du Cameroun avec nous.",
+      description: "Nous recherchons en permanence des bâtisseurs passionnés, des formateurs et des bénévoles pour rejoindre notre équipe.",
+      whyJoinEyebrow: "Pourquoi nous rejoindre",
+      whyJoinTitle: "Travailler chez NEXUS",
+      whyJoinDesc: "Nous offrons un environnement stimulant 100% à distance axé sur un impact réel.",
+      b1Title: "100% à Distance",
+      b1Text: "Travailliez depuis n'importe où au Cameroun avec des horaires flexibles.",
+      b2Title: "Un travail porteur de sens",
+      b2Text: "Chaque ligne de code et chaque campagne protège et autonomise directement les citoyens camerounais.",
+      b3Title: "Évolution & Gouvernance",
+      b3Text: "Une progression professionnelle claire encadrée par notre Constitution et notre programme de mentorat.",
+      openRolesEyebrow: "Opportunités",
+      openRolesTitle: "Postes ouverts et bénévolat",
+      openRolesDesc: "Trouvez un rôle où vos compétences feront la différence.",
+      r1Title: "Formateur Technique",
+      r1Division: "NEXUS Academy",
+      r1Desc: "Animez des cohortes pratiques en Développement Web ou Cybersécurité. Temps partiel à distance.",
+      r2Title: "Coordinateur Communautaire",
+      r2Division: "NEXUS Foundation",
+      r2Desc: "Organisez des ateliers de sensibilisation dans les lycées et communautés. Bénévolat / Temps partiel.",
+      r3Title: "Ingénieur Full-Stack Senior",
+      r3Division: "NEXUS Tech Hub",
+      r3Desc: "Développez des applications clients et des outils internes avec React, Next.js et Node.js. À distance.",
+      applyBtn: "Postuler à cette offre",
+    },
+    partnerPage: {
+      eyebrow: "Devenir Partenaire",
+      title: "Collaborez avec NEXUS pour un impact durable.",
+      description: "Nous mènons des partenariats avec des entreprises, institutions et ONG pour faire progresser la confiance numérique au Cameroun.",
+      waysEyebrow: "Modèles de partenariat",
+      waysTitle: "Comment nous pouvons collaborer",
+      waysDesc: "Nous personnalisons nos partenariats pour aligner nos objectifs communs au service du public.",
+      w1Title: "Partenaire Entreprise & Recrutement",
+      w1Text: "Recrutez les meilleurs diplômés en ingénierie logicielle et cybersécurité directement issus de l'Academy.",
+      w2Title: "Partenaire Fondation & Impact",
+      w2Text: "Soutenez des campagnes de sécurité numérique, la prévention des fraudes MoMo et les ateliers scolaires.",
+      w3Title: "Partenaire Technique & Projets",
+      w3Text: "Faites appel au Tech Hub pour vos besoins en développement logiciel, infrastructure cloud ou audit de sécurité.",
+      formTitle: "Formulaire de Demande de Partenariat",
+      orgNameLabel: "Nom de l'Organisation",
+      orgPlaceholder: "ex. Acme Tech Sarl",
+      contactNameLabel: "Personne de Contact",
+      contactPlaceholder: "ex. Jean Dupont",
+      emailLabel: "Adresse Email",
+      typeLabel: "Type d'Organisation",
+      typeSelect: "Sélectionnez le type...",
+      tCorporate: "Entreprise / Société",
+      tEducational: "Établissement d'Enseignement",
+      tGovernment: "Gouvernement / Organisme public",
+      tNgo: "ONG / Association",
+      tIndividual: "Sponsor Individuel",
+      messageLabel: "Comment souhaitez-vous collaborer ?",
+      messagePlaceholder: "Décrivez votre organisation et votre projet de partenariat...",
+      submitBtn: "Soumettre la Demande",
+      sentSuccess: "Merci ! Notre équipe chargée des partenariats vous recontactera sous peu.",
+    },
+    verifyPage: {
+      eyebrow: "Portail de Vérification",
+      title: "Vérifier les Certificats et Identifiants NEXUS Academy.",
+      description: "Outil public permettant aux employeurs et partenaires de vérifier l'authenticité des inscriptions et diplômes.",
+      searchPlaceholder: "Entrez l'identifiant (ex. NX-AC-2026-001)...",
+      verifyBtn: "Vérifier l'ID",
+      howTitle: "Comment fonctionne la vérification",
+      howText: "Chaque étudiant de NEXUS Academy reçoit un identifiant d'inscription unique lors de son admission. Entrez cet identifiant ci-dessus.",
+      sampleCode: "Exemple d'identifiant : NX-AC-2026-001",
+      noResult: "Aucun enregistrement trouvé pour cet identifiant. Veuillez vérifier la saisie.",
+      validResult: "Enregistrement Vérifié Trouvé",
+      registrationId: "Identifiant d'inscription",
+    },
+    legalPage: {
+      termsTitle: "Conditions d'Utilisation",
+      termsSubtitle: "Règles et conditions régissant l'utilisation des sites, plateformes et services NEXUS.",
+      privacyTitle: "Politique de Confidentialité",
+      privacySubtitle: "Comment NEXUS collecte, protège et traite vos données personnelles.",
+      lastUpdated: "Dernière mise à jour : Août 2026",
+      termsIntro: "Les conditions régissant votre utilisation du site web et des services NEXUS.",
+      termsAcceptanceTitle: "Acceptation",
+      termsAcceptanceText: "En utilisant ce site, vous acceptez ces conditions. Si vous n'êtes pas d'accord, veuillez ne pas utiliser le site.",
+      termsContentTitle: "Utilisation du contenu",
+      termsContentText: "Le contenu de ce site, textes, images et marques, appartient à NEXUS sauf mention contraire. Toute reproduction sans autorisation est interdite.",
+      termsEnrollmentTitle: "Inscription à l'Academy",
+      termsEnrollmentText: "L'inscription aux programmes NEXUS Academy dépend des places disponibles. Le paiement s'effectue via Mobile Money, et chaque inscription complétée reçoit un identifiant d'enregistrement. Remboursements et annulations suivent une procédure formelle.",
+      termsResponsibilityTitle: "Vos responsabilités",
+      termsResponsibilityText: "Vous vous engagez à fournir des informations exactes et à utiliser le site légalement. Toute tentative d'accès aux zones restreintes ou de perturbation du site est interdite.",
+      termsGuaranteeTitle: "Aucune garantie",
+      termsGuaranteeText: "Nous nous efforçons de maintenir ce site fiable, mais nous le fournissons \"tel quel\" sans garanties au-delà de ce que la loi exige.",
+      termsChangesTitle: "Modifications de ces conditions",
+      termsChangesText: "Nous pouvons mettre à jour ces conditions à tout moment. L'utilisation continue du site implique l'acceptation des conditions révisées.",
+      privacyIntro: "Comment NEXUS collecte, utilise et protège vos informations personnelles, conformément à la loi camerounaise n° 2010/012 sur la cybersécurité.",
+      pCollectTitle: "Informations que nous collectons",
+      pCollectText: "Nous ne collectons que ce que vous choisissez de partager : votre nom, adresse email, numéro de téléphone et les détails inclus dans vos messages, candidatures ou inscriptions.",
+      pUseTitle: "Comment nous les utilisons",
+      pUseText: "Vos informations servent uniquement à répondre à votre demande, traiter votre candidature, gérer votre inscription et améliorer nos services. Nous ne vendons, louons ni échangeons jamais vos données.",
+      pEnrollTitle: "Inscription et vérification",
+      pEnrollText: "Les dossiers d'inscription incluent le statut de paiement et un identifiant unique. Notre page de vérification n'affiche que des informations non sensibles, nom, programme et statut.",
+      pSecurityTitle: "Sécurité des données",
+      pSecurityText: "Nous protégeons vos données avec des mesures techniques et organisationnelles appropriées, conformément à la loi camerounaise.",
+      pRightsTitle: "Vos droits",
+      pRightsText: "Vous pouvez demander l'accès, la correction ou la suppression de vos informations personnelles à tout moment en nous contactant.",
+      pContactTitle: "Contact",
+      pContactText: "Des questions sur cette politique ? Contactez-nous via la page contact, par email ou sur WhatsApp.",
+    },
+    notFoundPage: {
+      title: "Page Non Trouvée",
+      subtitle: "La page que vous recherchez n'existe pas ou a été déplacée.",
+      backBtn: "Retourner à l'Accueil",
+    },
+    common: {
+      backToHome: "Retour à l'accueil",
+      submit: "Soumettre",
+      loading: "Chargement...",
+      success: "Succès !",
+      error: "Une erreur est survenue.",
+    },
+  },
+};
+
+const monthMap: Record<string, Record<Language, string>> = {
+  January: { en: "January", fr: "Janvier" },
+  February: { en: "February", fr: "Février" },
+  March: { en: "March", fr: "Mars" },
+  April: { en: "April", fr: "Avril" },
+  May: { en: "May", fr: "Mai" },
+  June: { en: "June", fr: "Juin" },
+  July: { en: "July", fr: "Juillet" },
+  August: { en: "August", fr: "Août" },
+  September: { en: "September", fr: "Septembre" },
+  October: { en: "October", fr: "Octobre" },
+  November: { en: "November", fr: "Novembre" },
+  December: { en: "December", fr: "Décembre" },
+};
+
+export function translateDate(dateStr: string, lang: Language): string {
+  if (lang === "en") return dateStr;
+  let result = dateStr;
+  for (const [enMonth, names] of Object.entries(monthMap)) {
+    result = result.replace(enMonth, names.fr);
+  }
+  return result;
+}

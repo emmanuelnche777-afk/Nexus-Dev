@@ -1,0 +1,18 @@
+[
+  {
+    "programSlug": "ethical-hacking-foundations",
+    "name": "Ethical Hacking Fundamental",
+    "period": "Dec1-Feb1",
+    "status": "open",
+    "startDate": "2026-12-07",
+    "endDate": "2027-02-14",
+    "applicationDeadline": "2026-12-05",
+    "maxStudents": 15,
+    "currentStudents": 0,
+    "location": "Online",
+    "schedule": "Mon/Wed/Fri/Sun",
+    "price": 30000,
+    "currency": "XAF",
+    "id": "cohort-1788514929295"
+  }
+]

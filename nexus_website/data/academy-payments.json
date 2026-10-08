@@ -1,0 +1,19 @@
+[
+  {
+    "id": "pay-1788904280669",
+    "studentId": "student-1788904280669",
+    "registrationId": "reg-1788904280669",
+    "studentCode": "NEXUS-SO-26-0001",
+    "amount": 20601,
+    "currency": "XAF",
+    "method": "mtn-momo",
+    "reference": "app-1788904280658-es60ig",
+    "status": "Pending",
+    "provider": "mobile_money",
+    "notes": "Awaiting payment proof from applicant",
+    "verifiedBy": null,
+    "verifiedAt": null,
+    "createdAt": "2026-09-08T21:51:20.658Z",
+    "updatedAt": "2026-09-08T21:51:20.658Z"
+  }
+]
