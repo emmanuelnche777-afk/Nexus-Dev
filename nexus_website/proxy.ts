@@ -41,7 +41,13 @@ function notFoundResponse(request: NextRequest): NextResponse {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.rewrite(new URL("/not-found", request.url), { status: 404 });
+  return new NextResponse(
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>404 | Page not found</title><style>html,body{min-height:100%;margin:0;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif}body{display:grid;place-items:center}.error{text-align:center;padding:2rem}.error h1{margin:0 0 .75rem;font-size:3rem;font-weight:600}.error p{margin:0;color:#555;font-size:1rem}</style></head><body><main class="error"><h1>404</h1><p>Page not found</p></main></body></html>`,
+    {
+      status: 404,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    },
+  );
 }
 
 function applyDomainBoundary(request: NextRequest): NextResponse | null {
