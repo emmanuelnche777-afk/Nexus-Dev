@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@google/generative-ai"],
   experimental: {
     useTypeScriptCli: false,
+    globalNotFound: true,
   },
   async redirects() {
     return [
