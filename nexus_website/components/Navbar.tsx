@@ -53,14 +53,16 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 border-b border-nexus-cyan/10 bg-nexus-dark/95 backdrop-blur supports-[backdrop-filter]:bg-nexus-dark/80">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image
-              src="/images/logo/nexus-logo-sm.jpg"
-              alt="NEXUS logo"
-              width={44}
-              height={44}
-              className="rounded-full object-cover"
-              unoptimized
-            />
+            <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full">
+              <Image
+                src="/images/logo/nexus-logo-sm.jpg"
+                alt="NEXUS logo"
+                width={44}
+                height={44}
+                className="scale-[1.3] rounded-full object-cover"
+                unoptimized
+              />
+            </span>
           </Link>
 
           <div className="hidden h-full items-center gap-1 lg:flex">
