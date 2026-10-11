@@ -11,16 +11,13 @@ export const dynamic = "force-dynamic";
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [token] = useState(() => searchParams.get("token") || "");
+  const [token, setToken] = useState(() => searchParams.get("token") || "");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  if (!token && typeof window !== "undefined") {
-    setError("No reset token provided. Please request a new password reset.");
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -44,7 +41,7 @@ function ResetPasswordContent() {
       res = await fetch("/api/admin/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ token, password, email: email || undefined }),
       });
     } catch {
       setError("Network error. Please try again.");
@@ -92,6 +89,30 @@ function ResetPasswordContent() {
           <p className={AUTH_SUCCESS_CLASS}>
             {success}
           </p>
+        )}
+
+        {!searchParams.get("token") && (
+          <>
+          <FormField
+            label="Staff account email"
+            id="recovery-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
+          <FormField
+            label="Recovery code"
+            id="recoveryCode"
+            value={token}
+            onChange={(e) => setToken(e.target.value.trim())}
+            placeholder="Enter the code sent to your verified phone"
+            required
+            disabled={submitting}
+            autoComplete="one-time-code"
+          />
+          </>
         )}
 
         <FormField

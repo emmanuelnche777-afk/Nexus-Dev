@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Search, ArrowLeft, BookOpen, Save, X as XIcon, Pl
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import AdminModal from "@/components/admin/AdminModal";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import { resolveVideoUrl } from "@/lib/video-url";
 import { removeCloudinaryVideo, uploadCloudinaryVideo, type CloudinaryVideoUpload } from "@/lib/cloudinary-video-upload";
 
@@ -161,7 +162,7 @@ export default function ProgramsPage() {
     if (!confirm(`Delete program "${program.title}"? This cannot be undone.`)) return;
     try {
       const slugOrId = program.slug || program.id;
-      const res = await fetch(`/api/admin/programs/${slugOrId}`, { method: "DELETE" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/programs/${slugOrId}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Delete failed");

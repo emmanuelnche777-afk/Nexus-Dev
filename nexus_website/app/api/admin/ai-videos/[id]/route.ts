@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import prisma from "@/lib/db";
 import { validateVideoUrl } from "@/lib/video-url";
 
@@ -75,6 +76,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     await prisma.aiVideo.delete({ where: { id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "ai_video", resourceId: id });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete video" }, { status: 500 });

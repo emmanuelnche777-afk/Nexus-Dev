@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { user, authorized } = await requirePermission("newsletter:manage");
@@ -20,6 +21,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (result.count === 0) {
       return NextResponse.json({ error: "Active subscriber not found." }, { status: 404 });
     }
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "newsletter_subscriber_status_changed",
+      resourceType: "newsletter_subscriber",
+      resourceId: id,
+      newValue: { status: body.status },
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[newsletter] Failed to update subscriber:", error);

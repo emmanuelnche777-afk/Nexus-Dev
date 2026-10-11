@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import prisma from "@/lib/db";
 
 export async function GET(
@@ -67,6 +68,7 @@ export async function DELETE(
     }
 
     await prisma.liveChat.delete({ where: { id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "live_chat", resourceId: id });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete chat" }, { status: 500 });

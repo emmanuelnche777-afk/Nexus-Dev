@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import {
   ArrowLeft,
   Plus,
@@ -133,7 +134,7 @@ export default function AdminServicesPage() {
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this service? This cannot be undone.")) return;
-    const res = await fetch(`/api/admin/services/${id}`, { method: "DELETE" });
+    const res = await fetchWithFreshTwoFactor(`/api/admin/services/${id}`, { method: "DELETE" });
     if (res.ok) await load();
   }
 

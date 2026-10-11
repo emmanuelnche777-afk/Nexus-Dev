@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, ArrowLeft, Users, Trash2 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface PathwayInquiry {
   id: string;
@@ -48,7 +49,7 @@ export default function MentorshipInquiriesPage() {
 
   async function updateInquiry(id: string, data: Partial<PathwayInquiry>) {
     try {
-      await fetch("/api/admin/mentorship-inquiries", {
+      await fetchWithFreshTwoFactor("/api/admin/mentorship-inquiries", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, ...data }),

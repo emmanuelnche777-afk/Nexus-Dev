@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
 import prisma from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+import { logSensitiveAccess } from "@/lib/audit";
 
 export async function GET(request: Request) {
   const { user, authorized } = await requirePermission("techhub:contracts:*");
@@ -75,6 +76,15 @@ export async function GET(request: Request) {
           milestoneCount: 0,
         } : null,
       };
+    });
+
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_list_view",
+      resourceType: "contract",
+      request,
+      details: { resultCount: contracts.length },
     });
 
     return NextResponse.json({ contracts: enriched });
@@ -201,7 +211,7 @@ export async function POST(request: Request) {
         entity: "Contract",
         entityId: contract.id,
         userId: user.id,
-        metadata: { contractType: contract.contractType, clientEmail: contract.clientEmail },
+        metadata: { contractType: contract.contractType },
       },
     });
 

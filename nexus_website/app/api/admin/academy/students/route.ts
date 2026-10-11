@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
 
 import { prisma } from "@/lib/db";
-import { logAdminAction } from "@/lib/audit";
+import { logAdminAction, logSensitiveAccess } from "@/lib/audit";
 
-export async function GET() {
+export async function GET(request: Request) {
   const { user, authorized } = await requirePermission("academy:students:*");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -22,6 +22,14 @@ export async function GET() {
           select: { channel: true, status: true, attemptCount: true, error: true, sentAt: true, updatedAt: true },
         },
       },
+    });
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_list_view",
+      resourceType: "student",
+      request,
+      details: { resultCount: students.length },
     });
     return NextResponse.json({ students });
   } catch (error) {

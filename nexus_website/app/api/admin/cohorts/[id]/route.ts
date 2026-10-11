@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 
 import prisma from "@/lib/db";
 
@@ -72,6 +73,7 @@ export async function DELETE(
       );
     }
     await prisma.cohort.delete({ where: { id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "academy_cohort", resourceId: id });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete cohort" }, { status: 500 });

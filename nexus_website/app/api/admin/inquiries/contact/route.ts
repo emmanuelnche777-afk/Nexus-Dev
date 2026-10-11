@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 
 import prisma from "@/lib/db";
 
@@ -44,6 +45,7 @@ export async function DELETE(request: Request) {
   try {
     const body = await request.json();
     await prisma.contactMessage.delete({ where: { id: body.id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "contact_inquiry", resourceId: body.id });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });

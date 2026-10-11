@@ -3,17 +3,18 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword, comparePassword } from "@/lib/admin-auth";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 
 const PASSWORD_MIN_LENGTH = 10;
 
 export async function POST(request: NextRequest) {
-  const { user, authorized } = await requirePermission("foundation:*");
+  // Password changes are self-service: the signed-in user may only change
+  // their own password, regardless of staff role.
+  const { user, authorized } = await requirePermission("account:security");
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!authorized) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  if (!authorized) return NextResponse.json({ error: "Session locked" }, { status: 423 });
 
   try {
     const body = await request.json();
@@ -57,6 +58,16 @@ export async function POST(request: NextRequest) {
         data: { passwordHash },
       });
       await tx.adminSession.deleteMany({ where: { userId: adminUser.id } });
+    });
+
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "password_changed",
+      resourceType: "admin_account",
+      resourceId: user.id,
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
     });
 
     return NextResponse.json({ success: true });

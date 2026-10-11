@@ -63,6 +63,11 @@ export default function LoginForm() {
       return;
     }
 
+    if (data.requiresTwoFactorSetup) {
+      window.location.href = "/admin/complete-setup"; // eslint-disable-line @next/next/no-location-assign-relative-destination
+      return;
+    }
+
     window.location.href = "/admin/dashboard"; // eslint-disable-line @next/next/no-location-assign-relative-destination
   }
 

@@ -119,6 +119,30 @@ function isWriteMethod(method: string): boolean {
   return ["POST", "PUT", "PATCH", "DELETE"].includes(method);
 }
 
+function requiresFreshTwoFactor(pathname: string, method: string): boolean {
+  if (method === "GET") {
+    return pathname === "/api/admin/opportunity-applications" ||
+      (pathname.startsWith("/api/admin/opportunity-applications/") &&
+        !pathname.endsWith("/options") && !pathname.endsWith("/assignees")) ||
+      pathname.startsWith("/api/admin/academy/students") ||
+      pathname === "/api/admin/academy/payments" ||
+      pathname === "/api/admin/newsletter" ||
+      (pathname.startsWith("/api/admin/staff/") && !pathname.endsWith("/resend-invite")) ||
+      pathname === "/api/admin/tech-hub/contracts" ||
+      (pathname.startsWith("/api/admin/tech-hub/contracts/") && !pathname.endsWith("/templates"));
+  }
+  if (method === "DELETE") return true;
+  if (pathname === "/api/admin/staff" && method === "POST") return true;
+  if (pathname.startsWith("/api/admin/staff/") && ["PUT", "PATCH", "DELETE"].includes(method)) return true;
+  if (pathname === "/api/admin/academy/payments" && method === "PUT") return true;
+  if (pathname === "/api/admin/academy/clear-data" && method === "POST") return true;
+  if (pathname.includes("/send") && pathname.includes("/api/admin/")) return true;
+  if (pathname.includes("/notifications") && method === "POST" && pathname.startsWith("/api/admin/academy/")) return true;
+  if (pathname.startsWith("/api/admin/tech-hub/contracts/") && pathname.endsWith("/signed") && method === "PUT") return true;
+  if (pathname === "/api/admin/tech-hub/contracts/generate-pdf" && method === "POST") return true;
+  return false;
+}
+
 function featureForPath(pathname: string): "blog" | "certificateVerification" | "aiAssistant" | null {
   if (pathname === "/blog" || pathname.startsWith("/blog/") || pathname === "/api/blog" || pathname.startsWith("/api/blog/")) {
     return "blog";
@@ -202,6 +226,7 @@ export async function proxy(req: NextRequest) {
 
 async function validateSession(req: NextRequest): Promise<NextResponse> {
   try {
+    const pathname = req.nextUrl.pathname;
     const sessionRes = await fetch(new URL("/api/admin/session", req.url), {
       headers: { cookie: req.headers.get("cookie") || "" },
       cache: "no-store",
@@ -222,6 +247,29 @@ async function validateSession(req: NextRequest): Promise<NextResponse> {
       const loginUrl = new URL("/admin/login", req.url);
       loginUrl.searchParams.set("next", req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    if (data.user?.sessionLocked && pathname !== "/admin/unlock" && pathname !== "/api/admin/session/unlock") {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Session locked", code: "SESSION_LOCKED" }, { status: 423 });
+      }
+      return NextResponse.redirect(new URL("/admin/unlock", req.url));
+    }
+
+    if (data.user?.requiresTwoFactorSetup && pathname !== "/admin/complete-setup") {
+      const allowedSetupApis = ["/api/admin/2fa/setup", "/api/admin/2fa/verify"];
+      if (allowedSetupApis.includes(pathname)) return NextResponse.next();
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Complete two-factor setup before using the admin area", code: "TWO_FACTOR_SETUP_REQUIRED" }, { status: 403 });
+      }
+      return NextResponse.redirect(new URL("/admin/complete-setup", req.url));
+    }
+
+    if (pathname.startsWith("/api/admin/") && requiresFreshTwoFactor(pathname, req.method) && data.user?.requiresFreshTwoFactor) {
+      return NextResponse.json({
+        error: "Verify your authenticator before continuing with this sensitive action.",
+        code: "MFA_REQUIRED",
+      }, { status: 428 });
     }
 
     return NextResponse.next();

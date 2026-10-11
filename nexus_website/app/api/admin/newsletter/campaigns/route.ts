@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/permissions-server";
 import { enforceActorRateLimit } from "@/lib/rate-limit";
 import { safeEmailSubject } from "@/lib/email-html";
+import { logAdminAction } from "@/lib/audit";
 
 const MAX_SUBJECT_LENGTH = 150;
 const MAX_BODY_LENGTH = 20_000;
@@ -29,6 +30,13 @@ export async function POST(request: Request) {
     const campaign = await prisma.newsletterCampaign.create({
       data: { subject, body: message, createdById: user.id },
       select: { id: true, subject: true, status: true, createdAt: true },
+    });
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "newsletter_campaign_created",
+      resourceType: "newsletter_campaign",
+      resourceId: campaign.id,
     });
     return NextResponse.json({ campaign }, { status: 201 });
   } catch (error) {

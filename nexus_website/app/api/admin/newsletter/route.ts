@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/permissions-server";
+import { logSensitiveAccess } from "@/lib/audit";
 
-export async function GET() {
+export async function GET(request: Request) {
   const { user, authorized } = await requirePermission("newsletter:read");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -33,6 +34,15 @@ export async function GET() {
         },
       }),
     ]);
+
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_list_view",
+      resourceType: "newsletter_subscriber",
+      request,
+      details: { resultCount: subscribers.length },
+    });
 
     return NextResponse.json({
       subscribers,

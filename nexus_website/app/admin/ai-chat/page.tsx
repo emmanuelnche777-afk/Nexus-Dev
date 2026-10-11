@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Search, Sparkles, Trash2, User, Bot, Image as ImageIcon, Calendar, MessageSquare } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface ChatMsg {
   id: string;
@@ -52,7 +53,7 @@ export default function AiChatPage() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this AI conversation?")) return;
     try {
-      await fetch("/api/admin/ai-chat", {
+      await fetchWithFreshTwoFactor("/api/admin/ai-chat", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

@@ -15,7 +15,13 @@ export type SafeAdminUser = {
   name: string;
   role: AdminRole;
   phone: string;
+  twoFactorEnabled: boolean;
+  requiresTwoFactorSetup: boolean;
+  sessionLocked: boolean;
+  requiresFreshTwoFactor: boolean;
 };
+
+const IDLE_LOCK_MS = 5 * 60 * 1000;
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -46,6 +52,10 @@ export async function validateCredentials(
     name: user.name,
     role: user.role as AdminRole,
     phone: user.phone,
+    twoFactorEnabled: user.twoFactorEnabled,
+    requiresTwoFactorSetup: !user.twoFactorEnabled,
+    sessionLocked: false,
+    requiresFreshTwoFactor: true,
   };
 }
 
@@ -62,20 +72,32 @@ export async function createSessionWithExpiry(
   ip: string | undefined,
   userAgent: string | undefined,
   rememberMe: boolean
-): Promise<void> {
+): Promise<boolean> {
   const token = crypto.randomBytes(32).toString("hex");
   const maxAge = rememberMe ? SESSION_MAX_AGE_REMEMBERED : SESSION_MAX_AGE;
+  const now = new Date();
+  const created = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${user.id})::bigint)`;
+    const active = await tx.adminSession.count({
+      where: { userId: user.id, expiresAt: { gt: now } },
+    });
+    if (active > 0) return false;
 
-  await prisma.adminSession.create({
-    data: {
-      token,
-      userId: user.id,
-      expiresAt: new Date(Date.now() + maxAge * 1000),
-      lastActiveAt: new Date(),
-      ipAddress: ip,
-      userAgent: userAgent,
-    },
+    await tx.adminSession.create({
+      data: {
+        token,
+        userId: user.id,
+        expiresAt: new Date(now.getTime() + maxAge * 1000),
+        lastActiveAt: now,
+        reauthenticatedAt: user.twoFactorEnabled ? now : null,
+        ipAddress: ip,
+        userAgent,
+      },
+    });
+    return true;
   });
+
+  if (!created) return false;
 
   const cookieStore = await cookies();
   (cookieStore as unknown as { set: (name: string, value: string, opts: Record<string, unknown>) => void }).set(
@@ -89,6 +111,7 @@ export async function createSessionWithExpiry(
       path: "/",
     }
   );
+  return true;
 }
 
 export async function getSession(): Promise<SafeAdminUser | null> {
@@ -116,10 +139,24 @@ export async function getSession(): Promise<SafeAdminUser | null> {
       return null;
     }
 
-    await prisma.adminSession.update({
-      where: { token: cookie.value },
-      data: { lastActiveAt: new Date() },
+    // Existing installations may have more than one session from before the
+    // one-session policy. Honor only the most recently active one.
+    const winner = await prisma.adminSession.findFirst({
+      where: { userId: session.userId, expiresAt: { gt: new Date() } },
+      orderBy: [{ lastActiveAt: "desc" }, { createdAt: "desc" }],
+      select: { id: true },
     });
+    if (winner?.id !== session.id) {
+      await clearSession();
+      return null;
+    }
+
+    const now = new Date();
+    let sessionLocked = Boolean(session.lockedAt);
+    if (!sessionLocked && now.getTime() - session.lastActiveAt.getTime() >= IDLE_LOCK_MS) {
+      await prisma.adminSession.update({ where: { id: session.id }, data: { lockedAt: now } });
+      sessionLocked = true;
+    }
 
     return {
       id: session.user.id,
@@ -127,10 +164,81 @@ export async function getSession(): Promise<SafeAdminUser | null> {
       name: session.user.name,
       role: session.user.role as AdminRole,
       phone: session.user.phone,
+      twoFactorEnabled: session.user.twoFactorEnabled,
+      requiresTwoFactorSetup: !session.user.twoFactorEnabled,
+      sessionLocked,
+      requiresFreshTwoFactor: !session.reauthenticatedAt || now.getTime() - session.reauthenticatedAt.getTime() > IDLE_LOCK_MS,
     };
   } catch {
     return null;
   }
+}
+
+/** Records explicit foreground input. Background API traffic does not extend idle time. */
+export async function recordSessionActivity(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const cookie = (cookieStore as unknown as { get: (name: string) => { value?: string } | undefined })
+    .get(SESSION_COOKIE);
+  if (!cookie?.value) return false;
+
+  const now = new Date();
+  const result = await prisma.adminSession.updateMany({
+    where: {
+      token: cookie.value,
+      expiresAt: { gt: now },
+      lockedAt: null,
+      lastActiveAt: { gt: new Date(now.getTime() - IDLE_LOCK_MS) },
+    },
+    data: { lastActiveAt: now },
+  });
+  return result.count === 1;
+}
+
+export async function hasRecentTwoFactorVerification(maxAgeMs = 5 * 60 * 1000): Promise<boolean> {
+  const cookieStore = await cookies();
+  const cookie = (cookieStore as unknown as { get: (name: string) => { value?: string } | undefined })
+    .get(SESSION_COOKIE);
+  if (!cookie?.value) return false;
+
+  const session = await prisma.adminSession.findFirst({
+    where: { token: cookie.value, expiresAt: { gt: new Date() }, lockedAt: null },
+    select: { reauthenticatedAt: true },
+  });
+  return Boolean(session?.reauthenticatedAt && Date.now() - session.reauthenticatedAt.getTime() <= maxAgeMs);
+}
+
+export async function markTwoFactorVerified(): Promise<void> {
+  const cookieStore = await cookies();
+  const cookie = (cookieStore as unknown as { get: (name: string) => { value?: string } | undefined })
+    .get(SESSION_COOKIE);
+  if (!cookie?.value) return;
+  await prisma.adminSession.updateMany({
+    where: { token: cookie.value, expiresAt: { gt: new Date() }, lockedAt: null },
+    data: { reauthenticatedAt: new Date() },
+  });
+}
+
+export async function unlockCurrentSession(password: string): Promise<boolean> {
+  const cookieStore = await cookies();
+  const cookie = (cookieStore as unknown as { get: (name: string) => { value?: string } | undefined })
+    .get(SESSION_COOKIE);
+  if (!cookie?.value) return false;
+
+  const session = await prisma.adminSession.findFirst({
+    where: { token: cookie.value, expiresAt: { gt: new Date() } },
+    include: { user: true },
+  });
+  if (!session?.lockedAt || session.user.status !== "ACTIVE" || session.user.deletedAt || !session.user.passwordHash) {
+    return false;
+  }
+  if (!(await comparePassword(password, session.user.passwordHash))) return false;
+
+  const now = new Date();
+  await prisma.adminSession.update({
+    where: { id: session.id },
+    data: { lockedAt: null, lastActiveAt: now },
+  });
+  return true;
 }
 
 export async function clearSession(): Promise<void> {

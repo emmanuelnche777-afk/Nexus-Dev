@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface OwnerSummary {
   id: string;
@@ -103,7 +104,7 @@ export default function OpportunityApplicationsPage() {
         owner: ownerFilter,
       });
       if (search.trim()) query.set("search", search.trim());
-      const res = await fetch(`/api/admin/opportunity-applications?${query.toString()}`);
+      const res = await fetchWithFreshTwoFactor(`/api/admin/opportunity-applications?${query.toString()}`);
       const data = await res.json();
       setApplications(data.applications || []);
       setTotal(data.total ?? (data.applications || []).length);
@@ -128,7 +129,7 @@ export default function OpportunityApplicationsPage() {
       if (search.trim()) query.set("search", search.trim());
       const last = applications[applications.length - 1];
       if (last) query.set("cursor", last.id);
-      const res = await fetch(`/api/admin/opportunity-applications?${query.toString()}`);
+      const res = await fetchWithFreshTwoFactor(`/api/admin/opportunity-applications?${query.toString()}`);
       const data = await res.json();
       setApplications((prev) => [...prev, ...(data.applications || [])]);
       setHasMore(Boolean(data.hasMore));

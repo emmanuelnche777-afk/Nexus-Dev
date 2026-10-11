@@ -20,6 +20,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import EmptyState from "@/components/admin/EmptyState";
 import AdminModal from "@/components/admin/AdminModal";
 import VideoPlayer from "@/components/video/VideoPlayer";
@@ -169,7 +170,7 @@ export default function AIVideosPage() {
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this video?")) return;
     try {
-      const res = await fetch(`/api/admin/ai-videos/${id}`, { method: "DELETE" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/ai-videos/${id}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Delete failed");

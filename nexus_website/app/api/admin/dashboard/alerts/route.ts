@@ -39,7 +39,7 @@ export async function GET() {
   try {
     // Only run the queries whose alert the caller could actually receive.
     const wantRegistrations = may("academy:registrations:*");
-    const wantPartnerships = may("foundation:partnerships:*");
+    const wantPartnerships = may("partnerships:inquiries:*");
     const wantNewsletter = may("newsletter:read");
     const wantOrders = may("techhub:services:*");
     const wantInquiries = may(PERMISSIONS.PATHWAY_INQUIRIES_READ);

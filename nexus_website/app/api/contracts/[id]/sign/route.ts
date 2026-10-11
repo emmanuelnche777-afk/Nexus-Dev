@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
+import { enforceOutboundRateLimit } from "@/lib/rate-limit";
+import { hashSigningToken } from "@/lib/contract-signing";
 import prisma from "@/lib/db";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const token = new URL(request.url).searchParams.get("token");
   if (!token) return NextResponse.json({ error: "Signature link is invalid" }, { status: 403 });
+  const limited = await enforceOutboundRateLimit(request, id, {
+    scope: "client-contract-signing",
+    ipLimit: 30,
+    ipWindowMs: 15 * 60 * 1000,
+    recipientLimit: 10,
+    recipientWindowMs: 15 * 60 * 1000,
+  });
+  if (limited) return limited;
 
   const contract = await prisma.contract.findUnique({ where: { id } });
-  if (!contract || contract.signatureToken !== token) {
+  if (!contract || contract.signatureToken !== hashSigningToken(token)) {
     return NextResponse.json({ error: "Signature link is invalid" }, { status: 403 });
   }
   if (!contract.signatureTokenExpiresAt || contract.signatureTokenExpiresAt < new Date()) {
@@ -41,8 +51,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (typeof token !== "string" || typeof clientSignature !== "string" || clientSignature.length > 2_000_000 || !clientSignature.startsWith("data:image/png;base64,")) {
       return NextResponse.json({ error: "A valid signature and token are required" }, { status: 400 });
     }
+    const limited = await enforceOutboundRateLimit(request, id, {
+      scope: "client-contract-signing",
+      ipLimit: 30,
+      ipWindowMs: 15 * 60 * 1000,
+      recipientLimit: 10,
+      recipientWindowMs: 15 * 60 * 1000,
+    });
+    if (limited) return limited;
     const contract = await prisma.contract.findUnique({ where: { id } });
-    if (!contract || contract.signatureToken !== token) return NextResponse.json({ error: "Signature link is invalid" }, { status: 403 });
+    if (!contract || contract.signatureToken !== hashSigningToken(token)) return NextResponse.json({ error: "Signature link is invalid" }, { status: 403 });
     if (!contract.signatureTokenExpiresAt || contract.signatureTokenExpiresAt < new Date()) {
       return NextResponse.json({ error: "Signature link has expired" }, { status: 403 });
     }

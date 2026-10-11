@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, ArrowLeft, ClipboardList } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface ServiceOrderInquiry {
   id: string;
@@ -47,7 +48,7 @@ export default function ServiceInquiriesPage() {
 
   async function updateStatus(id: string, status: string) {
     try {
-      await fetch("/api/admin/service-inquiries", {
+      await fetchWithFreshTwoFactor("/api/admin/service-inquiries", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status }),

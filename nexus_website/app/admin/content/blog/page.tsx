@@ -15,6 +15,7 @@ import {
   Eye,
 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import EmptyState from "@/components/admin/EmptyState";
 import AdminModal from "@/components/admin/AdminModal";
 import BlogContentEditor, {
@@ -192,7 +193,7 @@ export default function BlogAdminPage() {
   async function handleDelete(slug: string) {
     if (!confirm("Are you sure you want to delete this post?")) return;
     try {
-      const res = await fetch(`/api/admin/content/blog/${slug}`, { method: "DELETE" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/content/blog/${slug}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Delete failed");

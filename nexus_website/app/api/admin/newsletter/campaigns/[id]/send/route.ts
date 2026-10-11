@@ -6,6 +6,7 @@ import { enforceActorRateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/notifications";
 import { createUnsubscribeToken, renderNewsletterHtml } from "@/lib/newsletter";
 import type { Prisma } from "@prisma/client";
+import { logAdminAction } from "@/lib/audit";
 
 const BATCH_SIZE = 10;
 const STALE_CLAIM_MS = 10 * 60 * 1000;
@@ -221,6 +222,23 @@ export async function POST(request: Request, { params }: CampaignParams) {
         completedAt: unfinishedCount === 0 ? new Date() : null,
       },
       select: { id: true, status: true, recipientCount: true, sentCount: true, failedCount: true, skippedCount: true },
+    });
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "newsletter_campaign_batch_processed",
+      resourceType: "newsletter_campaign",
+      resourceId: id,
+      newValue: {
+        action,
+        status: updatedCampaign.status,
+        resultCount: updatedCampaign.recipientCount,
+        sent: sentCount,
+        failed: failedCount,
+        skipped: skippedCount,
+      },
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
     });
     return NextResponse.json({ campaign: updatedCampaign, unfinishedCount });
   } catch (error) {

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download, Loader2, Mail, RefreshCw, Send, ShieldCheck, UserMinus } from "lucide-react";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 type Subscriber = {
   id: string;
@@ -53,7 +54,7 @@ export default function NewsletterAdminPage() {
   const loadData = useCallback(async () => {
     setError("");
     try {
-      const response = await fetch("/api/admin/newsletter", { cache: "no-store" });
+      const response = await fetchWithFreshTwoFactor("/api/admin/newsletter", { cache: "no-store" });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not load newsletter data.");
       setData(result);
@@ -80,7 +81,7 @@ export default function NewsletterAdminPage() {
     setBusySubscriber(subscriber.id);
     setMessage("");
     try {
-      const response = await fetch(`/api/admin/newsletter/subscribers/${subscriber.id}`, {
+      const response = await fetchWithFreshTwoFactor(`/api/admin/newsletter/subscribers/${subscriber.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
@@ -104,7 +105,7 @@ export default function NewsletterAdminPage() {
       let nextAction: "start" | "continue" | "retry-failed" = action;
       let latestCampaign: Campaign | null = null;
       for (let batch = 0; batch < 30; batch += 1) {
-        const response = await fetch(`/api/admin/newsletter/campaigns/${campaignId}/send`, {
+        const response = await fetchWithFreshTwoFactor(`/api/admin/newsletter/campaigns/${campaignId}/send`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: nextAction }),

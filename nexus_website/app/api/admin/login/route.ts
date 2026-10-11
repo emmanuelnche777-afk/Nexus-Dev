@@ -6,6 +6,7 @@ import { checkRateLimit, recordAttempt } from "@/lib/rate-limit";
 import { encrypt } from "@/lib/encryption";
 import { prisma } from "@/lib/db";
 import crypto from "node:crypto";
+import { logAdminAction } from "@/lib/audit";
 
 const PENDING_LOGIN_COOKIE = "nexus_admin_2fa_pending";
 const PENDING_LOGIN_TTL = 5 * 60; // 5 minutes in seconds
@@ -26,6 +27,13 @@ export async function POST(request: NextRequest) {
 
   const { limited, retryAfterMs } = await checkRateLimit(email);
   if (limited) {
+    await logAdminAction({
+      action: "sign_in_rate_limited",
+      resourceType: "admin_authentication",
+      newValue: { loginIdentifierHash: crypto.createHash("sha256").update(email.trim().toLowerCase()).digest("hex") },
+      ipAddress: ip,
+      userAgent,
+    });
     return NextResponse.json(
       { success: false, error: `Too many attempts. Try again in ${Math.ceil(retryAfterMs / 60000)} minutes.` },
       { status: 429 }
@@ -36,6 +44,13 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     await recordAttempt(email, false, ip, userAgent);
+    await logAdminAction({
+      action: "sign_in_failed",
+      resourceType: "admin_authentication",
+      newValue: { loginIdentifierHash: crypto.createHash("sha256").update(email.trim().toLowerCase()).digest("hex") },
+      ipAddress: ip,
+      userAgent,
+    });
     return NextResponse.json(
       { success: false, error: "Invalid email or password" },
       { status: 401 }
@@ -76,9 +91,44 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "two_factor_challenge_started",
+      resourceType: "admin_account",
+      resourceId: user.id,
+      ipAddress: ip,
+      userAgent,
+    });
+
     return NextResponse.json({ success: true, requires2FA: true });
   }
 
-  await createSessionWithExpiry(user, ip, userAgent, !!rememberMe);
-  return NextResponse.json({ success: true, requires2FA: false });
+  const created = await createSessionWithExpiry(user, ip, userAgent, !!rememberMe);
+  if (!created) {
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sign_in_blocked_active_session",
+      resourceType: "admin_account",
+      resourceId: user.id,
+      ipAddress: ip,
+      userAgent,
+    });
+    return NextResponse.json({
+      success: false,
+      code: "SESSION_ALREADY_ACTIVE",
+      error: "This account already has an active session. Sign out from that session before signing in here, or reset your password if that device is lost.",
+    }, { status: 409 });
+  }
+  await logAdminAction({
+    actorId: user.id,
+    adminEmail: user.email,
+    action: "sign_in_completed_account_setup_required",
+    resourceType: "admin_account",
+    resourceId: user.id,
+    ipAddress: ip,
+    userAgent,
+  });
+  return NextResponse.json({ success: true, requires2FA: false, requiresTwoFactorSetup: true });
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
 import { getSession } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit";
 
 export async function GET() {
   const user = await getSession();
@@ -20,6 +21,9 @@ export async function GET() {
         phone: true,
         status: true,
         twoFactorEnabled: true,
+        recoveryEmail: true,
+        recoveryEmailVerifiedAt: true,
+        recoveryPhoneVerifiedAt: true,
         invitedAt: true,
         createdAt: true,
         momoPayoutName: true,
@@ -52,6 +56,9 @@ export async function GET() {
         phone: adminUser.phone,
         status: adminUser.status,
         twoFactorEnabled: adminUser.twoFactorEnabled,
+        recoveryEmail: adminUser.recoveryEmail,
+        recoveryEmailVerifiedAt: adminUser.recoveryEmailVerifiedAt,
+        recoveryPhoneVerifiedAt: adminUser.recoveryPhoneVerifiedAt,
         invitedAt: adminUser.invitedAt,
         createdAt: adminUser.createdAt,
       },
@@ -75,11 +82,26 @@ export async function PUT(request: Request) {
 
     const updateData: Record<string, unknown> = {};
     if (name !== undefined) updateData.name = name;
-    if (phone !== undefined) updateData.phone = phone;
+    if (phone !== undefined && phone !== user.phone) {
+      updateData.phone = phone;
+      updateData.recoveryPhone = null;
+      updateData.recoveryPhoneVerifiedAt = null;
+    }
 
     await prisma.adminUser.update({
       where: { id: user.id, deletedAt: null },
       data: updateData,
+    });
+
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "profile_updated",
+      resourceType: "admin_account",
+      resourceId: user.id,
+      newValue: updateData,
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
     });
 
     return NextResponse.json({ success: true });

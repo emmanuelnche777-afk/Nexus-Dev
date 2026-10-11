@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AdminModal from "@/components/admin/AdminModal";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import { Users, Loader2, Search, Mail, MessageCircle, Send } from "lucide-react";
 
 interface Student {
@@ -45,7 +46,7 @@ export default function StudentsPage() {
 
   async function loadStudents() {
     try {
-      const response = await fetch("/api/admin/academy/students");
+      const response = await fetchWithFreshTwoFactor("/api/admin/academy/students");
       if (!response.ok) throw new Error("Failed to load students");
       const data = await response.json();
       setStudents(data.students);
@@ -60,7 +61,7 @@ export default function StudentsPage() {
     if (clearPhrase !== "DELETE ALL") return;
     setClearing(true);
     try {
-      const response = await fetch("/api/admin/academy/clear-data", {
+      const response = await fetchWithFreshTwoFactor("/api/admin/academy/clear-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entity: "students", confirm: "DELETE ALL" }),
@@ -83,7 +84,7 @@ export default function StudentsPage() {
     )) return;
     setNotifying(true);
     try {
-      const res = await fetch("/api/admin/academy/students/notifications", {
+      const res = await fetchWithFreshTwoFactor("/api/admin/academy/students/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ studentIds: selected.map((student) => student.id) }),
@@ -108,7 +109,7 @@ export default function StudentsPage() {
     if (!window.confirm(`Send the welcome email and WhatsApp to ${student.fullName} at the saved email and phone? Previously sent channels will not be resent.`)) return;
     setSendingStudentIds((current) => [...current, student.id]);
     try {
-      const res = await fetch("/api/admin/academy/students/notifications", {
+      const res = await fetchWithFreshTwoFactor("/api/admin/academy/students/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ studentIds: [student.id] }),

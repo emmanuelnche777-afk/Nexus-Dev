@@ -14,6 +14,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface OwnerSummary {
   id: string;
@@ -168,7 +169,7 @@ export default function OpportunityApplicationDetailPage({
   async function loadApplication() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/opportunity-applications/${id}`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/opportunity-applications/${id}`, {
         cache: "no-store",
       });
       if (res.status === 404) {
@@ -184,6 +185,24 @@ export default function OpportunityApplicationDetailPage({
       console.error("Failed to load application:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function downloadApplicationDocument(documentIndex: number, storedUrl: string) {
+    try {
+      const response = await fetchWithFreshTwoFactor(`/api/admin/opportunity-applications/${id}/documents/${documentIndex}`);
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || "Could not open this document");
+      }
+      const objectUrl = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = documentName(storedUrl, documentIndex);
+      anchor.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch (cause) {
+      setRespondError(cause instanceof Error ? cause.message : "Could not open this document");
     }
   }
 
@@ -349,9 +368,8 @@ export default function OpportunityApplicationDetailPage({
                       // stored URL. This endpoint checks the admin's permission
                       // and listing scope, then redirects to a short-lived signed
                       // URL or streams the file.
-                      href={`/api/admin/opportunity-applications/${application.id}/documents/${i}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href="#download-document"
+                      onClick={(event) => { event.preventDefault(); void downloadApplicationDocument(i, url); }}
                       className="flex items-center gap-2 rounded-lg border border-nexus-navy/10 px-3 py-2 text-sm text-nexus-cyan transition hover:bg-nexus-navy/5"
                     >
                       <FileText className="h-4 w-4 shrink-0" />

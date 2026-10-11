@@ -78,6 +78,7 @@ export async function POST(request: Request) {
     };
 
     await logAdminAction({
+      actorId: user.id,
       adminEmail: user.email,
       action: "send_academy_student_welcome",
       resourceType: "student",

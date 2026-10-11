@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import prisma from "@/lib/db";
 
 interface ChatConversation {
@@ -89,11 +90,12 @@ export async function DELETE(request: Request) {
 
   try {
     const body = await request.json();
-    await prisma.adminChatMessage.deleteMany({
+    const deleted = await prisma.adminChatMessage.deleteMany({
       where: {
         sessionId: body.id,
       },
     });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "records_deleted", resourceType: "admin_chat_session", resourceId: body.id, newValue: { deletedCount: deleted.count } });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });

@@ -9,6 +9,7 @@ import Button from "@/components/admin/ui/button";
 import { InputField, SelectField } from "@/components/admin/ui/form-field";
 import { ROLE_DESCRIPTIONS } from "@/lib/permissions-data";
 import type { AdminRole } from "@/lib/permissions-data";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 const ROLES: AdminRole[] = [
   "ACADEMY_MANAGER",
@@ -24,6 +25,7 @@ export default function InviteStaffPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [recoveryEmail, setRecoveryEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<AdminRole>("CONTENT_EDITOR");
   const [submitting, setSubmitting] = useState(false);
@@ -36,10 +38,10 @@ export default function InviteStaffPage() {
     setError("");
     setSuccess("");
 
-    const res = await fetch("/api/admin/staff", {
+    const res = await fetchWithFreshTwoFactor("/api/admin/staff", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, phone, role }),
+      body: JSON.stringify({ name, email, phone, role, recoveryEmail }),
     });
 
     const data = await res.json();
@@ -53,6 +55,7 @@ export default function InviteStaffPage() {
     setSuccess(`Invitation sent to ${email}`);
     setName("");
     setEmail("");
+    setRecoveryEmail("");
     setPhone("");
     setRole("CONTENT_EDITOR");
     setSubmitting(false);
@@ -118,6 +121,17 @@ export default function InviteStaffPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="jane@example.com"
                   required
+                />
+              </div>
+              <div>
+                <InputField
+                  label="Backup recovery email (optional)"
+                  id="recoveryEmail"
+                  type="email"
+                  value={recoveryEmail}
+                  onChange={(e) => setRecoveryEmail(e.target.value)}
+                  placeholder="backup@example.com"
+                  helperText="The staff member must verify it before it can be used for recovery."
                 />
               </div>
               <div className="sm:col-span-2">

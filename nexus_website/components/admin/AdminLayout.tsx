@@ -186,9 +186,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [router, pathname, sessionCheckAttempt]);
 
   useEffect(() => {
+    let lastActivityRequest = 0;
+    let idleTimer: ReturnType<typeof setTimeout>;
+    const scheduleLockRedirect = () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => router.replace("/admin/unlock"), 5 * 60 * 1000);
+    };
+    scheduleLockRedirect();
+    const sendActivity = () => {
+      const now = Date.now();
+      scheduleLockRedirect();
+      if (now - lastActivityRequest < 30_000) return;
+      lastActivityRequest = now;
+      void fetch("/api/admin/session", { method: "PATCH", cache: "no-store" })
+        .then((response) => { if (response.status === 423) router.replace("/admin/unlock"); })
+        .catch(() => undefined);
+    };
+    const events: Array<keyof WindowEventMap> = ["pointerdown", "keydown", "wheel", "touchstart"];
+    events.forEach((event) => window.addEventListener(event, sendActivity, { passive: true }));
+    return () => {
+      clearTimeout(idleTimer);
+      events.forEach((event) => window.removeEventListener(event, sendActivity));
+    };
+  }, [router]);
+
+  useEffect(() => {
     const isPaymentPage = pathname === "/admin/academy/payments" || pathname.startsWith("/admin/academy/payments/");
     if (session?.role && isPaymentPage && !hasPermission(session.role, "academy:payments:verify")) {
       router.replace("/admin/academy");
+    }
+    if (session?.role && pathname.startsWith("/admin/logs") && session.role !== "SUPER_ADMIN") {
+      router.replace("/admin/dashboard");
     }
   }, [pathname, router, session]);
 
@@ -207,6 +235,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const renderNavItem = (item: NavItem) => {
     const itemPermission = NAV_PERMISSION_BY_HREF[item.href];
+    if (item.href === "/admin/analytics" && !["SUPER_ADMIN", "ACADEMY_MANAGER", "FINANCE", "CONTENT_EDITOR"].includes(session?.role || "")) {
+      return null;
+    }
+    if (item.href === "/admin/logs" && session?.role !== "SUPER_ADMIN") return null;
     if (!item.children && itemPermission && (!session?.role || !hasPermission(session.role, itemPermission))) {
       return null;
     }

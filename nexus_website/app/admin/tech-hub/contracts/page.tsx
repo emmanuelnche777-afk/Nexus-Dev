@@ -7,6 +7,7 @@ import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import AdminModal from "@/components/admin/AdminModal";
 import SignaturePad from "@/components/SignaturePad";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface Contract {
   id: string;
@@ -136,7 +137,7 @@ export default function TechHubContractManagementPage() {
   async function loadContracts(showArchived = archivedView) {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/tech-hub/contracts${showArchived ? "?archived=true" : ""}`, { cache: "no-store" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/tech-hub/contracts${showArchived ? "?archived=true" : ""}`, { cache: "no-store" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to refresh contracts");
       if (Array.isArray(data.contracts)) setContracts(data.contracts);
@@ -224,7 +225,7 @@ export default function TechHubContractManagementPage() {
     if (!nexusSigning || !nexusSignature) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/tech-hub/contracts/${nexusSigning.id}/signed`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/tech-hub/contracts/${nexusSigning.id}/signed`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signatureTechHubUrl: nexusSignature }),
@@ -244,7 +245,7 @@ export default function TechHubContractManagementPage() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this contract? This cannot be undone.")) return;
     try {
-      const res = await fetch(`/api/admin/tech-hub/contracts/${id}`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/tech-hub/contracts/${id}`, {
         method: "DELETE",
       });
       if (res.ok) await loadContracts();
@@ -256,7 +257,7 @@ export default function TechHubContractManagementPage() {
   async function generatePdf(contract: Contract) {
     setGenerating(true);
     try {
-      const res = await fetch("/api/admin/tech-hub/contracts/generate-pdf", {
+      const res = await fetchWithFreshTwoFactor("/api/admin/tech-hub/contracts/generate-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: contract.id }),
@@ -281,7 +282,7 @@ export default function TechHubContractManagementPage() {
     if (!confirm("Send this contract to the client for signature?")) return;
     setSending(true);
     try {
-      const res = await fetch(`/api/admin/tech-hub/contracts/${contract.id}/send`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/tech-hub/contracts/${contract.id}/send`, {
         method: "POST",
       });
       const data = await res.json();

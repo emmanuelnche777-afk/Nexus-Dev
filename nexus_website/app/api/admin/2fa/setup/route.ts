@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
 import { encrypt } from "@/lib/encryption";
 import { requirePermission } from "@/lib/permissions-server";
+import { enforceActorRateLimit } from "@/lib/rate-limit";
 
 const totp = new TOTP({
   issuer: "NEXUS",
@@ -13,14 +14,14 @@ const totp = new TOTP({
 });
 
 export async function POST() {
-  const { user, authorized } = await requirePermission("foundation:*");
+  // 2FA setup belongs to the authenticated account itself, not a staff role.
+  const { user, authorized } = await requirePermission("account:security");
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!authorized) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+  if (!authorized) return NextResponse.json({ error: "Session locked" }, { status: 423 });
+  const limited = await enforceActorRateLimit(user.id, "2fa-enrollment-start", 5, 60 * 60 * 1000);
+  if (limited) return limited;
   try {
     const adminUser = await prisma.adminUser.findUnique({
       where: { id: user.id, deletedAt: null },
@@ -45,8 +46,8 @@ export async function POST() {
     await prisma.adminUser.update({
       where: { id: user.id },
       data: {
-        twoFactorSecret: encrypt(secret),
-        backupCodes: JSON.stringify(backupCodeHashes),
+        pendingTwoFactorSecret: encrypt(secret),
+        pendingBackupCodes: JSON.stringify(backupCodeHashes),
       },
     });
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 
 import prisma from "@/lib/db";
 import { containsObviousSensitiveKnowledge } from "@/lib/ai/security";
@@ -91,6 +92,8 @@ export async function DELETE(request: Request) {
         content: "(archived)",
       },
     });
+
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_archived", resourceType: "ai_knowledge", resourceId: id || undefined });
 
     return NextResponse.json({ success: true });
   } catch {

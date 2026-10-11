@@ -10,6 +10,7 @@ import { sendEmail, sendWhatsApp } from "@/lib/notifications";
 import { describeDelivery } from "@/lib/notifications/outcome";
 import { OpportunityApplicationStatus } from "@prisma/client";
 import { clean } from "@/lib/join-us-pathways";
+import { logSensitiveAccess } from "@/lib/audit";
 
 function escapeHtml(value: string): string {
   return value
@@ -44,7 +45,7 @@ const APPLICATION_SELECT = {
 
 /** GET a single application, including the listing it targets. */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, authorized } = await requirePermission(PERMISSIONS.APPLICATIONS_READ);
@@ -79,6 +80,15 @@ export async function GET(
   if (!canSeeListingType(user.role, application.opportunity.type)) {
     return FORBIDDEN();
   }
+
+  await logSensitiveAccess({
+    actorId: user.id,
+    adminEmail: user.email,
+    action: "sensitive_record_view",
+    resourceType: "opportunity_application",
+    resourceId: id,
+    request,
+  });
 
   const owners = await resolveOwners([application.ownerId]);
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import prisma from "@/lib/db";
 import { validateVideoUrl } from "@/lib/video-url";
 import { deleteCloudinaryVideoIfUnused, managedCloudinaryVideoPublicId } from "@/lib/cloudinary-video";
@@ -190,6 +191,7 @@ export async function DELETE(request: Request) {
     const existing = await prisma.journeyEntry.findUnique({ where: { id: body.id }, select: { media: true } });
     if (!existing) return NextResponse.json({ error: "Journey entry not found." }, { status: 404 });
     await prisma.journeyEntry.delete({ where: { id: body.id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "journey_entry", resourceId: body.id });
     await cleanupRemovedJourneyVideos(existing.media, []);
     return NextResponse.json({ success: true });
   } catch {

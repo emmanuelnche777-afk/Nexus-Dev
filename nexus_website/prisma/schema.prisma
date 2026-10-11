@@ -24,14 +24,25 @@ model AdminUser {
   passwordHash                String?
   passwordResetTokenExpiresAt DateTime?
   passwordResetTokenHash      String?
+  recoveryEmail              String?
+  recoveryEmailVerifiedAt    DateTime?
+  recoveryPhone              String?
+  recoveryPhoneVerifiedAt    DateTime?
+  pendingRecoveryTarget      String?
+  pendingRecoveryType        String?
+  pendingRecoveryChannel     String?
+  pendingRecoveryCodeHash    String?
+  pendingRecoveryExpiresAt   DateTime?
   phone                       String
   salaryAmount                Decimal?
   salaryCurrency              String?              @default("XAF")
   status                      AdminStatus          @default(ACTIVE)
   twoFactorEnabled            Boolean              @default(false)
   twoFactorSecret             String?
+  pendingTwoFactorSecret      String?
   role                        AdminRole            @default(SUPPORT_STAFF)
   backupCodes                 Json?
+  pendingBackupCodes          Json?
   bootstrappedFromIp          String?
   bootstrappedAt              DateTime?
   activityLogs                ActivityLog[]
@@ -54,6 +65,8 @@ model AdminSession {
   createdAt    DateTime  @default(now())
   ipAddress    String?
   lastActiveAt DateTime  @default(now())
+  lockedAt     DateTime?
+  reauthenticatedAt DateTime?
   userAgent    String?
   user         AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -979,7 +992,6 @@ enum AdminRole {
   SUPER_ADMIN
   ACADEMY_MANAGER
   TECH_HUB_MANAGER
-  FOUNDATION_MANAGER
   MENTORSHIP_COORDINATOR
   CONTENT_EDITOR
   SUPPORT_STAFF

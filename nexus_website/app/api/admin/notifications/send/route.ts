@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { escapeHtmlWithBreaks } from "@/lib/email-html";
 import { enforceActorRateLimit, enforceOutboundRateLimit } from "@/lib/rate-limit";
+import { logAdminAction } from "@/lib/audit";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -85,6 +86,17 @@ export async function POST(request: NextRequest) {
     } catch (logError) {
       console.error("[notifications] Failed to write log:", logError);
     }
+
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: `notification_${status}`,
+      resourceType: "notification",
+      resourceId: logEntry?.id,
+      newValue: { channel: type, status },
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
 
     if (status === "failed") {
       return NextResponse.json({ ...result, logged: logEntry?.id, status }, { status: 502 });

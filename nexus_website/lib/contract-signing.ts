@@ -1,7 +1,12 @@
 import { randomBytes } from "crypto";
+import { createHash } from "node:crypto";
 
 export function generateToken(): string {
   return randomBytes(32).toString("hex");
+}
+
+export function hashSigningToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }
 
 export function getSignedUrl(contractId: string, token: string): string {

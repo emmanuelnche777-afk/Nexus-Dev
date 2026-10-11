@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
 import prisma from "@/lib/db";
 import type { Prisma } from "@prisma/client";
-import { generateToken, getSignedUrl } from "@/lib/contract-signing";
+import { generateToken, getSignedUrl, hashSigningToken } from "@/lib/contract-signing";
 import { sendContractEmail } from "@/lib/contract-email";
 import { sendWhatsApp } from "@/lib/notifications";
 import { logNotification } from "@/lib/notification-log";
@@ -29,13 +29,14 @@ export async function POST(
     }
 
     const token = generateToken();
+    const tokenHash = hashSigningToken(token);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const signUrl = getSignedUrl(id, token);
 
     const updated = await prisma.contract.update({
       where: { id },
       data: {
-        signatureToken: token,
+        signatureToken: tokenHash,
         signatureTokenExpiresAt: expiresAt,
         sentAt: new Date(),
         expiresAt,
@@ -69,7 +70,7 @@ export async function POST(
         subject: `Nexus Tech Hub: ${updated.contractType} for ${updated.clientName}`,
         body: `Contract ${updated.id} sent to ${updated.clientEmail}`,
         status: emailSent ? "sent" : "failed",
-        result: { signUrl },
+        result: { contractId: updated.id },
       });
       if (!emailSent) {
         await prisma.contract.update({
@@ -129,7 +130,7 @@ export async function POST(
         entity: "Contract",
         entityId: id,
         userId: user.id,
-        metadata: { clientEmail: updated.clientEmail, signUrl } satisfies Prisma.InputJsonObject,
+        metadata: { tokenExpiresAt: expiresAt.toISOString() } satisfies Prisma.InputJsonObject,
       },
     });
 

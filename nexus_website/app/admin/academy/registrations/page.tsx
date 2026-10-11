@@ -6,6 +6,7 @@ import { ArrowLeft, UserPlus, Eye, Check, Loader2, Search } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import AdminModal from "@/components/admin/AdminModal";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface Registration {
   id: string;
@@ -50,7 +51,7 @@ export default function RegistrationsPage() {
     if (clearConfirm !== "DELETE ALL") return;
     setClearing(true);
     try {
-      const res = await fetch("/api/admin/academy/clear-data", {
+      const res = await fetchWithFreshTwoFactor("/api/admin/academy/clear-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entity: "registrations", confirm: "DELETE ALL" }),

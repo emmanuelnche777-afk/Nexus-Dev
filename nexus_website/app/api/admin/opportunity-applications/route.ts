@@ -10,6 +10,7 @@ import {
 import { OpportunityApplicationStatus } from "@prisma/client";
 import { resolveOwners } from "@/lib/intake-owners";
 import { computeSla } from "@/lib/intake-sla";
+import { logSensitiveAccess } from "@/lib/audit";
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 50;
@@ -101,6 +102,15 @@ export async function GET(request: Request) {
         now
       ),
     }));
+
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_list_view",
+      resourceType: "opportunity_application",
+      request,
+      details: { resultCount: rows.length, pageSize: limit },
+    });
 
     return NextResponse.json({
       applications: enriched,

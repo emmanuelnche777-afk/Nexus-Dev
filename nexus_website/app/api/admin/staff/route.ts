@@ -9,10 +9,11 @@ import { getAdminUrl } from "@/lib/urls";
 import { escapeHtml } from "@/lib/email-html";
 import { enforceActorRateLimit } from "@/lib/rate-limit";
 import { ROLE_PERMISSIONS } from "@/lib/permissions-data";
+import { logAdminAction, logSensitiveAccess } from "@/lib/audit";
 
 const INVITE_TTL = 48 * 60 * 60 * 1000; // 48 hours
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const { user, authorized } = await requirePermission("staff:*");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -50,6 +51,14 @@ export async function GET() {
       hasAcceptedInvite: s.passwordHash !== null,
     }));
 
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_list_view",
+      resourceType: "staff_account",
+      request,
+      details: { resultCount: enriched.length },
+    });
     return NextResponse.json({ staff: enriched });
   } catch (error) {
     console.error("[staff] List error:", error);
@@ -66,11 +75,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, email, phone, role } = body as {
+    const { name, email, phone, role, recoveryEmail } = body as {
       name: string;
       email: string;
       phone: string;
       role: string;
+      recoveryEmail?: string;
     };
 
     if (!name || !email || !phone || !role) {
@@ -88,6 +98,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Select a valid staff role" }, { status: 400 });
     }
 
+    const normalizedRecoveryEmail = typeof recoveryEmail === "string" && recoveryEmail.trim()
+      ? recoveryEmail.trim().toLowerCase()
+      : null;
+    if (normalizedRecoveryEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedRecoveryEmail)) {
+      return NextResponse.json({ error: "Enter a valid backup recovery email" }, { status: 400 });
+    }
+    if (normalizedRecoveryEmail === email.trim().toLowerCase()) {
+      return NextResponse.json({ error: "Backup recovery email must be different from the staff email" }, { status: 400 });
+    }
+
     const existing = await prisma.adminUser.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
@@ -99,10 +119,11 @@ export async function POST(request: NextRequest) {
 
     const newStaff = await prisma.adminUser.create({
       data: {
-        email,
+        email: email.trim().toLowerCase(),
         name,
         role: role as AdminRole,
         phone,
+        recoveryEmail: normalizedRecoveryEmail,
         status: "ACTIVE",
         active: true,
         invitedAt: new Date(),
@@ -111,6 +132,17 @@ export async function POST(request: NextRequest) {
         createdBy: user.id,
         passwordHash: null,
       },
+    });
+
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "staff_invited",
+      resourceType: "admin_account",
+      resourceId: newStaff.id,
+      newValue: { role: newStaff.role, status: newStaff.status },
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
     });
 
     const baseUrl = getAdminUrl();

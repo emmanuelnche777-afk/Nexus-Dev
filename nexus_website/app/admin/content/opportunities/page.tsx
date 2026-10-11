@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import {
   Plus,
   Pencil,
@@ -204,7 +205,7 @@ export default function OpportunitiesPage() {
     if (!confirm(message)) return;
 
     try {
-      const res = await fetch(`/api/admin/opportunities/${item.id}`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/opportunities/${item.id}`, {
         method: "DELETE",
       });
       const data = await res.json().catch(() => ({}));
@@ -220,7 +221,7 @@ export default function OpportunitiesPage() {
           "Archived. Permanently delete it instead? Only possible because it has no applicants."
         )
       ) {
-        const purgeRes = await fetch(
+        const purgeRes = await fetchWithFreshTwoFactor(
           `/api/admin/opportunities/${item.id}?purge=true`,
           { method: "DELETE" }
         );

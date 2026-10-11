@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         entity: "TechHubConversation",
         entityId: conversation.id,
         userId: user.id,
-        metadata: { clientEmail: conversation.clientEmail, orderId },
+        metadata: { orderId },
       },
     });
 

@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/permissions-server";
 import { invalidateUserSessions } from "@/lib/admin-auth";
 import { encrypt, decrypt } from "@/lib/encryption";
 import { ROLE_PERMISSIONS } from "@/lib/permissions-data";
+import { logAdminAction, logSensitiveAccess } from "@/lib/audit";
 
 function canManageTargetRole(callerRole: string, targetRole: string): boolean {
   const hierarchy: Record<string, number> = {
@@ -61,6 +62,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         salaryCurrency: staff.salaryCurrency,
       };
     }
+
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_record_view",
+      resourceType: "staff_account",
+      resourceId: id,
+      request,
+    });
 
     return NextResponse.json({ staff, payroll });
   } catch (error) {
@@ -159,6 +169,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data: updateData,
     });
 
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: status === "SUSPENDED" ? "staff_suspended" : status === "ACTIVE" ? "staff_activated" : role !== undefined ? "staff_role_changed" : "staff_account_updated",
+      resourceType: "admin_account",
+      resourceId: id,
+      oldValue: { role: target.role, status: target.status },
+      newValue: { role: role ?? target.role, status: status ?? target.status, name: name !== undefined, email: email !== undefined, phone: phone !== undefined },
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
+
     if (status === "DELETED") {
       await invalidateUserSessions(target.id);
     }
@@ -205,6 +227,18 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         data: { status: "DELETED", deletedAt: new Date() },
       });
       await tx.adminSession.deleteMany({ where: { userId: id } });
+    });
+
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "staff_deleted",
+      resourceType: "admin_account",
+      resourceId: id,
+      oldValue: { role: target.role, status: target.status },
+      newValue: { status: "DELETED" },
+      ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+      userAgent: request.headers.get("user-agent") || undefined,
     });
 
     return NextResponse.json({ success: true });

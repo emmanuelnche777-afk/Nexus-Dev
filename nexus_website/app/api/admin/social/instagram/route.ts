@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import { getInstagramConnection, instagramRedirectUri, removeInstagramConnection } from "@/lib/instagram-login";
 
 export async function GET() {
@@ -26,6 +27,7 @@ export async function DELETE() {
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   try {
     await removeInstagramConnection();
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "integration_disconnected", resourceType: "instagram" });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Could not disconnect Instagram:", error);

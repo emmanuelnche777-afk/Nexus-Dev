@@ -20,6 +20,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 type NotificationType = "email" | "sms" | "whatsapp";
 
@@ -123,7 +124,7 @@ export default function NotificationsPage() {
     setResult(null);
 
     try {
-      const res = await fetch("/api/admin/notifications/send", {
+      const res = await fetchWithFreshTwoFactor("/api/admin/notifications/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -151,7 +152,7 @@ export default function NotificationsPage() {
   async function deleteLog(id: string) {
     if (!confirm("Delete this log entry?")) return;
     try {
-      await fetch("/api/admin/notifications", {
+      await fetchWithFreshTwoFactor("/api/admin/notifications", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

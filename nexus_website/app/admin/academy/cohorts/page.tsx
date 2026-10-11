@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Search, ArrowLeft, Users, Save, X as XIcon } from
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import AdminModal from "@/components/admin/AdminModal";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface Cohort {
   id: string;
@@ -166,7 +167,7 @@ export default function CohortsPage() {
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this cohort?")) return;
     try {
-      const res = await fetch(`/api/admin/cohorts/${id}`, { method: "DELETE" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/cohorts/${id}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Delete failed");

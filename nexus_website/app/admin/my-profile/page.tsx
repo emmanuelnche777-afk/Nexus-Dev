@@ -21,15 +21,9 @@ interface UserProfile {
   phone: string;
   status: string;
   twoFactorEnabled: boolean;
-}
-
-interface Session {
-  id: string;
-  createdAt: string;
-  lastActiveAt: string;
-  userAgent: string | null;
-  ipAddress: string | null;
-  expiresAt: string;
+  recoveryEmail: string | null;
+  recoveryEmailVerifiedAt: string | null;
+  recoveryPhoneVerifiedAt: string | null;
 }
 
 interface TwoFactorState {
@@ -41,7 +35,6 @@ interface TwoFactorState {
 export default function MyProfilePage() {
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -50,6 +43,10 @@ export default function MyProfilePage() {
   // Profile form state
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [recoveryChannel, setRecoveryChannel] = useState<"sms" | "whatsapp">("sms");
+  const [pendingRecoveryType, setPendingRecoveryType] = useState<"email" | "phone" | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showCurrent, setShowCurrent] = useState(false);
@@ -61,8 +58,6 @@ export default function MyProfilePage() {
   const [verifying, setVerifying] = useState(false);
   const [verifyStep, setVerifyStep] = useState<"setup" | "verify">("setup");
   const [verificationCode, setVerificationCode] = useState("");
-  const [disablePassword, setDisablePassword] = useState("");
-  const [showDisablePassword, setShowDisablePassword] = useState(false);
 
   useEffect(() => {
     void fetch("/api/admin/user/me", { cache: "no-store" })
@@ -74,22 +69,12 @@ export default function MyProfilePage() {
         setUser(data.user);
         setName(data.user.name);
         setPhone(data.user.phone);
+        setRecoveryEmail(data.user.recoveryEmail || "");
         setTwoFactor({ enabled: data.user.twoFactorEnabled });
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load profile"))
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    void fetch(`/api/admin/staff/${user.id}/sessions`, { cache: "no-store" })
-      .then((res) => {
-        if (!res.ok) return { sessions: [] };
-        return res.json();
-      })
-      .then((data) => setSessions(data.sessions || []))
-      .catch(() => setSessions([]));
-  }, [user?.id]);
 
   async function saveProfile() {
     if (!user) return;
@@ -110,6 +95,56 @@ export default function MyProfilePage() {
       setSuccess("Profile updated");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function startRecoveryVerification(type: "email" | "phone") {
+    setError("");
+    setSuccess("");
+    try {
+      const body = type === "email"
+        ? { type, channel: "email", target: recoveryEmail }
+        : { type, channel: recoveryChannel };
+      const response = await fetch("/api/admin/user/recovery-channels/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not send verification code");
+      setPendingRecoveryType(type);
+      setRecoveryCode("");
+      setSuccess("A verification code was sent. It expires in 10 minutes.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not send verification code");
+    }
+  }
+
+  async function verifyRecoveryContact() {
+    if (!recoveryCode) return;
+    setSaving(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/user/recovery-channels/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: recoveryCode }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not verify recovery contact");
+      setPendingRecoveryType(null);
+      setRecoveryCode("");
+      setSuccess("Recovery contact verified and ready to use.");
+      setUser((current) => current ? {
+        ...current,
+        recoveryEmail: data.type === "email" ? recoveryEmail : current.recoveryEmail,
+        recoveryEmailVerifiedAt: data.type === "email" ? new Date().toISOString() : current.recoveryEmailVerifiedAt,
+        recoveryPhoneVerifiedAt: data.type === "phone" ? new Date().toISOString() : current.recoveryPhoneVerifiedAt,
+      } : current);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not verify recovery contact");
     } finally {
       setSaving(false);
     }
@@ -157,7 +192,7 @@ export default function MyProfilePage() {
       const data = await res.json();
 
       setTwoFactor({
-        enabled: false,
+        enabled: user?.twoFactorEnabled ?? false,
         qrDataUrl: data.qrDataUrl,
         backupCodes: data.backupCodes,
       });
@@ -200,48 +235,8 @@ export default function MyProfilePage() {
 
   const cancel2FASetup = () => {
     setVerifyStep("setup");
-    setTwoFactor({ enabled: false, qrDataUrl: undefined, backupCodes: undefined });
+    setTwoFactor({ enabled: user?.twoFactorEnabled ?? false, qrDataUrl: undefined, backupCodes: undefined });
     setVerificationCode("");
-  };
-
-  const disable2FA = async () => {
-    if (!confirm("Disable 2FA on your account? You will need to re-setup next time you sign in.")) return;
-
-    setError("");
-    setSuccess("");
-
-    const res = await fetch("/api/admin/2fa/disable", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: disablePassword }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || "Failed to disable 2FA");
-    } else {
-      setTwoFactor({ enabled: false, qrDataUrl: undefined, backupCodes: undefined });
-      setSuccess("Two-factor authentication disabled");
-      setDisablePassword("");
-      setShowDisablePassword(false);
-      if (user) setUser({ ...user, twoFactorEnabled: false });
-    }
-  };
-
-  const revokeSession = async (id: string) => {
-    if (!confirm("Revoke this session? You will be logged out immediately.")) return;
-
-    try {
-      const res = await fetch(`/api/admin/staff/${user?.id}/sessions`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: id }),
-      });
-      if (!res.ok) throw new Error("Failed to revoke");
-      setSessions((prev) => prev.filter((s) => s.id !== id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to revoke session");
-    }
   };
 
   if (loading) {
@@ -451,8 +446,8 @@ export default function MyProfilePage() {
                 <h3 className="text-sm font-medium text-nexus-navy">Two-factor authentication</h3>
                 <p className="mt-1 text-xs text-nexus-navy/50">
                   {user.twoFactorEnabled
-                    ? "2FA is enabled on your account. You'll be asked for a verification code when signing in."
-                    : "Add an extra layer of security to your account."}
+                    ? "2FA is required at sign-in and for sensitive actions after your session has been idle."
+                    : "Set up an authenticator before using the admin workspace."}
                 </p>
               </div>
 
@@ -475,9 +470,9 @@ export default function MyProfilePage() {
                 </div>
               </div>
 
-              {!user.twoFactorEnabled && verifyStep === "setup" && (
+              {verifyStep === "setup" && (
                 <Button onClick={start2FASetup} loading={settingUp}>
-                  Enable two-factor authentication
+                  {user.twoFactorEnabled ? "Replace authenticator" : "Set up two-factor authentication"}
                 </Button>
               )}
 
@@ -539,94 +534,53 @@ export default function MyProfilePage() {
                       disabled={!verificationCode || verificationCode.length < 6}
                       className="flex-1"
                     >
-                      {verifying ? "Verifying..." : "Verify & enable"}
+                      {verifying ? "Verifying..." : user.twoFactorEnabled ? "Verify replacement authenticator" : "Verify and enable"}
                     </Button>
                   </div>
                 </div>
               )}
 
-              {user.twoFactorEnabled && (
-                <div className="pt-2">
-                  <div className="relative">
-                    <InputField
-                      label="Enter your password to disable 2FA"
-                      id="disablePassword"
-                      type={showDisablePassword ? "text" : "password"}
-                      value={disablePassword}
-                      onChange={(e) => setDisablePassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowDisablePassword(!showDisablePassword)}
-                      className="absolute right-3 top-9 text-nexus-navy/40 hover:text-nexus-navy"
-                    >
-                      {showDisablePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <Button variant="danger" onClick={disable2FA}>
-                    Disable two-factor authentication
-                  </Button>
-                </div>
+              {user.twoFactorEnabled && verifyStep === "setup" && (
+                <p className="text-xs text-nexus-navy/60">Two-factor authentication is required for all staff accounts and cannot be disabled.</p>
               )}
             </div>
           </Card>
 
           <Card>
-            <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-nexus-navy">Single active session</h3>
+            <p className="mt-2 text-xs text-nexus-navy/60">Only one device can be signed in at a time. Sign out before signing in on another device. If your device is lost, use password recovery to end its session.</p>
+          </Card>
+
+          <Card>
+            <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-nexus-navy">Active sessions</h3>
-                <p className="mt-1 text-xs text-nexus-navy/50">
-                  {sessions.length} active session{sessions.length !== 1 ? "s" : ""} on this account
-                </p>
+                <h3 className="text-sm font-medium text-nexus-navy">Account recovery contacts</h3>
+                <p className="mt-1 text-xs text-nexus-navy/60">Use only contacts you control. A contact becomes available for recovery after its code is verified.</p>
               </div>
-              {sessions.length > 1 && (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={async () => {
-                    if (!confirm("Revoke ALL sessions? You will be logged out of other devices.")) return;
-                    try {
-                      const res = await fetch(`/api/admin/staff/${user?.id}/sessions`, {
-                        method: "DELETE",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({}),
-                      });
-                      if (!res.ok) throw new Error("Failed to revoke");
-                      setSessions((prev) => prev.slice(0, 1));
-                    } catch (err) {
-                      setError(err instanceof Error ? err.message : "Failed");
-                    }
-                  }}
-                >
-                  Revoke all
-                </Button>
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                <InputField label="Backup recovery email" id="recoveryEmail" type="email" value={recoveryEmail} onChange={(event) => setRecoveryEmail(event.target.value)} placeholder="backup@example.com" />
+                <Button type="button" variant="secondary" disabled={!recoveryEmail || recoveryEmail === user.email} onClick={() => void startRecoveryVerification("email")}>Verify email</Button>
+              </div>
+              <p className="text-xs text-nexus-navy/60">Backup email status: {user.recoveryEmailVerifiedAt ? "Verified" : "Not verified"}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm text-nexus-navy">Phone: {user.phone || "Not set"}</span>
+                <Badge variant={user.recoveryPhoneVerifiedAt ? "success" : "neutral"}>{user.recoveryPhoneVerifiedAt ? "Verified" : "Not verified"}</Badge>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="text-sm text-nexus-navy" htmlFor="recovery-delivery">Send phone code by</label>
+                <select id="recovery-delivery" value={recoveryChannel} onChange={(event) => setRecoveryChannel(event.target.value as "sms" | "whatsapp")} className="rounded-md border border-nexus-navy/15 bg-white px-3 py-2 text-sm text-nexus-navy">
+                  <option value="sms">SMS</option>
+                  <option value="whatsapp">WhatsApp</option>
+                </select>
+                <Button type="button" variant="secondary" disabled={!user.phone} onClick={() => void startRecoveryVerification("phone")}>Verify phone</Button>
+              </div>
+              {pendingRecoveryType && (
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                  <InputField label="6-digit verification code" id="recoveryCode" value={recoveryCode} onChange={(event) => setRecoveryCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" />
+                  <Button type="button" loading={saving} disabled={recoveryCode.length !== 6} onClick={verifyRecoveryContact}>Confirm recovery contact</Button>
+                </div>
               )}
             </div>
-
-            {sessions.length === 0 ? (
-              <p className="mt-4 text-center text-sm text-nexus-navy/50">No active sessions.</p>
-            ) : (
-              <div className="mt-4 space-y-3">
-                {sessions.map((session) => (
-                  <div key={session.id} className="flex items-center justify-between rounded-md border border-nexus-navy/10 p-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-nexus-navy truncate">
-                        {session.userAgent || "Unknown device"}
-                      </p>
-                      <div className="flex items-center gap-3 text-xs text-nexus-navy/50">
-                        <span>{session.ipAddress || "Unknown IP"}</span>
-                        <span>·</span>
-                        <span>Last active {new Date(session.lastActiveAt).toLocaleString()}</span>
-                      </div>
-                    </div>
-                    <Button variant="danger" size="sm" onClick={() => revokeSession(session.id)}>
-                      Revoke
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
           </Card>
         </div>
       )}

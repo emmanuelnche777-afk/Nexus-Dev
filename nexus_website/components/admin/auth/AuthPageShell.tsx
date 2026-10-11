@@ -86,6 +86,7 @@ interface FormFieldProps {
   maxLength?: number;
   autoFocus?: boolean;
   autoComplete?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }
 
 export function FormField({
@@ -101,6 +102,7 @@ export function FormField({
   maxLength,
   autoFocus,
   autoComplete,
+  inputMode,
 }: FormFieldProps) {
   return (
     <div>
@@ -119,6 +121,7 @@ export function FormField({
         maxLength={maxLength}
         autoFocus={autoFocus}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         className={AUTH_INPUT_CLASS}
       />
     </div>

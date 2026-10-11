@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 
 import prisma from "@/lib/db";
 
@@ -70,6 +71,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     await prisma.service.delete({ where: { id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "service", resourceId: id });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete service failed:", error);

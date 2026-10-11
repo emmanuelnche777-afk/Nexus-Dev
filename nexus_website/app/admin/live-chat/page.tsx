@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Search, MessageSquare, Trash2, Send } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface ChatMessage {
   id: string;
@@ -91,7 +92,7 @@ export default function LiveChatPage() {
     if (!confirm("Are you sure you want to delete this chat?")) return;
 
     try {
-      const res = await fetch(`/api/admin/live-chat/${id}`, { method: "DELETE" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/live-chat/${id}`, { method: "DELETE" });
       if (res.ok) {
         setChats(chats.filter((c) => c.id !== id));
         if (selectedChat?.id === id) setSelectedChat(null);

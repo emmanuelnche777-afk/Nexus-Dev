@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions-data";
 import prisma from "@/lib/db";
 import { getContactDepartmentsForRole } from "@/lib/contact-routing";
@@ -83,6 +84,7 @@ export async function DELETE(request: Request) {
     });
     if (!existing) return NextResponse.json({ error: "Inquiry not found" }, { status: 404 });
     await prisma.contactMessage.delete({ where: { id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "contact_inquiry", resourceId: id });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete contact inquiry:", error);

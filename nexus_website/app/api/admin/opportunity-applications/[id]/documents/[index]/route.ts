@@ -32,7 +32,7 @@ const CONTENT_TYPES: Record<string, string> = {
 };
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   {
     params,
   }: { params: Promise<{ id: string; index: string }> }
@@ -73,11 +73,14 @@ export async function GET(
   // Reading an applicant's document is sensitive, so it is recorded who did it
   // and when, separately from the record's own change history.
   await logAdminAction({
+    actorId: user.id,
     adminEmail: user.email,
     action: "view_document",
     resourceType: "opportunity_application",
     resourceId: id,
     newValue: { documentIndex: position },
+    ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+    userAgent: request.headers.get("user-agent") || undefined,
   });
 
   if (url.startsWith("private://opportunity-applications/")) {

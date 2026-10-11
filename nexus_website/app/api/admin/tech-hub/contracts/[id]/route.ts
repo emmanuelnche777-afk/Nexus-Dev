@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
 import prisma from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+import { logSensitiveAccess } from "@/lib/audit";
 
 export async function GET(
-  request: Request,
+    request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, authorized } = await requirePermission("techhub:contracts:*");
@@ -34,6 +35,14 @@ export async function GET(
     });
 
     if (!contract) return NextResponse.json({ error: "Contract not found" }, { status: 404 });
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_record_view",
+      resourceType: "contract",
+      resourceId: id,
+      request,
+    });
     return NextResponse.json({ contract });
   } catch (error) {
     console.error("Failed to load contract:", error);
@@ -124,7 +133,7 @@ export async function PUT(
         entity: "Contract",
         entityId: contract.id,
         userId: user.id,
-        metadata: data as Prisma.InputJsonValue,
+        metadata: { changedFields: Object.keys(data).sort() } satisfies Prisma.InputJsonObject,
       },
     });
 
@@ -196,7 +205,7 @@ export async function DELETE(
         entity: "Contract",
         entityId: id,
         userId: user.id,
-        metadata: { clientEmail: existing.clientEmail },
+        metadata: { deleted: true },
       },
     });
 

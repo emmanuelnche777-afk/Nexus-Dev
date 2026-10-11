@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import { ArrowLeft, CalendarClock, Camera, Check, Link2Off, Send, Undo2 } from "lucide-react";
 
 interface SocialPost {
@@ -78,7 +79,7 @@ export default function SocialQueuePage() {
     if (!window.confirm("Disconnect the Instagram account from NEXUS?")) return;
     setInstagramBusy(true);
     try {
-      const response = await fetch("/api/admin/social/instagram", { method: "DELETE" });
+      const response = await fetchWithFreshTwoFactor("/api/admin/social/instagram", { method: "DELETE" });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not disconnect Instagram.");
       setInstagram({ ...instagram, connected: false, account: null });

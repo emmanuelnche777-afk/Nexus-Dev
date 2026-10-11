@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
 import { createSessionWithExpiry, clearSession, SafeAdminUser } from "@/lib/admin-auth";
 import { checkFailedAttemptLimit, consumeChallengeAttempt, recordAttempt } from "@/lib/rate-limit";
+import { logAdminAction } from "@/lib/audit";
 
 const totp = new TOTP({
   issuer: "NEXUS",
@@ -153,6 +154,15 @@ export async function POST(request: NextRequest) {
       if (ipIdentifier) {
         await recordAttempt(ipIdentifier, false, undefined, request.headers.get("user-agent") || undefined);
       }
+      await logAdminAction({
+        actorId: user.id,
+        adminEmail: user.email,
+        action: "two_factor_login_failed",
+        resourceType: "admin_account",
+        resourceId: user.id,
+        ipAddress: ip || undefined,
+        userAgent: request.headers.get("user-agent") || undefined,
+      });
 
       if (challengeAttempt.count >= CHALLENGE_ATTEMPT_LIMIT) {
         (cookieStore as unknown as { delete: (name: string, opts?: Record<string, unknown>) => void }).delete(PENDING_LOGIN_COOKIE, { path: "/" });
@@ -174,9 +184,38 @@ export async function POST(request: NextRequest) {
       name: user.name,
       role: user.role as SafeAdminUser["role"],
       phone: user.phone,
+      twoFactorEnabled: user.twoFactorEnabled,
+      requiresTwoFactorSetup: !user.twoFactorEnabled,
+      sessionLocked: false,
+      requiresFreshTwoFactor: false,
     };
 
-    await createSessionWithExpiry(safeUser, request.headers.get("x-forwarded-for") || undefined, request.headers.get("user-agent") || undefined, !!payload.rememberMe);
+    const created = await createSessionWithExpiry(safeUser, request.headers.get("x-forwarded-for") || undefined, request.headers.get("user-agent") || undefined, !!payload.rememberMe);
+    if (!created) {
+      await logAdminAction({
+        actorId: user.id,
+        adminEmail: user.email,
+        action: "sign_in_blocked_active_session",
+        resourceType: "admin_account",
+        resourceId: user.id,
+        ipAddress: ip || undefined,
+        userAgent: request.headers.get("user-agent") || undefined,
+      });
+      return NextResponse.json({
+        error: "This account already has an active session. Sign out from that session before signing in here, or reset your password if that device is lost.",
+        code: "SESSION_ALREADY_ACTIVE",
+      }, { status: 409 });
+    }
+
+    await logAdminAction({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sign_in_completed",
+      resourceType: "admin_account",
+      resourceId: user.id,
+      ipAddress: ip || undefined,
+      userAgent: request.headers.get("user-agent") || undefined,
+    });
 
     return NextResponse.json({ success: true, requires2FA: false });
   } catch (error) {

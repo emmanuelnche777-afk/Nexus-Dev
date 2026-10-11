@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import { ArrowLeft, Mail, Phone, Save, X, User } from "lucide-react";
 
 
@@ -60,7 +61,7 @@ export default function StudentDetailPage({
 
   const loadStudent = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/academy/students/${id}`);
+      const res = await fetchWithFreshTwoFactor(`/api/admin/academy/students/${id}`);
       if (res.ok) {
         const data = await res.json();
         setStudent(data);

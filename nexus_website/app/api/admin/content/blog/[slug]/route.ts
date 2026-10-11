@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import prisma from "@/lib/db";
 
 export async function GET(
@@ -52,6 +53,7 @@ export async function DELETE(
   try {
     const { slug } = await params;
     await prisma.blogPost.delete({ where: { slug } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "blog_post", resourceId: slug });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });

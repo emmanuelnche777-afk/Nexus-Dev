@@ -13,6 +13,7 @@ import {
   Search,
 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import EmptyState from "@/components/admin/EmptyState";
 
 interface Faq {
@@ -130,7 +131,7 @@ export default function AdminFaqPage() {
   async function deleteFaq(id: string) {
     if (!confirm("Delete this FAQ? It will be removed from the public FAQ and AI answers.")) return;
     try {
-      const res = await fetch(`/api/admin/faq/${id}`, { method: "DELETE" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/faq/${id}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Failed to delete FAQ");

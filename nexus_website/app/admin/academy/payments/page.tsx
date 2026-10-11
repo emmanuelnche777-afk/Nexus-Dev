@@ -17,6 +17,7 @@ import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import AdminModal from "@/components/admin/AdminModal";
 import { hasPermission, type AdminRole } from "@/lib/permissions";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface Payment {
   id: string;
@@ -81,7 +82,7 @@ export default function PaymentsPage() {
     if (clearConfirm !== "DELETE ALL") return;
     setClearing(true);
     try {
-      const res = await fetch("/api/admin/academy/clear-data", {
+      const res = await fetchWithFreshTwoFactor("/api/admin/academy/clear-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entity: "payments", confirm: "DELETE ALL" }),
@@ -101,7 +102,7 @@ export default function PaymentsPage() {
   async function loadPayments() {
     try {
       const [payRes, progRes, sessionRes] = await Promise.all([
-        fetch("/api/admin/academy/payments"),
+        fetchWithFreshTwoFactor("/api/admin/academy/payments"),
         fetch("/api/programs"),
         fetch("/api/admin/session", { cache: "no-store" }),
       ]);
@@ -177,7 +178,7 @@ export default function PaymentsPage() {
     if (!editingPayment) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/academy/payments`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/academy/payments`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

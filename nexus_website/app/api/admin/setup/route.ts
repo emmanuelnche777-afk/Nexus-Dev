@@ -172,13 +172,20 @@ export async function POST(request: NextRequest) {
       name: result.name,
       role: result.role as unknown as SafeAdminUser["role"],
       phone: result.phone,
+      twoFactorEnabled: false,
+      requiresTwoFactorSetup: true,
+      sessionLocked: false,
+      requiresFreshTwoFactor: true,
     };
 
-    await createSessionWithExpiry(user, ip, request.headers.get("user-agent") || undefined, false);
+    const sessionCreated = await createSessionWithExpiry(user, ip, request.headers.get("user-agent") || undefined, false);
+    if (!sessionCreated) {
+      return NextResponse.json({ error: "Could not start the initial account security setup" }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
-      redirectTo: "/admin/dashboard",
+      redirectTo: "/admin/complete-setup",
     });
   } catch (error: unknown) {
     if (isDatabaseUnavailable(error)) {

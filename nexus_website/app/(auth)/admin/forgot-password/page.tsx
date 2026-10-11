@@ -7,6 +7,7 @@ import { AuthPageShell, FormField, AUTH_ERROR_CLASS } from "@/components/admin/a
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [channel, setChannel] = useState("primary_email");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +20,7 @@ export default function ForgotPasswordPage() {
     const res = await fetch("/api/admin/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, channel }),
     });
 
     const data = await res.json();
@@ -55,8 +56,7 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
           <p className="text-sm text-nexus-gray/80">
-            If an account with that email exists, a reset link has been sent.
-            Please check your inbox and spam folder.
+            If the account has that verified recovery method, instructions have been sent. Check the selected inbox or phone.
           </p>
           <button
             onClick={() => router.push("/admin/login")}
@@ -68,8 +68,7 @@ export default function ForgotPasswordPage() {
       ) : (
         <>
           <p className="text-sm text-nexus-gray/80">
-            Enter your email address and we will send you a link to reset your
-            password.
+            Choose a verified recovery method for your account. Phone recovery uses a short-lived code.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -85,12 +84,26 @@ export default function ForgotPasswordPage() {
               autoComplete="email"
             />
 
+            <label className="block text-sm text-nexus-gray/80" htmlFor="recovery-channel">Send recovery instructions by</label>
+            <select
+              id="recovery-channel"
+              value={channel}
+              onChange={(event) => setChannel(event.target.value)}
+              disabled={submitting}
+              className="w-full rounded-md border border-nexus-gray/30 bg-nexus-dark px-3 py-3 text-sm text-nexus-white focus:border-nexus-cyan focus:outline-none"
+            >
+              <option value="primary_email">Primary staff email</option>
+              <option value="backup_email">Verified backup email</option>
+              <option value="sms">Verified phone by SMS</option>
+              <option value="whatsapp">Verified phone by WhatsApp</option>
+            </select>
+
             <button
               type="submit"
               disabled={submitting || !email}
               className="w-full rounded-md bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-nexus-cyan"
             >
-              {submitting ? "Sending..." : "Send Reset Link"}
+              {submitting ? "Sending..." : "Send Recovery Instructions"}
             </button>
           </form>
         </>

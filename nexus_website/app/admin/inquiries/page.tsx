@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, ArrowLeft, UserPlus, Handshake, MessageSquare, Trash2, Check, Mail as MailIcon } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface Application {
   id: string;
@@ -75,7 +76,7 @@ export default function InquiriesPage() {
 
   async function markMessageRead(id: string) {
     try {
-      await fetch("/api/admin/inquiries/contact", {
+      await fetchWithFreshTwoFactor("/api/admin/inquiries/contact", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: "read" }),
@@ -89,7 +90,7 @@ export default function InquiriesPage() {
   async function deleteMessage(id: string) {
     if (!confirm("Delete this message?")) return;
     try {
-      await fetch("/api/admin/inquiries/contact", {
+      await fetchWithFreshTwoFactor("/api/admin/inquiries/contact", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

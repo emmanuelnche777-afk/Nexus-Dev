@@ -7,6 +7,7 @@ import { Search, ArrowLeft, MessageSquare, Trash2 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import { CONTACT_DEPARTMENT_LABELS, isContactDepartment } from "@/lib/contact-routing";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface ContactInquiry {
   id: string;
@@ -45,7 +46,7 @@ export default function ContactInquiriesPage() {
 
   async function updateInquiry(id: string, data: Partial<ContactInquiry>) {
     try {
-      await fetch("/api/admin/contact-inquiries", {
+      await fetchWithFreshTwoFactor("/api/admin/contact-inquiries", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, ...data }),
@@ -59,7 +60,7 @@ export default function ContactInquiriesPage() {
   async function deleteInquiry(id: string) {
     if (!confirm("Delete this contact inquiry?")) return;
     try {
-      await fetch("/api/admin/contact-inquiries", {
+      await fetchWithFreshTwoFactor("/api/admin/contact-inquiries", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

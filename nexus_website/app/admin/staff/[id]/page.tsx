@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/admin/ui/skeleton";
 
 import { ROLE_PERMISSIONS, ROLE_DESCRIPTIONS } from "@/lib/permissions-data";
 import type { AdminRole } from "@/lib/permissions-data";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 type TabId = "profile" | "security" | "payroll";
 
@@ -75,14 +76,14 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
         }
       } catch {}
 
-      const res = await fetch(`/api/admin/staff/${staffId}`, { cache: "no-store" });
+      const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}`, { cache: "no-store" });
       if (!res.ok) throw new Error("Failed to load staff");
       const data = await res.json();
       setStaff(data.staff);
       setPayroll(data.payroll || null);
 
       // Fetch sessions (inlined to avoid hoisting issues)
-      void fetch(`/api/admin/staff/${staffId}/sessions`, { cache: "no-store" })
+      void fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}/sessions`, { cache: "no-store" })
         .then((res) => {
           if (!res.ok) return;
           return res.json();
@@ -110,7 +111,7 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
     setSaveSuccess("");
 
     try {
-      const res = await fetch(`/api/admin/staff/${staffId}`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -137,7 +138,7 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
     if (!confirm("Revoke this session? The user will be logged out immediately.")) return;
 
     try {
-      const res = await fetch(`/api/admin/staff/${staffId}/sessions`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}/sessions`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: id }),
@@ -154,7 +155,7 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
     if (!confirm("Revoke ALL sessions? The user will be logged out everywhere.")) return;
 
     try {
-      const res = await fetch(`/api/admin/staff/${staffId}/sessions`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}/sessions`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -359,8 +360,8 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
                 <h3 className="text-sm font-medium text-nexus-navy">Two-factor authentication</h3>
                 <p className="mt-1 text-xs text-nexus-navy/50">
                   {staff.twoFactorEnabled
-                    ? "2FA is enabled for this staff member. Only they can disable it from their own My Profile page."
-                    : "2FA is not enabled. This staff member will be prompted to set it up on next login (if required)."}
+                    ? "Two-factor authentication is enabled and required for this staff account."
+                    : "Two-factor setup is required before this staff member can enter the admin workspace."}
                 </p>
               </div>
 
@@ -379,15 +380,6 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
                     {staff.twoFactorEnabled ? "2FA Enabled" : "2FA Disabled"}
                   </Badge>
                 </div>
-                {staff.role === "SUPER_ADMIN" && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => router.push(`/admin/staff/${staff.id}/2fa`)}
-                  >
-                    Manage 2FA
-                  </Button>
-                )}
               </div>
             </div>
           </Card>
@@ -496,7 +488,7 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
                   setSaving(true);
                   setSaveError("");
                   try {
-                    const res = await fetch(`/api/admin/staff/${staffId}`, {
+                    const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}`, {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 import prisma from "@/lib/db";
 
 export async function PUT(
@@ -55,6 +56,7 @@ export async function DELETE(
     }
 
     await prisma.milestone.delete({ where: { id: milestoneId } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "service_milestone", resourceId: milestoneId });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete milestone" }, { status: 500 });

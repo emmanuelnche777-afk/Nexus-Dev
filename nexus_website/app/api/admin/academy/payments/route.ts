@@ -6,8 +6,9 @@ import { logAdminAction } from "@/lib/audit";
 import { PaymentProvider } from "@prisma/client";
 import { triggerNotification } from "@/lib/notification-triggers";
 import { getAdminUrl } from "@/lib/urls";
+import { logSensitiveAccess } from "@/lib/audit";
 
-export async function GET() {
+export async function GET(request: Request) {
   const { user, authorized } = await requirePermission("academy:payments:read");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -19,6 +20,15 @@ export async function GET() {
         student: true,
         registration: { include: { cohort: true } },
       },
+    });
+
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_list_view",
+      resourceType: "payment",
+      request,
+      details: { resultCount: payments.length },
     });
     
     return NextResponse.json({ payments });

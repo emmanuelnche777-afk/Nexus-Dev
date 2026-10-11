@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
 
 import { prisma } from "@/lib/db";
-import { logAdminAction } from "@/lib/audit";
+import { logAdminAction, logSensitiveAccess } from "@/lib/audit";
 
 export async function GET(
   request: Request,
@@ -28,6 +28,15 @@ export async function GET(
     if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
+
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "sensitive_record_view",
+      resourceType: "student",
+      resourceId: id,
+      request,
+    });
 
     return NextResponse.json(student);
   } catch (error) {

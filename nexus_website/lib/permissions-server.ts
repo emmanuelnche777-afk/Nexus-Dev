@@ -14,6 +14,15 @@ export async function requirePermission(
     return { user: null, authorized: false };
   }
 
+  // Session-scoped self-service endpoints (profile, password, 2FA) must be
+  // available to every signed-in role without granting any admin resource.
+  if (permission === "session:self") {
+    return { user, authorized: !user.sessionLocked && !user.requiresTwoFactorSetup };
+  }
+  if (permission === "account:security") {
+    return { user, authorized: !user.sessionLocked };
+  }
+
   const authorized = hasPermission(user.role, permission);
   return { user, authorized };
 }

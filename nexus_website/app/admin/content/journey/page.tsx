@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import {
   Plus,
   Pencil,
@@ -235,7 +236,7 @@ export default function JourneyAdminPage() {
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this entry?")) return;
     try {
-      const res = await fetch("/api/admin/content/journey", {
+      const res = await fetchWithFreshTwoFactor("/api/admin/content/journey", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),

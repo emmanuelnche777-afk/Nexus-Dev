@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/permissions-server";
+import { logSensitiveAccess } from "@/lib/audit";
+import { logAdminAction } from "@/lib/audit";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { user, authorized } = await requirePermission("staff:*");
@@ -37,6 +39,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
 
+    await logSensitiveAccess({
+      actorId: user.id,
+      adminEmail: user.email,
+      action: "staff_sessions_view",
+      resourceType: "staff_account",
+      resourceId: id,
+      request,
+      details: { resultCount: sessions.length },
+    });
+
     return NextResponse.json({ sessions });
   } catch (error) {
     console.error("[staff/[id]/sessions] List error:", error);
@@ -66,13 +78,33 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     if (sessionId) {
-      await prisma.adminSession.deleteMany({
+      const deleted = await prisma.adminSession.deleteMany({
         where: { id: sessionId, userId: id },
       });
-      return NextResponse.json({ success: true, revoked: 1 });
+      await logAdminAction({
+        actorId: user.id,
+        adminEmail: user.email,
+        action: "staff_session_revoked",
+        resourceType: "admin_session",
+        resourceId: sessionId,
+        newValue: { resultCount: deleted.count, revoked: deleted.count },
+        ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+        userAgent: request.headers.get("user-agent") || undefined,
+      });
+      return NextResponse.json({ success: true, revoked: deleted.count });
     } else {
       const result = await prisma.adminSession.deleteMany({
         where: { userId: id },
+      });
+      await logAdminAction({
+        actorId: user.id,
+        adminEmail: user.email,
+        action: "staff_sessions_revoked",
+        resourceType: "admin_account",
+        resourceId: id,
+        newValue: { resultCount: result.count, revoked: result.count },
+        ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+        userAgent: request.headers.get("user-agent") || undefined,
       });
       return NextResponse.json({ success: true, revoked: result.count });
     }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { logAdminAction } from "@/lib/audit";
 
 import prisma from "@/lib/db";
 import { validateVideoUrl } from "@/lib/video-url";
@@ -91,6 +92,7 @@ export async function DELETE(
     }
 
     await prisma.program.delete({ where: { id: existing.id } });
+    await logAdminAction({ actorId: user.id, adminEmail: user.email, action: "record_deleted", resourceType: "academy_program", resourceId: existing.id });
     const videoId = existing.overviewVideoPublicId || managedCloudinaryVideoPublicId(existing.overviewVideoUrl);
     if (videoId) {
       await deleteCloudinaryVideoIfUnused(videoId).catch((error) => {

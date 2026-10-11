@@ -6,6 +6,7 @@ import { ArrowLeft, BarChart3, TrendingUp, Users, DollarSign } from "lucide-reac
 import LoadingState from "@/components/admin/LoadingState";
 
 interface AnalyticsMetrics {
+  role?: string;
   students?: {
     totalStudents?: number;
     activeStudents?: number;
@@ -43,6 +44,9 @@ export default function AnalyticsPage() {
   }
 
   const programs = metrics.programs ?? [];
+  const showAcademy = metrics.role === "SUPER_ADMIN" || metrics.role === "ACADEMY_MANAGER";
+  const showFinance = metrics.role === "SUPER_ADMIN" || metrics.role === "FINANCE";
+  const showOpportunities = metrics.role === "SUPER_ADMIN" || metrics.role === "CONTENT_EDITOR";
 
   useEffect(() => {
     queueMicrotask(() => void loadMetrics());
@@ -70,35 +74,35 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
+        {showAcademy && <MetricCard
           label="Total Students"
           value={metrics.students?.totalStudents || 0}
           icon={Users}
           color="text-blue-600"
-        />
-        <MetricCard
+        />}
+        {showAcademy && <MetricCard
           label="Active Students"
           value={metrics.students?.activeStudents || 0}
           icon={TrendingUp}
           color="text-emerald-600"
-        />
-        <MetricCard
+        />}
+        {showFinance && <MetricCard
           label="Total Revenue"
           value={metrics.payments?.totalRevenue || 0}
           prefix="XAF "
           icon={DollarSign}
           color="text-green-600"
-        />
-        <MetricCard
+        />}
+        {showFinance && <MetricCard
           label="Paid Payments"
           value={metrics.payments?.paid || 0}
           icon={BarChart3}
           color="text-nexus-cyan"
-        />
+        />}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
+        {showAcademy && <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
           <h2 className="text-lg font-bold text-nexus-navy">Program Performance</h2>
           <div className="mt-4 space-y-3">
             {programs.length === 0 ? (
@@ -116,9 +120,9 @@ export default function AnalyticsPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-nexus-navy">
+                    {metrics.role === "SUPER_ADMIN" && <p className="text-sm font-semibold text-nexus-navy">
                       XAF {program.revenue?.toLocaleString() || 0}
-                    </p>
+                    </p>}
                     <p className="text-xs text-nexus-navy/60">
                       {program.conversionRate || 0}% conversion
                     </p>
@@ -127,9 +131,9 @@ export default function AnalyticsPage() {
               ))
             )}
           </div>
-        </section>
+        </section>}
 
-        <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
+        {showFinance && <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
           <h2 className="text-lg font-bold text-nexus-navy">Payments Overview</h2>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-nexus-navy/10 p-3">
@@ -149,9 +153,9 @@ export default function AnalyticsPage() {
               <p className="text-xl font-bold text-gray-600">{metrics.payments?.refunded || 0}</p>
             </div>
           </div>
-        </section>
+        </section>}
 
-        <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
+        {showOpportunities && <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
           <h2 className="text-lg font-bold text-nexus-navy">Opportunities</h2>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-nexus-navy/10 p-3">
@@ -171,9 +175,9 @@ export default function AnalyticsPage() {
               <p className="text-xl font-bold text-gray-600">{metrics.opportunities?.expired || 0}</p>
             </div>
           </div>
-        </section>
+        </section>}
 
-        <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
+        {showAcademy && <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
           <h2 className="text-lg font-bold text-nexus-navy">This Month</h2>
           <div className="mt-4 space-y-3">
             <div className="flex items-center justify-between">
@@ -189,7 +193,7 @@ export default function AnalyticsPage() {
               <span className="text-sm font-semibold text-nexus-navy">{metrics.students?.suspensionRate || 0}%</span>
             </div>
           </div>
-        </section>
+        </section>}
       </div>
 
       <p className="text-xs text-nexus-navy/50">

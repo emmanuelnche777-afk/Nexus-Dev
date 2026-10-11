@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       adminEmail: user.email,
       action: "delete_all",
       resourceType: entity,
+      actorId: user.id,
       newValue: { deletedCount },
     });
 

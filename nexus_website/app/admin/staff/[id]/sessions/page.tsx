@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 
 interface Session {
   id: string;
@@ -29,7 +30,7 @@ export default function StaffSessionsPage({ params }: { params: Promise<{ id: st
   useEffect(() => {
     if (!staffId) return;
     let cancelled = false;
-    fetch(`/api/admin/staff/${staffId}/sessions`, { cache: "no-store" })
+    fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}/sessions`, { cache: "no-store" })
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to load sessions");
         const data = await res.json();
@@ -53,7 +54,7 @@ export default function StaffSessionsPage({ params }: { params: Promise<{ id: st
 
     setRevoking(id);
     try {
-      const res = await fetch(`/api/admin/staff/${staffId}/sessions`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}/sessions`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: id }),
@@ -73,7 +74,7 @@ export default function StaffSessionsPage({ params }: { params: Promise<{ id: st
 
     setRevokingAll(true);
     try {
-      const res = await fetch(`/api/admin/staff/${staffId}/sessions`, {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}/sessions`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),

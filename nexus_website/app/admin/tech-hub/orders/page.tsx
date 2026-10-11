@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
 import {
   ArrowLeft,
   Search,
@@ -255,7 +256,7 @@ export default function AdminServiceOrdersPage() {
   async function toggleMilestone(milestone: Milestone) {
     if (!selected) return;
     const nextStatus = milestone.status === "completed" ? "pending" : "completed";
-    await fetch(`/api/admin/service-orders/${selected.id}/milestones/${milestone.id}`, {
+    await fetchWithFreshTwoFactor(`/api/admin/service-orders/${selected.id}/milestones/${milestone.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: nextStatus }),
@@ -277,7 +278,7 @@ export default function AdminServiceOrdersPage() {
 
   async function deleteOrder(id: string) {
     if (!confirm("Delete this order? This cannot be undone.")) return;
-    const res = await fetch(`/api/admin/service-orders/${id}`, { method: "DELETE" });
+    const res = await fetchWithFreshTwoFactor(`/api/admin/service-orders/${id}`, { method: "DELETE" });
     if (res.ok) {
       setOrders((prev) => prev.filter((o) => o.id !== id));
       setSelected(null);
