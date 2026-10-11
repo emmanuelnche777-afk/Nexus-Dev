@@ -198,11 +198,11 @@ export default function About() {
             title={t.about.identityTitle}
             description={t.about.identityDesc}
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-4 min-[375px]:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {facts.map((fact) => (
               <div
                 key={fact.label}
-                className="group rounded-lg border border-nexus-cyan/20 bg-nexus-gray p-6 transition hover:border-nexus-cyan hover:bg-nexus-white"
+                className="group rounded-lg border border-nexus-cyan/20 bg-nexus-gray p-4 transition hover:border-nexus-cyan hover:bg-nexus-white min-[480px]:p-6"
               >
                 <p className="text-xs font-semibold uppercase tracking-wider text-nexus-cyan">
                   {fact.label}
@@ -232,11 +232,11 @@ export default function About() {
             title={t.about.whatWeDoTitle}
             description={t.about.whatWeDoDesc}
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-4 min-[375px]:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {whatWeDo.map((item) => (
               <div
                 key={item.title}
-                className="rounded-lg border border-nexus-cyan/20 bg-nexus-white p-6 transition hover:border-nexus-cyan"
+                className="rounded-lg border border-nexus-cyan/20 bg-nexus-white p-4 transition hover:border-nexus-cyan min-[480px]:p-6"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-nexus-navy text-nexus-cyan-bright">
                   {item.icon}
@@ -261,11 +261,11 @@ export default function About() {
             title={t.about.valuesTitle}
             description={t.about.valuesDesc}
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-4 min-[375px]:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {values.map((v) => (
               <div
                 key={v.name}
-                className="rounded-lg border border-nexus-cyan/20 bg-nexus-gray p-6"
+                className="rounded-lg border border-nexus-cyan/20 bg-nexus-gray p-4 min-[480px]:p-6"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-nexus-navy text-nexus-cyan-bright">
                   {v.icon}
@@ -301,11 +301,11 @@ export default function About() {
             title={t.about.teamTitle}
             description={t.about.teamDesc}
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-4 min-[375px]:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {teamRoles.map((role) => (
               <div
                 key={role.title}
-                className="rounded-lg border border-nexus-cyan/20 bg-nexus-white p-6"
+                className="rounded-lg border border-nexus-cyan/20 bg-nexus-white p-4 min-[480px]:p-6"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-nexus-navy text-nexus-cyan-bright">
                   <Users className="h-6 w-6" />

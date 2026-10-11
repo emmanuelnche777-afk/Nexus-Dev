@@ -254,7 +254,7 @@ export default function Home() {
             title={t.home.ecosystemTitle}
             description={t.home.ecosystemDesc}
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-4 min-[375px]:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             {DIVISIONS.map((d, i) => {
               const info = getDivisionData(d.name, d.tagline);
               return (
@@ -262,7 +262,7 @@ export default function Home() {
                   <TiltCard className="h-full">
                     <Link
                       href={d.href}
-                      className="group flex h-full flex-col rounded-lg border border-nexus-cyan/20 bg-nexus-gray p-6 transition hover:border-nexus-cyan hover:bg-nexus-white"
+                      className="group flex h-full flex-col rounded-lg border border-nexus-cyan/20 bg-nexus-gray p-4 transition hover:border-nexus-cyan hover:bg-nexus-white min-[480px]:p-6"
                     >
                       <div className="flex h-12 w-12 items-center justify-center rounded-md bg-nexus-navy text-nexus-cyan-bright">
                         {divisionIcons[i]}
