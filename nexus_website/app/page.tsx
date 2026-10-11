@@ -17,7 +17,6 @@ import {
 import SectionHeading from "@/components/SectionHeading";
 import CTA from "@/components/CTA";
 import Reveal from "@/components/divisions/tech-hub/Reveal";
-import CountUp from "@/components/divisions/tech-hub/CountUp";
 import TiltCard from "@/components/divisions/tech-hub/TiltCard";
 import ScrollProgress from "@/components/divisions/tech-hub/ScrollProgress";
 import { DIVISIONS } from "@/lib/site";
@@ -199,10 +198,7 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <Reveal>
               <div className="rounded-lg border border-nexus-cyan/20 bg-nexus-white p-6">
-                <p className="text-4xl font-extrabold text-nexus-cyan">
-                  <CountUp end={1} suffix="" />
-                </p>
-                <h3 className="mt-3 text-lg font-bold text-nexus-dark">
+                <h3 className="text-lg font-bold text-nexus-dark">
                   {t.home.gapPoint1Title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-nexus-navy/70">
@@ -212,10 +208,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={120}>
               <div className="rounded-lg border border-nexus-cyan/20 bg-nexus-white p-6">
-                <p className="text-4xl font-extrabold text-nexus-cyan">
-                  <CountUp end={4} suffix="M+" />
-                </p>
-                <h3 className="mt-3 text-lg font-bold text-nexus-dark">
+                <h3 className="text-lg font-bold text-nexus-dark">
                   {t.home.gapPoint2Title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-nexus-navy/70">
@@ -225,10 +218,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={240}>
               <div className="rounded-lg border border-nexus-cyan/20 bg-nexus-white p-6">
-                <p className="text-4xl font-extrabold text-nexus-cyan">
-                  <CountUp end={0} suffix="" />
-                </p>
-                <h3 className="mt-3 text-lg font-bold text-nexus-dark">
+                <h3 className="text-lg font-bold text-nexus-dark">
                   {t.home.gapPoint3Title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-nexus-navy/70">
