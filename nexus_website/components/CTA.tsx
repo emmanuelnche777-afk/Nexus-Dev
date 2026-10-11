@@ -34,7 +34,7 @@ export default function CTA({
             {description}
           </p>
         )}
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-8 flex flex-row flex-wrap items-center justify-center gap-3">
           <Link
             href={primaryHref}
             className="rounded-md bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright"

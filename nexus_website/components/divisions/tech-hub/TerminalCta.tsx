@@ -100,7 +100,7 @@ export default function TerminalCta({
         ))}
 
         <div
-          className={`mt-7 flex flex-col gap-3 transition-all duration-700 sm:flex-row ${
+          className={`mt-7 flex flex-row flex-wrap gap-3 transition-all duration-700 ${
             done ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
           }`}
         >

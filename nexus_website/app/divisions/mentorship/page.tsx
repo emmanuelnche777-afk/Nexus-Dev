@@ -146,7 +146,7 @@ export default function Mentorship() {
             <p className="text-lg md:text-xl text-nexus-gray/70 leading-relaxed mb-8 max-w-2xl">
               {t.mentorshipPage.description}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-row flex-wrap gap-4">
               <button
                 onClick={openModal}
                 className="group rounded-md bg-nexus-cyan px-8 py-4 text-sm font-semibold text-nexus-dark transition-all duration-300 hover:bg-nexus-cyan-bright hover:shadow-lg hover:shadow-nexus-cyan/20 text-center inline-flex items-center justify-center gap-2"
@@ -539,7 +539,7 @@ export default function Mentorship() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-row flex-wrap justify-center gap-4">
             <button
               onClick={openModal}
               className="group rounded-md bg-nexus-cyan px-8 py-4 text-sm font-semibold text-nexus-dark transition-all duration-300 hover:bg-nexus-cyan-bright hover:shadow-lg hover:shadow-nexus-cyan/20 text-center inline-flex items-center justify-center gap-2"

@@ -66,7 +66,7 @@ export default function NewsletterForm({
     <div className="w-full max-w-xl">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-3 sm:flex-row"
+        className="flex flex-row flex-wrap gap-3"
         noValidate
       >
         <input

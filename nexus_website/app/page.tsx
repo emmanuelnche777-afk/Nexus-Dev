@@ -168,7 +168,7 @@ export default function Home() {
             </p>
           </Reveal>
           <Reveal delay={400}>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-row flex-wrap gap-3">
               <Link
                 href="/partner"
                 className="rounded-md bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright"

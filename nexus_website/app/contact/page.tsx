@@ -180,7 +180,7 @@ export default function Contact() {
                         ? "Nous vous répondrons dans les 24-48 heures ouvrables."
                         : "We'll get back to you within 24-48 business hours."}
                     </p>
-                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                    <div className="mt-4 flex flex-row flex-wrap gap-2">
                       <button
                         onClick={() => {
                           setSubmitted(false);
@@ -368,7 +368,7 @@ export default function Contact() {
               ? "Découvrez nos programmes de formation en développement, design et intelligence artificielle."
               : "Discover our training programs in development, design, and artificial intelligence."}
           </p>
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="flex flex-row flex-wrap items-center justify-center gap-3">
             <Link
               href="/academy"
               className="rounded-md bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright"

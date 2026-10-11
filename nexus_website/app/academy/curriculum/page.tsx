@@ -327,7 +327,7 @@ export default function AcademyCurriculum() {
                   )}
 
                   {/* Enroll CTA */}
-                  <div className="mt-8 flex flex-col gap-3 border-t border-nexus-cyan/10 pt-6 sm:flex-row">
+                  <div className="mt-8 flex flex-row flex-wrap gap-3 border-t border-nexus-cyan/10 pt-6">
                     <Link
                       href={`/academy/register/${program.slug}`}
                       className="inline-flex items-center justify-center gap-2 rounded-lg bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright"
@@ -399,7 +399,7 @@ export default function AcademyCurriculum() {
               ? "Notre curriculum complet vous prépare aux défis réels du marché de l'emploi tech."
               : "Our comprehensive curriculum prepares you for real-world challenges in the tech job market."}
           </p>
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="flex flex-row flex-wrap items-center justify-center gap-3">
             <Link
               href="/academy"
               className="rounded-md bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright"

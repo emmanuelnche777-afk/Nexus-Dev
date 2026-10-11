@@ -16,7 +16,7 @@ export default function NotFound() {
       <p className="mt-3 max-w-md text-sm leading-relaxed text-nexus-gray/75">
         {t.notFoundPage.subtitle}
       </p>
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-8 flex flex-row flex-wrap gap-3">
         <Link
           href="/"
           className="inline-flex items-center justify-center gap-2 rounded-md bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright"

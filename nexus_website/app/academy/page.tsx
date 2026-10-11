@@ -329,7 +329,7 @@ export default function AcademyPage() {
             {language === "fr" ? "Apprendre · Construire · Prouver" : "Learn · Build · Prove"}
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-row flex-wrap gap-3">
             <Link href="#programs" className="group rounded-md bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright">
               {language === "fr" ? "Explorer les programmes" : "Explore Programs"}
             </Link>
@@ -879,7 +879,7 @@ export default function AcademyPage() {
               ? "Que vous vouliez devenir développeur, designer ou spécialiste en IA, nous avons le programme qu'il vous faut."
               : "Whether you want to become a developer, designer, or AI specialist, we have the program for you."}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-row flex-wrap justify-center gap-4">
             <Link href="/academy/programs" className="group flex items-center justify-center gap-2 bg-nexus-cyan text-nexus-dark px-8 py-4 rounded-lg font-semibold text-lg transition hover:bg-nexus-cyan-bright">
               {language === "fr" ? "Postuler maintenant" : "Apply Now"}
               <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />

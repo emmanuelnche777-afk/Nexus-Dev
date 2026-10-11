@@ -363,7 +363,7 @@ export default function AcademyPrograms() {
                     ? "Que vous vouliez devenir développeur, designer ou spécialiste en IA, nous avons le programme qu'il vous faut."
                     : "Whether you want to become a developer, designer, or AI specialist, we have the program for you."}
                 </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div className="mt-8 flex flex-row flex-wrap gap-3">
                   <Link
                     href={registerHref}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-nexus-cyan px-6 py-3 text-sm font-semibold text-nexus-dark transition hover:bg-nexus-cyan-bright"
