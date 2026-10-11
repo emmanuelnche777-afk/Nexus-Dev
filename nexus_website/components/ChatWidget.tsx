@@ -159,7 +159,7 @@ export default function ChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-[90] flex flex-col items-end">
+    <div className="fixed bottom-5 right-5 z-[70] flex flex-col items-end">
       {/* Floating Toggle Button */}
       {!isOpen && (
         <button

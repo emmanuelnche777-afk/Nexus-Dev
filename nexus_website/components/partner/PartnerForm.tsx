@@ -186,10 +186,10 @@ export default function PartnerForm() {
           <p className="mt-3 text-sm leading-relaxed text-nexus-gray/80">{p.formSideText}</p>
           <div className="mt-6 space-y-3 border-t border-nexus-cyan/10 pt-6">
             <WhatsAppLink label={p.whatsappAlt} />
-            <p className="flex items-center gap-2 text-sm text-nexus-gray/80">
+            <p className="flex min-w-0 items-start gap-2 text-sm text-nexus-gray/80">
               <Mail className="h-4 w-4 text-nexus-cyan-bright" />
               {p.emailAlt}{" "}
-              <a href={`mailto:${CONTACT.email}`} className="font-medium text-nexus-cyan-bright hover:text-nexus-cyan">
+              <a href={`mailto:${CONTACT.email}`} className="min-w-0 break-all font-medium text-nexus-cyan-bright hover:text-nexus-cyan">
                 {CONTACT.email}
               </a>
             </p>

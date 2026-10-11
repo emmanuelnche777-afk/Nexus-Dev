@@ -166,7 +166,7 @@ export default function AcademyPrograms() {
       </section>
 
       {/* FILTER TOOLBAR */}
-      <section className="sticky top-0 z-30 border-b border-nexus-cyan/10 bg-white/90 backdrop-blur-md">
+      <section className="sticky top-16 z-30 border-b border-nexus-cyan/10 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           {/* Search */}
           <div className="relative flex-1 max-w-md">

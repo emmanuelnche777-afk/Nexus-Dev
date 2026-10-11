@@ -592,7 +592,7 @@ export default function Mentorship() {
                   <label className="block text-sm font-medium text-nexus-dark mb-1">Full Name *</label>
                   <input type="text" required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-nexus-cyan/20 text-sm focus:outline-none focus:border-nexus-cyan focus:ring-2 focus:ring-nexus-cyan/10 transition" placeholder="Enter your full name" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-nexus-dark mb-1">Age</label>
                     <input type="number" value={formData.age} onChange={(e) => setFormData({ ...formData, age: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-nexus-cyan/20 text-sm focus:outline-none focus:border-nexus-cyan focus:ring-2 focus:ring-nexus-cyan/10 transition" placeholder="Age" />
@@ -610,7 +610,7 @@ export default function Mentorship() {
                   <label className="block text-sm font-medium text-nexus-dark mb-1">Location</label>
                   <input type="text" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-nexus-cyan/20 text-sm focus:outline-none focus:border-nexus-cyan focus:ring-2 focus:ring-nexus-cyan/10 transition" placeholder="e.g. Buea, Bamenda" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-nexus-dark mb-1">Current Status *</label>
                     <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-nexus-cyan/20 text-sm focus:outline-none focus:border-nexus-cyan focus:ring-2 focus:ring-nexus-cyan/10 transition bg-white">

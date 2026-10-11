@@ -35,7 +35,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-nexus-cyan/20 bg-nexus-dark text-nexus-gray">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <div>
             <div className="flex items-center gap-2.5">
               <Image
@@ -160,10 +160,10 @@ export default function Footer() {
               <li>
                 <a
                   href={`tel:${settings.phone}`}
-                  className="flex items-center gap-2 text-sm text-nexus-gray/70 transition hover:text-nexus-cyan-bright"
+                  className="flex min-w-0 items-start gap-2 text-sm text-nexus-gray/70 transition hover:text-nexus-cyan-bright"
                 >
-                  <Phone className="h-4 w-4 text-nexus-cyan" />
-                  <div>
+                  <Phone className="h-4 w-4 shrink-0 text-nexus-cyan" />
+                  <div className="min-w-0">
                     <p className="font-medium text-nexus-gray/90">{settings.phone}</p>
                     <p className="text-xs text-nexus-gray/50">{p.contactPhoneLabel}</p>
                   </div>
@@ -174,8 +174,8 @@ export default function Footer() {
                   href={`https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, "")}`}
                   className="flex items-center gap-2 text-sm text-nexus-gray/70 transition hover:text-nexus-cyan-bright"
                 >
-                  <MessageCircle className="h-4 w-4 text-nexus-cyan" />
-                  <div>
+                  <MessageCircle className="h-4 w-4 shrink-0 text-nexus-cyan" />
+                  <div className="min-w-0">
                     <p className="font-medium text-nexus-gray/90">{settings.whatsapp}</p>
                     <p className="text-xs text-nexus-gray/50">{p.contactWhatsappLabel}</p>
                   </div>
@@ -186,14 +186,14 @@ export default function Footer() {
                   href={`mailto:${settings.contactEmail}`}
                   className="flex items-center gap-2 text-sm text-nexus-gray/70 transition hover:text-nexus-cyan-bright"
                 >
-                  <Mail className="h-4 w-4 text-nexus-cyan" />
-                  <div>
-                    <p className="font-medium text-nexus-gray/90">{settings.contactEmail}</p>
+                  <Mail className="h-4 w-4 shrink-0 text-nexus-cyan" />
+                  <div className="min-w-0">
+                    <p className="min-w-0 break-all font-medium text-nexus-gray/90">{settings.contactEmail}</p>
                     <p className="text-xs text-nexus-gray/50">{p.contactEmailLabel}</p>
                   </div>
                 </a>
                 {settings.supportEmail && (
-                  <p className="mt-1 text-xs text-nexus-gray/60">
+                  <p className="mt-1 break-all text-xs text-nexus-gray/60">
                     Support: {settings.supportEmail}
                   </p>
                 )}

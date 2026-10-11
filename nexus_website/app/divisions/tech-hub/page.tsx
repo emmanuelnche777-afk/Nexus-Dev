@@ -376,7 +376,7 @@ export default function TechHub() {
   const heroWords = th.title.split(" ");
 
   return (
-    <div className="bg-nexus-dark">
+    <div className="overflow-x-clip bg-nexus-dark">
       <Preloader />
       <ScrollProgress />
 

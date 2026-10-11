@@ -182,7 +182,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
-              className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-nexus-dark shadow-2xl"
+              className="absolute inset-y-0 right-0 flex h-dvh max-h-dvh w-full max-w-sm flex-col bg-nexus-dark shadow-2xl"
             >
               <div className="flex items-center justify-between border-b border-nexus-cyan/10 p-6">
                 <span className="text-xl font-bold tracking-widest text-nexus-white">
@@ -198,7 +198,7 @@ export default function Navbar() {
                 </button>
               </div>
 
-              <div className="flex flex-1 flex-col justify-center gap-1 p-6">
+              <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain p-6">
                 {NAV_LINKS.filter((link) => link.label !== "Blog" || settingsLoading || settings.blog).map((link) => {
                   const displayLabel = getLabel(link.label);
                   return link.children ? (
