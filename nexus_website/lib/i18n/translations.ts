@@ -1060,7 +1060,7 @@ export const translations: Record<Language, TranslationKeys> = {
       gapPoint2Text: "A digital service matters when it fits people’s circumstances: accessible, relevant and useful enough to justify the time, cost and effort of using it.",
       gapPoint3Title: "Trust built into the work",
       gapPoint3Text: "People need to understand a service, feel confident using it and see a real benefit. Listening to users and building responsibly are part of making a solution work.",
-      gapClosing: "NEXUS is building an ecosystem where learners, businesses and communities can work together on challenges that matter. Our aim is to grow practical skills and develop solutions shaped by local realities—earning trust through useful work and lasting value.",
+      gapClosing: "NEXUS is building an ecosystem where learners, businesses and communities can work together on challenges that matter. Our aim is to grow practical skills and develop solutions shaped by local realities, earning trust through useful work and lasting value.",
       ecosystemEyebrow: "One ecosystem",
       ecosystemTitle: "Four divisions, one mission",
       ecosystemDesc: "Each division of NEXUS solves a different piece of the same problem.",
