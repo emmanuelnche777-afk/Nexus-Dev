@@ -56,14 +56,11 @@ export default function Navbar() {
             <Image
               src="/images/logo/nexus-logo-sm.jpg"
               alt="NEXUS logo"
-              width={36}
-              height={36}
+              width={44}
+              height={44}
               className="rounded-full object-cover"
               unoptimized
             />
-            <span className="text-lg font-bold tracking-widest text-nexus-white">
-              {settings.siteName}
-            </span>
           </Link>
 
           <div className="hidden h-full items-center gap-1 lg:flex">
