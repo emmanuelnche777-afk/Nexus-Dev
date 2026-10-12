@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 
-import { Search, MessageSquare, Trash2, Send } from "lucide-react";
+import { Search, MessageSquare, Trash2, Send, RefreshCw } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
@@ -34,18 +34,22 @@ export default function LiveChatPage() {
   const [selectedChat, setSelectedChat] = useState<LiveChat | null>(null);
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     loadChats();
   }, []);
 
   async function loadChats() {
+    setError("");
     try {
-      const res = await fetch("/api/admin/live-chat");
+      const res = await fetch("/api/admin/live-chat", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load live chats.");
       setChats(data.chats || []);
-    } catch (error) {
-      console.error("Failed to load chats:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to load live chats.");
     } finally {
       setLoading(false);
     }
@@ -55,13 +59,14 @@ export default function LiveChatPage() {
     if (!replyText.trim() || !selectedChat) return;
 
     setSending(true);
+    setError("");
+    setNotice("");
     try {
       const newMessage: ChatMessage = {
         id: `msg-${Date.now()}`,
         sender: "admin",
         text: replyText.trim(),
         timestamp: new Date().toISOString(),
-        adminName: "Admin",
       };
 
       const updatedChat = {
@@ -76,13 +81,14 @@ export default function LiveChatPage() {
         body: JSON.stringify(updatedChat),
       });
 
-      if (res.ok) {
-        setSelectedChat(updatedChat);
-        setReplyText("");
-        loadChats();
-      }
-    } catch (error) {
-      console.error("Failed to send reply:", error);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send reply.");
+      setSelectedChat({ ...updatedChat, messages: data.messages || updatedChat.messages });
+      setReplyText("");
+      setNotice("Reply saved to the conversation.");
+      await loadChats();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to send reply.");
     } finally {
       setSending(false);
     }
@@ -90,15 +96,16 @@ export default function LiveChatPage() {
 
   async function handleDeleteChat(id: string) {
     if (!confirm("Are you sure you want to delete this chat?")) return;
-
+    setError("");
     try {
       const res = await fetchWithFreshTwoFactor(`/api/admin/live-chat/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setChats(chats.filter((c) => c.id !== id));
-        if (selectedChat?.id === id) setSelectedChat(null);
-      }
-    } catch (error) {
-      console.error("Failed to delete chat:", error);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete chat.");
+      setChats((current) => current.filter((c) => c.id !== id));
+      if (selectedChat?.id === id) setSelectedChat(null);
+      setNotice("Conversation deleted.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to delete chat.");
     }
   }
 
@@ -111,6 +118,7 @@ export default function LiveChatPage() {
 
   return (
     <div className="flex min-w-0 flex-col gap-4 lg:h-[calc(100vh-8rem)] lg:flex-row lg:gap-6">
+      {(error || notice) && <div role={error ? "alert" : "status"} className={`basis-full rounded-lg border p-3 text-sm ${error ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}>{error || notice}{error && <button type="button" onClick={() => void loadChats()} disabled={loading} className="ml-2 inline-flex items-center gap-1 font-semibold underline"><RefreshCw className="h-3.5 w-3.5" />Try again</button>}</div>}
       {/* Chat List */}
       <div className="w-full min-w-0 space-y-4 lg:w-80 lg:shrink-0">
         <div className="flex items-center justify-between">

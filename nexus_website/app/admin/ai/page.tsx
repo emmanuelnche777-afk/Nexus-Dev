@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, MessageSquare, Play, Sparkles, Users } from "lucide-react";
+import { ArrowRight, BookOpen, MessageSquare, Play, RefreshCw, Sparkles, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 
@@ -22,19 +22,24 @@ export default function AIDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/ai/summary", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Unable to load AI overview");
-        return response.json();
-      })
-      .then((data) => {
-        setCounts(data.counts ?? {});
-        setPermissions(data.permissions ?? {});
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+  const loadSummary = useCallback(async (refresh = false) => {
+    if (refresh) { setLoading(true); setError(false); }
+    try {
+      const response = await fetch("/api/admin/ai/summary", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load AI overview");
+      setCounts(data.counts ?? {});
+      setPermissions(data.permissions ?? {});
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial loading is already true; the loader only sets state after its network request.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void loadSummary(); }, [loadSummary]);
 
   if (loading) return <LoadingState />;
   const visibleTiles = TILES.filter((tile) => permissions[tile.key]);
@@ -47,7 +52,7 @@ export default function AIDashboard() {
         <p className="mt-1 text-sm text-nexus-navy/70">Monitor visitor conversations, staff escalations, and AI content.</p>
       </header>
       {error ? (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">AI overview counts could not be loaded. Refresh the page or open a section directly.</div>
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">AI overview counts could not be loaded. <button type="button" onClick={() => void loadSummary(true)} disabled={loading} className="ml-1 inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button></div>
       ) : (
         <>
           <section className="rounded-xl border border-nexus-navy/10 bg-white p-5">

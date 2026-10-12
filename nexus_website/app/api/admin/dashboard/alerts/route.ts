@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { getSession } from "@/lib/admin-auth";
 import { hasPermission, type AdminRole } from "@/lib/permissions";
 import { PERMISSIONS } from "@/lib/permissions-data";
+import { applicationWhereFor } from "@/lib/intake-scope";
 
 /**
  * Dashboard alerts, filtered by what the caller is allowed to see.
@@ -45,6 +46,9 @@ export async function GET() {
     const wantInquiries = may(PERMISSIONS.PATHWAY_INQUIRIES_READ);
     const wantApplications = may(PERMISSIONS.APPLICATIONS_READ);
     const wantListings = may(PERMISSIONS.LISTINGS_WRITE);
+    const wantBlog = may("content:blog:read");
+    const wantJourney = may("content:journey:read");
+    const wantCohorts = may("academy:cohorts:read");
 
     const [
       pendingApps,
@@ -55,6 +59,10 @@ export async function GET() {
       newPathwayInquiries,
       newApplications,
       openListings,
+      blogPosts,
+      journeyEntries,
+      activeCohorts,
+      pendingOpportunityApplications,
     ] = await Promise.all([
       wantRegistrations
         ? prisma.pendingApplication.count({ where: { status: "new" } })
@@ -77,11 +85,17 @@ export async function GET() {
         ? prisma.pathwayInquiry.count({ where: { status: "NEW" } })
         : 0,
       wantApplications
-        ? prisma.opportunityApplication.count({ where: { status: "NEW" } })
+        ? prisma.opportunityApplication.count({ where: applicationWhereFor(role, { status: "NEW" }) })
         : 0,
       wantListings
         ? prisma.opportunity.count({ where: { lifecycle: "OPEN" } })
         : 0,
+      wantBlog ? prisma.blogPost.count() : null,
+      wantJourney ? prisma.journeyEntry.count() : null,
+      wantCohorts ? prisma.cohort.count({ where: { status: "open" } }) : null,
+      wantApplications
+        ? prisma.opportunityApplication.count({ where: applicationWhereFor(role, { status: { in: ["NEW", "UNDER_REVIEW"] } }) })
+        : null,
     ]);
 
     const alerts: Alert[] = [];
@@ -200,8 +214,20 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ alerts });
-  } catch {
-    return NextResponse.json({ alerts: [] });
+    return NextResponse.json({
+      alerts,
+      stats: {
+        blogPosts,
+        journeyEntries,
+        openOpportunities: wantListings ? openListings : null,
+        activeCohorts,
+        pendingApplications: pendingOpportunityApplications,
+        activePartnerships: wantPartnerships ? partnerInquiries : null,
+      },
+      lastUpdated: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Failed to load dashboard overview:", error);
+    return NextResponse.json({ error: "Failed to load dashboard overview" }, { status: 500 });
   }
 }

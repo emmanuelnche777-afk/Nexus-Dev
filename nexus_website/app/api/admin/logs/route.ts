@@ -33,7 +33,8 @@ export async function GET() {
     });
 
     return NextResponse.json({ logs });
-  } catch {
-    return NextResponse.json({ logs: [] });
+  } catch (error) {
+    console.error("Failed to load audit logs:", error);
+    return NextResponse.json({ error: "Failed to load audit logs." }, { status: 500 });
   }
 }

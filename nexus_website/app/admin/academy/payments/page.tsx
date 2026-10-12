@@ -90,19 +90,21 @@ export default function PaymentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entity: "payments", confirm: "DELETE ALL" }),
       });
-      if (res.ok) {
-        setClearConfirm("");
-        setShowModal(false);
-        await loadPayments();
-      }
-    } catch (error) {
-      console.error(error);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not clear payment records.");
+      setClearConfirm("");
+      setShowModal(false);
+      await loadPayments();
+    } catch (cause) {
+      setLoadError(cause instanceof Error ? cause.message : "Could not clear payment records.");
     } finally {
       setClearing(false);
     }
   }
 
   async function loadPayments() {
+    setLoading(true);
+    setLoadError("");
     try {
       const [payRes, progRes, sessionRes] = await Promise.all([
         fetchWithFreshTwoFactor("/api/admin/academy/payments"),
@@ -113,6 +115,7 @@ export default function PaymentsPage() {
       const payData = await payRes.json();
       const progData = await progRes.json();
       const sessionData = await sessionRes.json().catch(() => ({}));
+      if (!payRes.ok || !progRes.ok) throw new Error("Could not load payment and program records.");
       const role = sessionData?.user?.role as AdminRole | undefined;
       setCanClearPayments(Boolean(role && hasPermission(role, "academy:payments:delete")));
 
@@ -142,8 +145,8 @@ export default function PaymentsPage() {
 
 
       setPayments(paymentsWithDetails);
-    } catch (error) {
-      console.error("Failed to load payments:", error);
+    } catch (cause) {
+      setLoadError(cause instanceof Error ? cause.message : "Failed to load payments.");
     } finally {
       setLoading(false);
     }

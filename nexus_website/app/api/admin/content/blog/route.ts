@@ -12,8 +12,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json({ posts });
-  } catch {
-    return NextResponse.json({ posts: [] });
+  } catch (error) {
+    console.error("Failed to load blog posts:", error);
+    return NextResponse.json({ error: "Failed to load blog posts." }, { status: 500 });
   }
 }
 

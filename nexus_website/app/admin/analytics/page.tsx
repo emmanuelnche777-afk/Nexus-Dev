@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart3, TrendingUp, Users, DollarSign } from "lucide-react";
+import { ArrowLeft, BarChart3, RefreshCw, TrendingUp, Users, DollarSign } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 
 interface AnalyticsMetrics {
@@ -30,30 +30,39 @@ interface AnalyticsMetrics {
 export default function AnalyticsPage() {
   const [metrics, setMetrics] = useState<AnalyticsMetrics>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  async function loadMetrics() {
+  const loadMetrics = useCallback(async (refresh = false) => {
+    if (refresh) { setLoading(true); setError(""); }
     try {
       const res = await fetch("/api/admin/analytics", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load analytics.");
       setMetrics(data.metrics || {});
-    } catch (error) {
-      console.error("Failed to load analytics:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load analytics.");
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   const programs = metrics.programs ?? [];
   const showAcademy = metrics.role === "SUPER_ADMIN" || metrics.role === "ACADEMY_MANAGER";
   const showFinance = metrics.role === "SUPER_ADMIN" || metrics.role === "FINANCE";
   const showOpportunities = metrics.role === "SUPER_ADMIN" || metrics.role === "CONTENT_EDITOR";
 
+  // Initial loading is already true; the loader only sets state after its network request.
   useEffect(() => {
-    queueMicrotask(() => void loadMetrics());
-  }, []);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadMetrics();
+  }, [loadMetrics]);
 
-  if (loading) {
+  if (loading && !metrics.role) {
     return <LoadingState label="Loading analytics..." />;
+  }
+
+  if (error) {
+    return <main className="space-y-4"><Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-sm text-nexus-navy/70 hover:text-nexus-cyan"><ArrowLeft className="h-4 w-4" />Dashboard</Link><div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p>{error}</p><button type="button" onClick={() => void loadMetrics(true)} disabled={loading} className="mt-2 inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button></div></main>;
   }
 
   return (
@@ -71,6 +80,7 @@ export default function AnalyticsPage() {
             Business metrics and performance overview
           </p>
         </div>
+        <button type="button" onClick={() => void loadMetrics(true)} disabled={loading} className="ml-auto inline-flex items-center gap-2 rounded-md border border-nexus-navy/15 px-3 py-2 text-sm disabled:opacity-60"><RefreshCw className="h-4 w-4" />Refresh</button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

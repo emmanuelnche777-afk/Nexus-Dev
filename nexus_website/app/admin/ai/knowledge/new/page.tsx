@@ -9,14 +9,27 @@ export default function KnowledgeNewPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("academy");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  async function handleSubmit() {
-    await fetch("/api/admin/ai/knowledge", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content, category }),
-    });
-    router.push("/admin/ai/knowledge");
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/ai/knowledge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, category }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not save this knowledge entry.");
+      router.push("/admin/ai/knowledge");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not save this knowledge entry.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -33,9 +46,12 @@ export default function KnowledgeNewPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
         <div>
-          <label>Title</label>
+          <label htmlFor="knowledge-title">Title</label>
           <input
+            id="knowledge-title"
+            required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter knowledge title"
@@ -44,8 +60,9 @@ export default function KnowledgeNewPage() {
         </div>
 
         <div>
-          <label>Category</label>
+          <label htmlFor="knowledge-category">Category</label>
           <select
+            id="knowledge-category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded-lg border border-nexus-navy/10 px-3 py-2 text-sm"
@@ -59,8 +76,10 @@ export default function KnowledgeNewPage() {
         </div>
 
         <div>
-          <label>Content</label>
+          <label htmlFor="knowledge-content">Content</label>
           <textarea
+            id="knowledge-content"
+            required
             rows={3}
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -69,8 +88,8 @@ export default function KnowledgeNewPage() {
           />
         </div>
 
-        <button type="submit" className="w-full rounded-md bg-nexus-cyan px-4 py-2.5 text-sm font-medium text-white transition hover:bg-nexus-cyan-bright">
-          Add Knowledge Entry
+        <button type="submit" disabled={saving} className="w-full rounded-md bg-nexus-cyan px-4 py-2.5 text-sm font-medium text-white transition hover:bg-nexus-cyan-bright disabled:cursor-wait disabled:opacity-60">
+          {saving ? "Saving…" : "Add Knowledge Entry"}
         </button>
       </form>
     </div>

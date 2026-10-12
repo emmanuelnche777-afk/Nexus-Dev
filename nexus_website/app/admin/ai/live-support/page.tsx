@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { RefreshCw, Users } from "lucide-react";
 
 
 interface LiveSupportSession {
@@ -19,30 +19,45 @@ interface LiveSupportSession {
 
 export default function LiveSupportPage() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [endingId, setEndingId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<LiveSupportSession[]>([]);
 
-  useEffect(() => {
-    fetch("/api/admin/live-support", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data) => {
-        setSessions(data.sessions || []);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+  const loadSessions = useCallback(async (refresh = false) => {
+    if (refresh) { setLoading(true); setError(""); }
+    try {
+      const response = await fetch("/api/admin/live-support", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not load live support sessions.");
+      setSessions(Array.isArray(data.sessions) ? data.sessions : []);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load live support sessions.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleEndSession = (id: string) => {
-    setSessions(
-      sessions.map((s) =>
-        s.id === id ? { ...s, endTime: new Date().toISOString() } : s)
-    );
-    fetch(`/api/admin/live-support`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: id, adminId: "admin-1", endSession: true }),
-    });
+  // Initial loading is already true; the loader only sets state after its network request.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void loadSessions(); }, [loadSessions]);
+
+  const handleEndSession = async (id: string) => {
+    setEndingId(id);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/live-support", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: id, endSession: true }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not end this support session.");
+      setSessions((current) => current.filter((session) => session.id !== id));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not end this support session.");
+    } finally {
+      setEndingId(null);
+    }
   };
 
   return (
@@ -52,13 +67,13 @@ export default function LiveSupportPage() {
           <Users className="h-5 w-5 text-nexus-cyan" />
           <h2 className="text-xl font-bold text-nexus-dark">Live Support Sessions</h2>
         </div>
-        <Link
-          href="/admin/ai"
-          className="text-sm text-nexus-navy hover:text-nexus-navy"
-        >
-          ← Back to AI Management
-        </Link>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => void loadSessions(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-md border border-nexus-navy/15 px-3 py-2 text-sm disabled:opacity-60"><RefreshCw className="h-4 w-4" />Refresh</button>
+          <Link href="/admin/ai" className="text-sm text-nexus-navy hover:text-nexus-cyan">← Back to AI Management</Link>
+        </div>
       </header>
+
+      {error && <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
 
       <div className="mt-6">
         <h3 className="font-semibold text-nexus-dark mb-3">
@@ -92,19 +107,9 @@ export default function LiveSupportPage() {
                       Started: {new Date(session.startedAt).toLocaleDateString()}
                     </p>
                   </div>
-                  {session.endTime ? (
-                    <span className="text-green-600 text-sm">
-                      ended {new Date(session.endTime).toLocaleDateString()}
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => handleEndSession(session.id)}
-                      className="text-red-500 hover:text-red-700 text-sm"
-                      title="End Session"
-                    >
-                      ✕ End
-                    </button>
-                  )}
+                  <button type="button" onClick={() => void handleEndSession(session.id)} disabled={endingId === session.id} className="text-sm text-red-600 hover:text-red-800 disabled:opacity-60" title="End session">
+                    {endingId === session.id ? "Ending…" : "✕ End"}
+                  </button>
                 </div>
               </div>
             ))}

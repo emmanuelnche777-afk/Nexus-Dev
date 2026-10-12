@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { Search, ArrowLeft, Users, Trash2 } from "lucide-react";
+import { Search, ArrowLeft, RefreshCw, Users, Trash2 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
@@ -28,56 +28,65 @@ interface PathwayInquiry {
 export default function MentorshipInquiriesPage() {
   const [inquiries, setInquiries] = useState<PathwayInquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     loadData();
   }, []);
 
   async function loadData() {
+    setError("");
     try {
-      const res = await fetch("/api/admin/mentorship-inquiries");
-      if (!res.ok) throw new Error("Failed to load");
+      const res = await fetch("/api/admin/mentorship-inquiries", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load mentor and volunteer requests.");
       setInquiries(data.inquiries || []);
-    } catch (error) {
-      console.error("Failed to load mentorship inquiries:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to load mentor and volunteer requests.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function updateInquiry(id: string, data: Partial<PathwayInquiry>) {
+  async function updateInquiry(id: string, updates: Partial<PathwayInquiry>) {
     try {
-      await fetchWithFreshTwoFactor("/api/admin/mentorship-inquiries", {
+      const response = await fetchWithFreshTwoFactor("/api/admin/mentorship-inquiries", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, ...data }),
+        body: JSON.stringify({ id, ...updates }),
       });
-      loadData();
-    } catch (err) {
-      console.error("Failed to update:", err);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not update request.");
+      await loadData();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not update request.");
     }
   }
 
   async function deleteInquiry(id: string) {
     if (!confirm("Delete this mentorship inquiry?")) return;
     try {
-      await fetch("/api/admin/mentorship-inquiries", {
+      const response = await fetchWithFreshTwoFactor("/api/admin/mentorship-inquiries", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      loadData();
-    } catch (err) {
-      console.error("Failed to delete:", err);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not delete request.");
+      await loadData();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not delete request.");
     }
   }
 
   const filteredInquiries = inquiries.filter(inq =>
-    inq.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.pathway.toLowerCase().includes(searchQuery.toLowerCase())
+    (statusFilter === "all" || inq.status === statusFilter) && (
+      inq.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.pathway.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   if (loading) {
@@ -92,15 +101,22 @@ export default function MentorshipInquiriesPage() {
           <p className="text-nexus-navy/60 mt-1">Mentor and volunteer applications</p>
         </div>
         <Link
-          href="/admin/inquiries"
+          href="/admin/requests"
           className="flex items-center gap-2 px-4 py-2 text-nexus-navy/70 hover:text-nexus-navy"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Inquiries
+          Back to Requests
         </Link>
       </div>
 
+      <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">Mentor and volunteer submissions also appear in Join Us Requests. This page is a focused view of those same records.</p>
+
       <div className="bg-nexus-white rounded-lg border border-nexus-cyan/10 p-6">
+        <label className="mb-4 block max-w-xs text-sm font-medium text-nexus-navy">Filter by status
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="mt-1 w-full rounded-md border border-nexus-cyan/20 bg-white px-3 py-2 text-sm">
+            <option value="all">All statuses</option><option value="NEW">New</option><option value="REVIEWED">Reviewed</option><option value="RESPONDED">Responded</option>
+          </select>
+        </label>
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-nexus-navy/40" />
@@ -114,7 +130,8 @@ export default function MentorshipInquiriesPage() {
           </div>
         </div>
 
-        {filteredInquiries.length === 0 ? (
+        {error && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}<button type="button" onClick={() => void loadData()} disabled={loading} className="inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button></div>}
+        {error && inquiries.length === 0 ? null : filteredInquiries.length === 0 ? (
           <EmptyState
             icon={Users}
             title="No mentorship inquiries"
@@ -151,13 +168,15 @@ export default function MentorshipInquiriesPage() {
                     <td className="py-4 px-4">
                       <select
                         value={inquiry.status}
-                        onChange={(e) => updateInquiry(inquiry.id, { status: e.target.value, reviewedAt: new Date().toISOString() })}
+                        onChange={(e) => {
+                          const status = e.target.value;
+                          if (status !== "RESPONDED") void updateInquiry(inquiry.id, { status, reviewedAt: new Date().toISOString() });
+                        }}
                         className="px-2 py-1 text-sm border border-nexus-cyan/20 rounded focus:outline-none focus:ring-1 focus:ring-nexus-cyan/50"
                       >
                         <option value="NEW">New</option>
-                        <option value="REVIEWING">Reviewing</option>
-                        <option value="APPROVED">Approved</option>
-                        <option value="REJECTED">Rejected</option>
+                        <option value="REVIEWED">Reviewed</option>
+                        <option value="RESPONDED" disabled>Responded (update from Join Us request detail)</option>
                       </select>
                     </td>
                     <td className="py-4 px-4">

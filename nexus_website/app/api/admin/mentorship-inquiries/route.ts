@@ -34,7 +34,7 @@ export async function GET() {
     return NextResponse.json({ inquiries });
   } catch (error) {
     console.error("Failed to load mentorship inquiries:", error);
-    return NextResponse.json({ inquiries: [] });
+    return NextResponse.json({ error: "Failed to load mentorship inquiries." }, { status: 500 });
   }
 }
 

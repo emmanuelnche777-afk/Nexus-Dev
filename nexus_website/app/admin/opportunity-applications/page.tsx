@@ -84,6 +84,7 @@ export default function OpportunityApplicationsPage() {
   const [overdue, setOverdue] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [opportunityFilter, setOpportunityFilter] = useState<string>("all");
@@ -97,6 +98,7 @@ export default function OpportunityApplicationsPage() {
 
   async function loadApplications() {
     setLoading(true);
+    setError("");
     try {
       const query = new URLSearchParams({
         status: statusFilter,
@@ -106,12 +108,13 @@ export default function OpportunityApplicationsPage() {
       if (search.trim()) query.set("search", search.trim());
       const res = await fetchWithFreshTwoFactor(`/api/admin/opportunity-applications?${query.toString()}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load applications.");
       setApplications(data.applications || []);
       setTotal(data.total ?? (data.applications || []).length);
       setOverdue(data.overdue ?? 0);
       setHasMore(Boolean(data.hasMore));
-    } catch (error) {
-      console.error("Failed to load opportunity applications:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load applications.");
     } finally {
       setLoading(false);
     }
@@ -131,10 +134,11 @@ export default function OpportunityApplicationsPage() {
       if (last) query.set("cursor", last.id);
       const res = await fetchWithFreshTwoFactor(`/api/admin/opportunity-applications?${query.toString()}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load more applications.");
       setApplications((prev) => [...prev, ...(data.applications || [])]);
       setHasMore(Boolean(data.hasMore));
-    } catch (error) {
-      console.error("Failed to load more applications:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load more applications.");
     } finally {
       setLoadingMore(false);
     }
@@ -145,9 +149,12 @@ export default function OpportunityApplicationsPage() {
     // which requires the listings-write permission that intake roles do not hold,
     // so their filter dropdown rendered empty.
     fetch("/api/admin/opportunity-applications/options", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data) => setOpportunities(data.opportunities || []))
-      .catch(() => setOpportunities([]));
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Could not load opportunity filters.");
+        setOpportunities(data.opportunities || []);
+      })
+      .catch((cause) => setError(cause instanceof Error ? cause.message : "Could not load opportunity filters."));
   }, []);
 
   return (
@@ -185,6 +192,7 @@ export default function OpportunityApplicationsPage() {
       </div>
 
       <div className="space-y-3">
+        {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error} <button type="button" onClick={() => void loadApplications()} disabled={loading} className="ml-2 font-semibold underline">Try again</button></div>}
         {overdue > 0 && (
           <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {overdue} application{overdue !== 1 ? "s have" : " has"} passed the
@@ -259,7 +267,9 @@ export default function OpportunityApplicationsPage() {
       </div>
 
       <div className="rounded-xl border border-nexus-navy/10 bg-white">
-        {loading ? (
+        {error && applications.length === 0 ? (
+          <p className="p-6 text-sm text-red-700">Applications were not loaded; retry above.</p>
+        ) : loading ? (
           <LoadingState label="Loading applications..." />
         ) : applications.length === 0 ? (
           <EmptyState

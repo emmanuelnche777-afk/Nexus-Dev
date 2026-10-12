@@ -23,6 +23,6 @@ export async function GET() {
     return NextResponse.json({ assignees: await listAssignableAdmins() });
   } catch (error) {
     console.error("Failed to load assignees:", error);
-    return NextResponse.json({ assignees: [] });
+    return NextResponse.json({ error: "Failed to load assignees." }, { status: 500 });
   }
 }

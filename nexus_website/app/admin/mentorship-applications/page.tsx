@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Mail, RefreshCw } from "lucide-react";
+import { Mail, RefreshCw, Search } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 
@@ -25,6 +25,8 @@ export default function MentorshipApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const loadApplications = useCallback(async () => {
     setLoading(true);
@@ -69,6 +71,14 @@ export default function MentorshipApplicationsPage() {
     }
   }
 
+  const filteredApplications = applications.filter((item) => {
+    const draft = drafts[item.id];
+    const query = search.trim().toLowerCase();
+    const matchesSearch = !query || [item.name, item.email, item.phone || "", item.role || "", item.message || ""]
+      .some((value) => value.toLowerCase().includes(query));
+    return matchesSearch && (statusFilter === "all" || (draft?.status || item.status) === statusFilter);
+  });
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -83,10 +93,14 @@ export default function MentorshipApplicationsPage() {
       </div>
 
       {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {!loading && applications.length > 0 && <div className="grid gap-3 sm:grid-cols-[1fr_15rem]">
+        <label className="relative block"><span className="sr-only">Search mentee applications</span><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-navy/40" /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, email, phone, or details" className="w-full rounded-lg border border-nexus-cyan/20 bg-white py-2.5 pl-10 pr-3 text-sm" /></label>
+        <label className="text-sm font-medium text-nexus-dark">Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-1 block w-full rounded-lg border border-nexus-cyan/20 bg-white px-3 py-2.5 text-sm"><option value="all">All statuses</option>{STATUSES.map((status) => <option key={status} value={status}>{status[0].toUpperCase() + status.slice(1)}</option>)}</select></label>
+      </div>}
       {loading ? <LoadingState /> : applications.length === 0 ? (
         <EmptyState icon={Mail} title="No mentee applications" description="New applications from the public Mentorship page will appear here." />
-      ) : <div className="space-y-4">
-        {applications.map((item) => {
+      ) : filteredApplications.length === 0 ? <p className="rounded-lg border border-nexus-navy/10 bg-white p-5 text-sm text-nexus-navy/70">No applications match the current search and status filters.</p> : <div className="space-y-4">
+        {filteredApplications.map((item) => {
           const draft = drafts[item.id] || { status: item.status, adminNotes: item.adminNotes || "" };
           return <article key={item.id} className="rounded-xl border border-nexus-cyan/15 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">

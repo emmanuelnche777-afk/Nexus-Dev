@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ClipboardList, GraduationCap, Handshake, Mail, Users, Building2 } from "lucide-react";
+import { ArrowRight, ClipboardList, GraduationCap, Handshake, Mail, RefreshCw, Users, Building2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 
@@ -14,26 +14,33 @@ const QUEUES: Queue[] = [
   { key: "joiners", title: "Join Us requests", href: "/admin/joiners", icon: Users, description: "Pathway requests awaiting review" },
   { key: "opportunities", title: "Opportunity applications", href: "/admin/opportunity-applications", icon: ClipboardList, description: "Applications awaiting a decision" },
   { key: "mentees", title: "Mentee applications", href: "/admin/mentorship-applications", icon: GraduationCap, description: "Mentee requests awaiting review" },
-  { key: "mentors", title: "Mentor / volunteer applications", href: "/admin/mentorship-inquiries", icon: Users, description: "Mentor and volunteer requests awaiting review" },
+  { key: "mentors", title: "Mentor / volunteer applications", href: "/admin/mentorship-inquiries", icon: Users, description: "Focused view of mentor and volunteer requests also listed under Join Us" },
   { key: "partnerships", title: "Partnerships", href: "/admin/partnerships", icon: Handshake, description: "Partnership requests still in progress" },
-  { key: "services", title: "Tech Hub service requests", href: "/admin/service-inquiries", icon: Building2, description: "New and in progress service requests" },
+  { key: "services", title: "Tech Hub service requests", href: "/admin/tech-hub/orders", icon: Building2, description: "Managed in the Tech Hub orders workspace" },
 ];
 
 export default function RequestsOverviewPage() {
   const [queues, setQueues] = useState<Partial<Record<QueueKey, number>>>({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetch("/api/admin/requests/summary", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Unable to load requests");
-        return response.json();
-      })
-      .then((data) => setQueues(data.queues ?? {}))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+  const loadQueues = useCallback(async (refresh = false) => {
+    if (refresh) { setLoading(true); setError(""); }
+    try {
+      const response = await fetch("/api/admin/requests/summary", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load request queues.");
+      setQueues(data.queues ?? {});
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to load request queues.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial loading is already true; the loader only sets state after its network request.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void loadQueues(); }, [loadQueues]);
 
   const visibleQueues = QUEUES.filter((queue) => Object.hasOwn(queues, queue.key));
   const waiting = visibleQueues.reduce((sum, queue) => {
@@ -53,7 +60,8 @@ export default function RequestsOverviewPage() {
 
       {error ? (
         <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          Request counts could not be loaded. Refresh the page or open a queue directly.
+          <p>{error}</p>
+          <button type="button" onClick={() => void loadQueues(true)} disabled={loading} className="mt-2 inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button>
         </div>
       ) : (
         <>
@@ -72,7 +80,7 @@ export default function RequestsOverviewPage() {
                   <ArrowRight className="h-4 w-4 text-nexus-cyan transition group-hover:translate-x-1" />
                 </div>
                 <p className="mt-4 text-sm text-nexus-navy/60">
-                  {queue.key === "mentors" && queues.joiners !== undefined ? "These requests are also included in Join Us requests" : queue.description}
+                  {queue.description}
                 </p>
                 <p className="mt-3 text-2xl font-bold text-nexus-navy">{queues[queue.key] ?? 0}</p>
                 <p className="text-xs text-nexus-navy/50">open items</p>

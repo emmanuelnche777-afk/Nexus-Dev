@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Link from "next/link";
-import { GraduationCap, BookOpen, Users, ArrowRight, TrendingUp } from "lucide-react";
+import { GraduationCap, BookOpen, Users, ArrowRight, RefreshCw, TrendingUp } from "lucide-react";
 
 interface Program {
   id: string;
@@ -27,19 +27,28 @@ export default function AcademyAdminPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/admin/programs").then((r) => r.json()),
-      fetch("/api/admin/cohorts").then((r) => r.json()),
-    ])
-      .then(([progs, coh]) => {
-        setPrograms(Array.isArray(progs) ? progs : progs.programs || []);
-        setCohorts(Array.isArray(coh) ? coh : coh.cohorts || []);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const loadOverview = useCallback(async (refresh = false) => {
+    if (refresh) { setLoading(true); setError(""); }
+    try {
+      const responses = await Promise.all([fetch("/api/admin/programs", { cache: "no-store" }), fetch("/api/admin/cohorts", { cache: "no-store" })]);
+      const data = await Promise.all(responses.map((response) => response.json()));
+      const failedIndex = responses.findIndex((response) => !response.ok);
+      if (failedIndex >= 0) throw new Error(data[failedIndex]?.error || "Could not load Academy data.");
+      const [progs, coh] = data;
+      setPrograms(Array.isArray(progs) ? progs : progs.programs || []);
+      setCohorts(Array.isArray(coh) ? coh : coh.cohorts || []);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load Academy data.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial loading is already true; the loader only sets state after its network request.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void loadOverview(); }, [loadOverview]);
 
   const openCohorts = cohorts.filter((c) => c.status === "open").length;
   const totalStudents = cohorts.reduce((sum, c) => sum + c.currentStudents, 0);
@@ -54,6 +63,8 @@ export default function AcademyAdminPage() {
         </p>
       </div>
 
+      {error && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"><span>{error}</span><button type="button" onClick={() => void loadOverview(true)} disabled={loading} className="inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button></div>}
+
       {/* Stats */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-nexus-navy/10 bg-white p-6">
@@ -62,7 +73,7 @@ export default function AcademyAdminPage() {
               <BookOpen className="h-5 w-5 text-nexus-cyan" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : programs.length}</p>
+              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : error ? "—" : programs.length}</p>
               <p className="text-xs text-nexus-navy">Programs</p>
             </div>
           </div>
@@ -74,7 +85,7 @@ export default function AcademyAdminPage() {
               <Users className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : cohorts.length}</p>
+              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : error ? "—" : cohorts.length}</p>
               <p className="text-xs text-nexus-navy">Cohorts</p>
             </div>
           </div>
@@ -86,7 +97,7 @@ export default function AcademyAdminPage() {
               <TrendingUp className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : totalStudents}</p>
+              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : error ? "—" : totalStudents}</p>
               <p className="text-xs text-nexus-navy">Total Students</p>
             </div>
           </div>
@@ -98,7 +109,7 @@ export default function AcademyAdminPage() {
               <GraduationCap className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : openCohorts}</p>
+              <p className="text-2xl font-bold text-nexus-navy">{loading ? "…" : error ? "—" : openCohorts}</p>
               <p className="text-xs text-nexus-navy">Open Cohorts</p>
             </div>
           </div>

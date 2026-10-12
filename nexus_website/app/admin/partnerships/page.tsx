@@ -189,7 +189,8 @@ export default function PartnershipsPage() {
       if (selected.status !== "approved" && selected.status !== "rejected") {
         setSelected({ ...selected, status: "contacted" });
       }
-      setNotice("Email sent and saved to this request.");
+      setNotice(`Email sent and saved to this request.${data.smsStatus === "queued" ? " SMS queued through TextBee." : data.smsStatus === "failed" ? " Email sent, but SMS failed; see Notifications for details." : data.smsStatus === "skipped" ? " Email sent, but SMS provider is not configured." : ""}`);
+      setSendSmsToo(false);
       await refreshPartnerships();
     } catch (sendError) {
       setError(sendError instanceof Error ? sendError.message : "Could not send this reply.");
@@ -203,6 +204,9 @@ export default function PartnershipsPage() {
     return !query || [item.organizationName, item.contactName, item.contactEmail, item.partnershipType]
       .some((value) => value.toLowerCase().includes(query));
   });
+  const pageSize = 25;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const visiblePartnerships = filtered.slice((Math.min(page, pageCount) - 1) * pageSize, Math.min(page, pageCount) * pageSize);
   const websiteUrl = selected ? safeWebsiteUrl(selected.website) : null;
 
   return (
@@ -227,7 +231,7 @@ export default function PartnershipsPage() {
           type="search"
           placeholder="Search organization, contact, or email..."
           value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
+          onChange={(event) => { setSearchQuery(event.target.value); setPage(1); }}
           className="w-full rounded-lg border border-nexus-navy/10 bg-white py-2.5 pl-10 pr-4 text-sm text-nexus-navy placeholder:text-nexus-navy/40 focus:border-nexus-cyan focus:outline-none"
         />
       </div>
@@ -239,7 +243,7 @@ export default function PartnershipsPage() {
             type="button"
             role="tab"
             aria-selected={filter === item.value}
-            onClick={() => setFilter(item.value)}
+            onClick={() => { setFilter(item.value); setPage(1); }}
             className={`rounded-lg px-4 py-2 text-sm font-medium ${filter === item.value ? "bg-nexus-cyan text-white" : "border border-nexus-navy/10 bg-white text-nexus-navy"}`}
           >
             {item.label}
@@ -256,7 +260,7 @@ export default function PartnershipsPage() {
           />
         ) : (
           <div className="divide-y divide-nexus-navy/10">
-            {filtered.map((item) => (
+            {visiblePartnerships.map((item) => (
               <button
                 key={item.id}
                 type="button"
@@ -281,6 +285,11 @@ export default function PartnershipsPage() {
           </div>
         )}
       </div>
+
+      {!loading && filtered.length > pageSize && <nav aria-label="Partnership request pages" className="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <p className="text-nexus-navy/60">Showing {(Math.min(page, pageCount) - 1) * pageSize + 1}–{Math.min(page, pageCount) * pageSize} of {filtered.length} matching requests</p>
+        <div className="flex gap-2"><button type="button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1} className="rounded-md border px-3 py-2 disabled:opacity-50">Previous</button><span className="px-2 py-2">Page {Math.min(page, pageCount)} of {pageCount}</span><button type="button" onClick={() => setPage((current) => Math.min(pageCount, current + 1))} disabled={page >= pageCount} className="rounded-md border px-3 py-2 disabled:opacity-50">Next</button></div>
+      </nav>}
 
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-nexus-dark/60 p-3 sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>

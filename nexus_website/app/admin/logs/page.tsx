@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { Search, ArrowLeft, ScrollText } from "lucide-react";
+import { Search, ArrowLeft, RefreshCw, ScrollText } from "lucide-react";
 
 interface ActivityLog {
   id: string;
@@ -19,6 +19,7 @@ interface ActivityLog {
 export default function LogsPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [staffFilter, setStaffFilter] = useState("");
   const [eventFilter, setEventFilter] = useState("");
@@ -26,12 +27,15 @@ export default function LogsPage() {
   const [dateTo, setDateTo] = useState("");
 
   async function loadLogs() {
+    setError("");
+    setLoading(true);
     try {
-      const res = await fetch("/api/admin/logs");
+      const res = await fetch("/api/admin/logs", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load audit logs.");
       setLogs(data.logs || []);
-    } catch (error) {
-      console.error("Failed to load logs:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to load audit logs.");
     } finally {
       setLoading(false);
     }
@@ -70,11 +74,13 @@ export default function LogsPage() {
           <div>
             <h1 className="text-2xl font-bold text-nexus-navy">Audit Log</h1>
             <p className="mt-1 text-sm text-nexus-navy">
-              Review staff actions and access to sensitive records
+              Review staff actions recorded by the system. Page views and every record read are not all logged.
             </p>
           </div>
         </div>
       </div>
+
+      <div className="flex justify-end"><button type="button" onClick={() => void loadLogs()} disabled={loading} className="inline-flex items-center gap-2 rounded-md border border-nexus-navy/15 bg-white px-3 py-2 text-sm disabled:opacity-60"><RefreshCw className="h-4 w-4" />Refresh logs</button></div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-navy/40" />
@@ -109,7 +115,9 @@ export default function LogsPage() {
       </div>
 
       <div className="rounded-xl border border-nexus-navy/10 bg-white">
-        {loading ? (
+        {error ? (
+          <div role="alert" className="p-6 text-sm text-red-800">{error}<button type="button" onClick={() => void loadLogs()} className="ml-2 font-semibold underline">Try again</button></div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-nexus-cyan border-t-transparent" />
           </div>

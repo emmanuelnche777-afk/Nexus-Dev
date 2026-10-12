@@ -38,11 +38,22 @@ export async function PUT(
       return NextResponse.json({ error: "Chat not found" }, { status: 404 });
     }
 
+    const oldMessages = Array.isArray(existing.messages) ? existing.messages as Array<Record<string, unknown>> : [];
+    const oldIds = new Set(oldMessages.map((message) => message.id).filter((id): id is string => typeof id === "string"));
+    const messages = Array.isArray(body.messages)
+      ? (body.messages as Array<Record<string, unknown>>).map((message) =>
+          message.sender === "admin" && typeof message.id === "string" && !oldIds.has(message.id)
+            ? { ...message, adminName: user.name }
+            : message
+        )
+      : existing.messages;
+
     const chat = await prisma.liveChat.update({
       where: { id },
       data: {
         ...body,
         id,
+        messages,
         updatedAt: new Date(),
       },
     });

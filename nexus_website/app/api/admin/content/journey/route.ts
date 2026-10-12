@@ -121,8 +121,9 @@ export async function GET() {
       orderBy: [{ projectName: "asc" }, { phaseOrder: "asc" }, { date: "desc" }],
     });
     return NextResponse.json({ entries });
-  } catch {
-    return NextResponse.json({ entries: [] });
+  } catch (error) {
+    console.error("Failed to load journey entries:", error);
+    return NextResponse.json({ error: "Failed to load journey entries." }, { status: 500 });
   }
 }
 

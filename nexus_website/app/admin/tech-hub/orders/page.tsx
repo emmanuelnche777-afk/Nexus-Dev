@@ -186,6 +186,7 @@ export default function AdminServiceOrdersPage() {
     setNotes(order.notes || "");
     setAssignedToDraft(order.assignedToId || "");
     setQuoteOpen(false);
+    setQuoteSms(false);
     setError(null);
     setSavedMessage("");
   }
@@ -259,24 +260,42 @@ export default function AdminServiceOrdersPage() {
   async function toggleMilestone(milestone: Milestone) {
     if (!selected) return;
     const nextStatus = milestone.status === "completed" ? "pending" : "completed";
-    await fetchWithFreshTwoFactor(`/api/admin/service-orders/${selected.id}/milestones/${milestone.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: nextStatus }),
-    });
-    const updated = await fetch(`/api/admin/service-orders/${selected.id}`).then((r) => r.json());
-    setSelected(updated);
-    await load();
+    setError(null);
+    try {
+      const response = await fetch(`/api/admin/service-orders/${selected.id}/milestones/${milestone.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not update milestone.");
+      const orderResponse = await fetch(`/api/admin/service-orders/${selected.id}`, { cache: "no-store" });
+      const orderData = await orderResponse.json();
+      if (!orderResponse.ok) throw new Error(orderData.error || "Milestone updated, but the order could not refresh.");
+      setSelected(orderData);
+      setSavedMessage("Milestone updated.");
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not update milestone.");
+    }
   }
 
   async function deleteMilestone(milestone: Milestone) {
     if (!selected) return;
-    await fetch(`/api/admin/service-orders/${selected.id}/milestones/${milestone.id}`, {
-      method: "DELETE",
-    });
-    const updated = await fetch(`/api/admin/service-orders/${selected.id}`).then((r) => r.json());
-    setSelected(updated);
-    await load();
+    setError(null);
+    try {
+      const response = await fetchWithFreshTwoFactor(`/api/admin/service-orders/${selected.id}/milestones/${milestone.id}`, { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not delete milestone.");
+      const orderResponse = await fetch(`/api/admin/service-orders/${selected.id}`, { cache: "no-store" });
+      const orderData = await orderResponse.json();
+      if (!orderResponse.ok) throw new Error(orderData.error || "Milestone deleted, but the order could not refresh.");
+      setSelected(orderData);
+      setSavedMessage("Milestone deleted.");
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not delete milestone.");
+    }
   }
 
   async function deleteOrder(id: string) {

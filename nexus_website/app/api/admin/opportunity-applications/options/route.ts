@@ -50,6 +50,6 @@ export async function GET() {
     return NextResponse.json({ opportunities });
   } catch (error) {
     console.error("Failed to load listing options:", error);
-    return NextResponse.json({ opportunities: [] });
+    return NextResponse.json({ error: "Failed to load opportunity filters." }, { status: 500 });
   }
 }

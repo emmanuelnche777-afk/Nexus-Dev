@@ -14,9 +14,13 @@ export default function EscalationNewPage() {
     reason: "",
     aiMessages: [],
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSaving(true);
+    setError("");
 
     try {
       const res = await fetch("/api/admin/ai/escalations", {
@@ -28,13 +32,14 @@ export default function EscalationNewPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert("Failed to create escalation: " + (data.error || "Unknown error"));
-        return;
+        throw new Error(data.error || "Failed to create escalation.");
       }
 
       router.push("/admin/ai/escalations");
-    } catch {
-      alert("Network error. Please try again.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Network error. Please try again.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -57,6 +62,7 @@ export default function EscalationNewPage() {
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
         <div>
           <label className={labelClass}>Client Name</label>
           <input
@@ -105,8 +111,8 @@ export default function EscalationNewPage() {
         </div>
 
         <div>
-          <button type="submit" className="w-full rounded-md bg-nexus-cyan px-4 py-2.5 text-sm font-medium text-white transition hover:bg-nexus-cyan-bright">
-            Create Escalation
+          <button type="submit" disabled={saving} className="w-full rounded-md bg-nexus-cyan px-4 py-2.5 text-sm font-medium text-white transition hover:bg-nexus-cyan-bright disabled:cursor-wait disabled:opacity-60">
+            {saving ? "Creating…" : "Create Escalation"}
           </button>
         </div>
       </form>

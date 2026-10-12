@@ -9,7 +9,10 @@ import { removeCloudinaryVideo, uploadCloudinaryVideo, type CloudinaryVideoUploa
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [settings, setSettings] = useState({
     siteName: "NEXUS",
     siteDescription: "Empowering the next generation of Cameroonian technologists",
@@ -50,6 +53,8 @@ export default function SettingsPage() {
 
   async function handleSave() {
     setSaving(true);
+    setError("");
+    setNotice("");
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
@@ -79,31 +84,24 @@ export default function SettingsPage() {
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        if (data.success) {
-          pendingVideoUploadRef.current = null;
-          alert("Settings saved successfully");
-        } else {
-          alert("Failed to save settings: " + (data.error || "Unknown server error."));
-        }
-      } else {
-        const data = await res.json().catch(() => ({}));
-        alert("Failed to save settings. Server error: " + (data.error || res.status + " " + res.statusText));
-      }
-    } catch (error) {
-      console.error("Failed to save settings:", error);
-      alert("Error saving settings. Please try again.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(data.error || `Failed to save settings (${res.status}).`);
+      pendingVideoUploadRef.current = null;
+      setNotice("Settings saved successfully.");
+      setEditing(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Error saving settings. Please try again.");
     } finally {
       setSaving(false);
-      setEditing(false);
     }
   }
 
   const loadSettings = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/settings");
+      const res = await fetch("/api/admin/settings", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load settings.");
+      setSettingsLoaded(true);
       const str = (v: unknown) => (v == null ? "" : String(v));
       if (data.settings) {
         const s = data.settings;
@@ -142,8 +140,8 @@ export default function SettingsPage() {
         }));
       }
       if (data.providers) setProviders(data.providers);
-    } catch (error) {
-      console.error("Failed to load settings:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to load settings.");
     } finally {
       setLoading(false);
     }
@@ -179,10 +177,14 @@ export default function SettingsPage() {
         </button>
       </div>
 
+      {(error || notice) && <div role={error ? "alert" : "status"} className={`rounded-lg border p-3 text-sm ${error ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}>{error || notice}</div>}
+
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-nexus-cyan border-t-transparent" />
         </div>
+      ) : error && !settingsLoaded ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">Settings could not be loaded. <button type="button" onClick={() => void loadSettings()} className="font-semibold underline">Try again</button></div>
       ) : (
         <div className="space-y-6">
           {/* General Settings */}
@@ -332,7 +334,7 @@ export default function SettingsPage() {
                       const nextUrl = e.target.value;
                       const isUploadedVideo = Boolean(settings.academyOverviewVideoPublicId) || settings.academyOverviewVideoUrl.startsWith("/videos/");
                       if (isUploadedVideo && nextUrl.trim()) {
-                        alert("Remove the uploaded video before entering a URL.");
+                        setError("Remove the uploaded video before entering a URL.");
                         return;
                       }
                       if (!nextUrl.trim() && settings.academyOverviewVideoUrl) {
@@ -357,7 +359,7 @@ export default function SettingsPage() {
                         const file = e.target.files?.[0];
                         if (!file) return;
                         if (settings.academyOverviewVideoUrl.trim()) {
-                          alert("Remove the current URL or uploaded video before adding another video.");
+                          setError("Remove the current URL or uploaded video before adding another video.");
                           e.target.value = "";
                           return;
                         }
@@ -365,8 +367,8 @@ export default function SettingsPage() {
                           const uploaded = await uploadCloudinaryVideo(file, "academy-settings");
                           pendingVideoUploadRef.current = uploaded;
                           setSettings((current) => ({ ...current, academyOverviewVideoUrl: uploaded.url, academyOverviewVideoPublicId: uploaded.publicId }));
-                        } catch (error) {
-                          alert(error instanceof Error ? error.message : "Upload failed");
+                        } catch (cause) {
+                          setError(cause instanceof Error ? cause.message : "Upload failed");
                         }
                         e.target.value = "";
                       }}
@@ -421,7 +423,7 @@ export default function SettingsPage() {
                         if (res.ok && data.url) {
                           setSettings({ ...settings, academyOverviewVideoPoster: data.url });
                         } else {
-                          alert(data.error || "Upload failed");
+                          setError(data.error || "Upload failed");
                         }
                         e.target.value = "";
                       }}

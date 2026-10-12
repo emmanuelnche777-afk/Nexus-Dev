@@ -1,212 +1,119 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  FileText,
-  Map,
-  UserPlus,
-  Handshake,
-  BookOpen,
-  Calendar,
-  Bell,
-  ArrowRight,
+  BookOpen, Calendar, FileText, Handshake, Loader2, RefreshCw, UserPlus,
 } from "lucide-react";
 
-type Stat = {
-  label: string;
-  value: number | string;
-  href: string;
-  icon: React.ReactNode;
-  color: string;
+type DashboardStats = {
+  blogPosts: number | null;
+  journeyEntries: number | null;
+  openOpportunities: number | null;
+  activeCohorts: number | null;
+  pendingApplications: number | null;
+  activePartnerships: number | null;
+};
+
+const EMPTY_STATS: DashboardStats = {
+  blogPosts: null,
+  journeyEntries: null,
+  openOpportunities: null,
+  activeCohorts: null,
+  pendingApplications: null,
+  activePartnerships: null,
 };
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stat[]>([]);
-  const [recentActivity, setRecentActivity] = useState<{ action: string; item: string; time: string }[]>([]);
+  const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [lastUpdated, setLastUpdated] = useState("");
 
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const [blogRes, journeyRes, inquiriesRes] = await Promise.all([
-          fetch("/api/admin/content/blog", { cache: "no-store" }),
-          fetch("/api/admin/content/journey", { cache: "no-store" }),
-          fetch("/api/admin/inquiries/list", { cache: "no-store" }),
-        ]);
-
-        const blog = await blogRes.json().catch(() => ({ posts: [] }));
-        const journey = await journeyRes.json().catch(() => ({ entries: [] }));
-        const inquiries = await inquiriesRes.json().catch(() => ({ inquiries: [] }));
-
-        const pendingApplications = inquiries.applications?.filter((a: { status?: string }) => a.status === "new" || !a.status).length || 0;
-        const pendingPartners = inquiries.partners?.filter((p: { status?: string }) => p.status === "new" || !p.status).length || 0;
-
-        setStats([
-          {
-            label: "Blog Posts",
-            value: blog.posts?.length || 0,
-            href: "/admin/content/blog",
-            icon: <FileText className="h-5 w-5" />,
-            color: "text-blue-400",
-          },
-          {
-            label: "Journey Entries",
-            value: journey.entries?.length || 0,
-            href: "/admin/content/journey",
-            icon: <Map className="h-5 w-5" />,
-            color: "text-green-400",
-          },
-          {
-            label: "Pending Applications",
-            value: pendingApplications,
-            href: "/admin/inquiries",
-            icon: <UserPlus className="h-5 w-5" />,
-            color: "text-amber-400",
-          },
-          {
-            label: "Partner Inquiries",
-            value: pendingPartners,
-            href: "/admin/inquiries",
-            icon: <Handshake className="h-5 w-5" />,
-            color: "text-purple-400",
-          },
-          {
-            label: "Active Opportunities",
-            value: 0,
-            href: "/admin/content/opportunities",
-            icon: <BookOpen className="h-5 w-5" />,
-            color: "text-orange-400",
-          },
-          {
-            label: "Active Cohorts",
-            value: 0,
-            href: "/admin/academy",
-            icon: <Calendar className="h-5 w-5" />,
-            color: "text-pink-400",
-          },
-          {
-            label: "Unread Notifications",
-            value: 0,
-            href: "/admin/dashboard",
-            icon: <Bell className="h-5 w-5" />,
-            color: "text-red-400",
-          },
-        ]);
-
-        const allInquiries = [
-          ...(inquiries.inquiries || []).map((i: { type?: string; name?: string; date?: string }) => ({
-            action: "Contact Form",
-            item: i.name || "Unknown",
-            time: i.date || "",
-          })),
-          ...(inquiries.applications || []).map((a: { type?: string; name?: string; date?: string }) => ({
-            action: "Application",
-            item: a.name || "Unknown",
-            time: a.date || "",
-          })),
-          ...(inquiries.partners || []).map((p: { type?: string; name?: string; date?: string }) => ({
-            action: "Partner Inquiry",
-            item: p.name || "Unknown",
-            time: p.date || "",
-          })),
-        ];
-
-        allInquiries.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-        setRecentActivity(allInquiries.slice(0, 10));
-      } catch {
-        // Stats will show zeros on error
-      }
-    };
-
-    loadStats();
+  const loadDashboard = useCallback(async (refresh = false) => {
+    if (refresh) { setLoading(true); setError(""); }
+    try {
+      const response = await fetch("/api/admin/dashboard/alerts", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not load dashboard data.");
+      setStats({ ...EMPTY_STATS, ...(data.stats || {}) });
+      setLastUpdated(data.lastUpdated || "");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load dashboard data.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  // Initial loading is already true; the loader only sets state after its network request.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void loadDashboard(); }, [loadDashboard]);
+
+  const cards = [
+    { label: "Blog Posts", value: stats.blogPosts, href: "/admin/content/blog", icon: FileText, color: "text-blue-600" },
+    { label: "Journey Entries", value: stats.journeyEntries, href: "/admin/content/journey", icon: BookOpen, color: "text-emerald-600" },
+    { label: "Applications Awaiting Review", value: stats.pendingApplications, href: "/admin/opportunity-applications", icon: UserPlus, color: "text-amber-700" },
+    { label: "Partnerships In Progress", value: stats.activePartnerships, href: "/admin/partnerships", icon: Handshake, color: "text-violet-700" },
+    { label: "Open Opportunity Listings", value: stats.openOpportunities, href: "/admin/content/opportunities", icon: BookOpen, color: "text-orange-700" },
+    { label: "Active Cohorts", value: stats.activeCohorts, href: "/admin/academy/cohorts", icon: Calendar, color: "text-pink-700" },
+  ].filter((card) => card.value !== null);
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-nexus-dark">Dashboard</h1>
-        <p className="mt-1 text-sm text-nexus-navy">
-          Welcome to the NEXUS Admin Dashboard
-        </p>
-      </div>
+    <main className="space-y-6">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-nexus-dark">Dashboard</h1>
+          <p className="mt-1 text-sm text-nexus-navy">Overview of the admin areas assigned to your account.</p>
+        </div>
+        <button type="button" onClick={() => void loadDashboard(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-nexus-navy/15 bg-white px-3 py-2 text-sm font-semibold text-nexus-navy disabled:opacity-60">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          Refresh
+        </button>
+      </header>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Link
-            key={stat.label}
-            href={stat.href}
-            className="rounded-lg border border-nexus-cyan/20 bg-white p-6 transition hover:border-nexus-cyan hover:shadow-sm"
-          >
-            <div className="flex items-center justify-between">
-              <div className={`${stat.color}`}>{stat.icon}</div>
-              <span className="text-2xl font-bold text-nexus-dark">{stat.value}</span>
-            </div>
-            <p className="mt-2 text-sm font-medium text-nexus-navy">{stat.label}</p>
-          </Link>
-        ))}
-      </div>
+      {error ? (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <p>{error}</p>
+          <button type="button" onClick={() => void loadDashboard(true)} disabled={loading} className="mt-2 font-semibold underline">Try again</button>
+        </div>
+      ) : loading && cards.length === 0 ? (
+        <div role="status" className="rounded-lg border border-nexus-navy/10 bg-white p-6 text-sm text-nexus-navy/70">Loading dashboard…</div>
+      ) : (
+        <>
+          {cards.length === 0 ? (
+            <p className="rounded-lg border border-nexus-navy/10 bg-white p-5 text-sm text-nexus-navy/70">No summary cards are available for your role.</p>
+          ) : (
+            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Admin overview counts">
+              {cards.map(({ label, value, href, icon: Icon, color }) => (
+                <Link key={label} href={href} className="rounded-lg border border-nexus-cyan/20 bg-white p-5 transition hover:border-nexus-cyan hover:shadow-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <Icon className={`h-5 w-5 ${color}`} />
+                    <span className="text-2xl font-bold text-nexus-dark">{value}</span>
+                  </div>
+                  <p className="mt-2 text-sm font-medium text-nexus-navy">{label}</p>
+                </Link>
+              ))}
+            </section>
+          )}
+          {lastUpdated && <p className="text-xs text-nexus-navy/50">Updated {new Date(lastUpdated).toLocaleString()}</p>}
+        </>
+      )}
 
-      {/* Recent Activity */}
-      <div className="rounded-lg border border-nexus-cyan/20 bg-white p-6">
-        <h2 className="text-lg font-bold text-nexus-dark">Recent Activity</h2>
-        {recentActivity.length === 0 ? (
-          <p className="mt-4 text-sm text-nexus-navy">No recent activity.</p>
-        ) : (
-          <div className="mt-4 space-y-3">
-            {recentActivity.map((activity, i) => (
-              <div
-                key={`${activity.action}-${activity.item}-${i}`}
-                className="flex items-center justify-between border-b border-nexus-navy/5 pb-3 last:border-0"
-              >
-                <div>
-                  <p className="text-sm font-medium text-nexus-dark">
-                    {activity.action}: {activity.item}
-                  </p>
-                  <p className="text-xs text-nexus-navy/50">
-                    {activity.time ? new Date(activity.time).toLocaleString() : "Unknown date"}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="rounded-lg border border-nexus-cyan/20 bg-white p-6">
+      <section className="rounded-lg border border-nexus-cyan/20 bg-white p-6">
         <h2 className="text-lg font-bold text-nexus-dark">Quick Actions</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Link
-            href="/admin/content/blog/new"
-            className="flex items-center justify-between rounded-md border border-nexus-cyan/20 p-4 transition hover:border-nexus-cyan"
-          >
-            <span className="text-sm font-medium text-nexus-dark">New Blog Post</span>
-            <ArrowRight className="h-4 w-4 text-nexus-cyan" />
-          </Link>
-          <Link
-            href="/admin/content/journey/new"
-            className="flex items-center justify-between rounded-md border border-nexus-cyan/20 p-4 transition hover:border-nexus-cyan"
-          >
-            <span className="text-sm font-medium text-nexus-dark">New Journey Entry</span>
-            <ArrowRight className="h-4 w-4 text-nexus-cyan" />
-          </Link>
-          <Link
-            href="/admin/academy"
-            className="flex items-center justify-between rounded-md border border-nexus-cyan/20 p-4 transition hover:border-nexus-cyan"
-          >
-            <span className="text-sm font-medium text-nexus-dark">Manage Academy</span>
-            <ArrowRight className="h-4 w-4 text-nexus-cyan" />
-          </Link>
-          <Link
-            href="/admin/inquiries"
-            className="flex items-center justify-between rounded-md border border-nexus-cyan/20 p-4 transition hover:border-nexus-cyan"
-          >
-            <span className="text-sm font-medium text-nexus-dark">View Inquiries</span>
-            <ArrowRight className="h-4 w-4 text-nexus-cyan" />
-          </Link>
+          {[
+            ["Manage blog posts", "/admin/content/blog"],
+            ["Manage journey entries", "/admin/content/journey"],
+            ["Manage Academy", "/admin/academy"],
+            ["Review requests", "/admin/requests"],
+          ].map(([label, href]) => (
+            <Link key={href} href={href} className="rounded-md border border-nexus-cyan/20 p-4 text-sm font-medium text-nexus-dark transition hover:border-nexus-cyan">
+              {label} <span aria-hidden="true" className="text-nexus-cyan">→</span>
+            </Link>
+          ))}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

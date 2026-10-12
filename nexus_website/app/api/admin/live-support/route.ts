@@ -82,7 +82,10 @@ export async function PUT(request: Request) {
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
-    const { sessionId, adminId, adminName, endSession } = await request.json();
+    const { sessionId, endSession } = await request.json();
+    if (typeof sessionId !== "string" || !sessionId) {
+      return NextResponse.json({ error: "A valid session ID is required" }, { status: 400 });
+    }
 
     const existing = await prisma.liveSupportSession.findUnique({
       where: { id: sessionId },
@@ -94,7 +97,9 @@ export async function PUT(request: Request) {
     const updated = await prisma.liveSupportSession.update({
       where: { id: sessionId },
       data: {
-        adminName: adminName || adminId || undefined,
+        // Record the authenticated staff member; never trust an identity from
+        // the browser request body.
+        adminName: user.name,
         ...(endSession ? { endedAt: new Date() } : {}),
       },
     });

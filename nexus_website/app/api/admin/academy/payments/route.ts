@@ -33,8 +33,8 @@ export async function GET(request: Request) {
     
     return NextResponse.json({ payments });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ payments: [] });
+    console.error("Failed to load Academy payments:", error);
+    return NextResponse.json({ error: "Failed to load payment records." }, { status: 500 });
   }
 }
 

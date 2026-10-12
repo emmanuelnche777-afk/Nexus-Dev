@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ClipboardList, FileText, MessageSquare, TrendingUp } from "lucide-react";
+import { ArrowLeft, ClipboardList, FileText, MessageSquare, RefreshCw, TrendingUp } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 
@@ -32,26 +32,30 @@ export default function TechHubDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  async function load() {
-    setLoading(true);
+  const load = useCallback(async (refresh = false) => {
+    if (refresh) { setLoading(true); setError(""); }
     try {
       const ordersRes = await fetch("/api/admin/service-orders", { cache: "no-store" });
       const ordersData = await ordersRes.json();
       const contractsRes = await fetch("/api/admin/tech-hub/contracts", { cache: "no-store" });
       const contractsData = await contractsRes.json();
+      if (!ordersRes.ok || !contractsRes.ok) throw new Error(ordersData.error || contractsData.error || "Could not load Tech Hub overview.");
       setOrders(Array.isArray(ordersData.orders) ? ordersData.orders : []);
       setContracts(Array.isArray(contractsData.contracts) ? contractsData.contracts : []);
-    } catch {
-      // silence
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not load Tech Hub overview.");
     } finally {
       setLoading(false);
     }
-  }
-
-  useEffect(() => {
-    queueMicrotask(() => void load());
   }, []);
+
+  // Initial loading is already true; the loader only sets state after its network request.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+  }, [load]);
 
   const stats = [
     { label: "Total Orders", value: orders.length, icon: ClipboardList, color: "text-nexus-cyan" },
@@ -89,13 +93,15 @@ export default function TechHubDashboardPage() {
         </p>
       </div>
 
+      {error && <div role="alert" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"><span>{error}</span><button type="button" onClick={() => void load(true)} disabled={loading} className="inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button></div>}
+
       {/* Stats */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-xl border border-nexus-navy/10 bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-nexus-navy">{stat.value}</div>
+                <div className="text-2xl font-bold text-nexus-navy">{error ? "—" : stat.value}</div>
                 <div className="text-xs text-nexus-navy/50">{stat.label}</div>
               </div>
               <stat.icon className={`h-5 w-5 ${stat.color}`} />

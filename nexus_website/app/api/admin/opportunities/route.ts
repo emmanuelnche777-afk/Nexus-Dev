@@ -113,7 +113,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Failed to load opportunities:", error);
-    return NextResponse.json({ opportunities: [], sectionEnabled: true });
+    return NextResponse.json({ error: "Failed to load opportunities." }, { status: 500 });
   }
 }
 

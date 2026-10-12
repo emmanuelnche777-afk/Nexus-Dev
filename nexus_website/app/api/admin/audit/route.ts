@@ -31,7 +31,8 @@ export async function GET() {
     });
 
     return NextResponse.json({ logs });
-  } catch {
-    return NextResponse.json({ logs: [] });
+  } catch (error) {
+    console.error("Failed to load audit records:", error);
+    return NextResponse.json({ error: "Failed to load audit records." }, { status: 500 });
   }
 }

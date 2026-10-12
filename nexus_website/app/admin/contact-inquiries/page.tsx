@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { Search, ArrowLeft, MessageSquare, Trash2 } from "lucide-react";
+import { Search, ArrowLeft, MessageSquare, RefreshCw, Trash2 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import { CONTACT_DEPARTMENT_LABELS, isContactDepartment } from "@/lib/contact-routing";
@@ -25,58 +25,67 @@ interface ContactInquiry {
 export default function ContactInquiriesPage() {
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     loadData();
   }, []);
 
   async function loadData() {
+    setError("");
     try {
-      const res = await fetch("/api/admin/contact-inquiries");
-      if (!res.ok) throw new Error("Failed to load");
+      const res = await fetch("/api/admin/contact-inquiries", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load contact inquiries.");
       setInquiries(data.inquiries || []);
-    } catch (error) {
-      console.error("Failed to load contact inquiries:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to load contact inquiries.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function updateInquiry(id: string, data: Partial<ContactInquiry>) {
+  async function updateInquiry(id: string, updates: Partial<ContactInquiry>) {
     try {
-      await fetchWithFreshTwoFactor("/api/admin/contact-inquiries", {
+      const response = await fetchWithFreshTwoFactor("/api/admin/contact-inquiries", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, ...data }),
+        body: JSON.stringify({ id, ...updates }),
       });
-      loadData();
-    } catch (err) {
-      console.error("Failed to update:", err);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to update inquiry.");
+      await loadData();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to update inquiry.");
     }
   }
 
   async function deleteInquiry(id: string) {
     if (!confirm("Delete this contact inquiry?")) return;
     try {
-      await fetchWithFreshTwoFactor("/api/admin/contact-inquiries", {
+      const response = await fetchWithFreshTwoFactor("/api/admin/contact-inquiries", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      loadData();
-    } catch (err) {
-      console.error("Failed to delete:", err);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to delete inquiry.");
+      await loadData();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to delete inquiry.");
     }
   }
 
   const filteredInquiries = inquiries.filter(inq =>
-    inq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.message.toLowerCase().includes(searchQuery.toLowerCase())
+    (statusFilter === "all" || inq.status === statusFilter) && (
+      inq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.message.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   if (loading) {
@@ -91,15 +100,20 @@ export default function ContactInquiriesPage() {
           <p className="text-nexus-navy/60 mt-1">Public contact form messages</p>
         </div>
         <Link
-          href="/admin/inquiries"
+          href="/admin/requests"
           className="flex items-center gap-2 px-4 py-2 text-nexus-navy/70 hover:text-nexus-navy"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Inquiries
+          Back to Requests
         </Link>
       </div>
 
       <div className="bg-nexus-white rounded-lg border border-nexus-cyan/10 p-6">
+        <label className="mb-4 block max-w-xs text-sm font-medium text-nexus-navy">Filter by status
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="mt-1 w-full rounded-md border border-nexus-cyan/20 bg-white px-3 py-2 text-sm">
+            <option value="all">All statuses</option><option value="new">New</option><option value="read">Read</option><option value="replied">Replied</option><option value="archived">Archived</option>
+          </select>
+        </label>
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-nexus-navy/40" />
@@ -113,7 +127,8 @@ export default function ContactInquiriesPage() {
           </div>
         </div>
 
-        {filteredInquiries.length === 0 ? (
+        {error && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}<button type="button" onClick={() => void loadData()} disabled={loading} className="inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button></div>}
+        {error && inquiries.length === 0 ? null : filteredInquiries.length === 0 ? (
           <EmptyState
             icon={MessageSquare}
             title="No contact inquiries"

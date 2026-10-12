@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { Search, ArrowLeft, ClipboardList } from "lucide-react";
+import { Search, ArrowLeft, ClipboardList, RefreshCw } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
 import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
@@ -27,20 +27,23 @@ interface ServiceOrderInquiry {
 export default function ServiceInquiriesPage() {
   const [inquiries, setInquiries] = useState<ServiceOrderInquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     loadData();
   }, []);
 
   async function loadData() {
+    setError("");
     try {
-      const res = await fetch("/api/admin/service-inquiries");
-      if (!res.ok) throw new Error("Failed to load");
+      const res = await fetch("/api/admin/service-inquiries", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load service inquiries.");
       setInquiries(data.inquiries || []);
-    } catch (error) {
-      console.error("Failed to load service inquiries:", error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to load service inquiries.");
     } finally {
       setLoading(false);
     }
@@ -48,35 +51,41 @@ export default function ServiceInquiriesPage() {
 
   async function updateStatus(id: string, status: string) {
     try {
-      await fetchWithFreshTwoFactor("/api/admin/service-inquiries", {
+      const response = await fetchWithFreshTwoFactor("/api/admin/service-inquiries", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status }),
       });
-      loadData();
-    } catch (err) {
-      console.error("Failed to update status:", err);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to update status.");
+      await loadData();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to update status.");
     }
   }
 
   async function deleteInquiry(id: string) {
     if (!confirm("Delete this inquiry?")) return;
     try {
-      await fetch("/api/admin/service-inquiries", {
+      const response = await fetchWithFreshTwoFactor("/api/admin/service-inquiries", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      loadData();
-    } catch (err) {
-      console.error("Failed to delete:", err);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to delete inquiry.");
+      await loadData();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Failed to delete inquiry.");
     }
   }
 
   const filteredInquiries = inquiries.filter(inq =>
-    inq.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.clientEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inq.serviceType.toLowerCase().includes(searchQuery.toLowerCase())
+    (statusFilter === "all" || inq.status === statusFilter) && (
+      inq.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.clientEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inq.serviceType.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   if (loading) {
@@ -91,15 +100,22 @@ export default function ServiceInquiriesPage() {
           <p className="text-nexus-navy/60 mt-1">Client service requests from the Tech Hub</p>
         </div>
         <Link
-          href="/admin/tech-hub/services"
+          href="/admin/tech-hub/orders"
           className="flex items-center gap-2 px-4 py-2 text-nexus-navy/70 hover:text-nexus-navy"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Services
+          Open Order Workspace
         </Link>
       </div>
 
+      <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">These inquiries are the same service-order records managed in Tech Hub → Services Ordered. Use that workspace for quotes, assignments, milestones, and the complete client workflow.</p>
+
+      {error && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}<button type="button" onClick={() => void loadData()} disabled={loading} className="inline-flex items-center gap-2 font-semibold underline"><RefreshCw className="h-4 w-4" />Try again</button></div>}
+
       <div className="bg-nexus-white rounded-lg border border-nexus-cyan/10 p-6">
+        <label className="mb-4 block max-w-xs text-sm font-medium text-nexus-navy">Filter by status
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="mt-1 w-full rounded-md border border-nexus-cyan/20 bg-white px-3 py-2 text-sm"><option value="all">All statuses</option><option value="new">New</option><option value="assigned">Assigned</option><option value="in_progress">In progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+        </label>
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-nexus-navy/40" />
@@ -113,7 +129,7 @@ export default function ServiceInquiriesPage() {
           </div>
         </div>
 
-        {filteredInquiries.length === 0 ? (
+        {error && inquiries.length === 0 ? null : filteredInquiries.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
             title="No service inquiries"
@@ -154,8 +170,8 @@ export default function ServiceInquiriesPage() {
                         className="px-2 py-1 text-sm border border-nexus-cyan/20 rounded focus:outline-none focus:ring-1 focus:ring-nexus-cyan/50"
                       >
                         <option value="new">New</option>
-                        <option value="assigned">Assigned</option>
-                        <option value="in-progress">In Progress</option>
+                        <option value="quoted">Quoted</option>
+                        <option value="in_progress">In Progress</option>
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
