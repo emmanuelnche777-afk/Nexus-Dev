@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       }
       if (result?.skipped) status = "skipped";
       else if (result?.success === false) status = "failed";
+      else if (result?.queued) status = "queued";
     } catch (sendError) {
       status = "failed";
       result = { success: false, error: sendError instanceof Error ? sendError.message : "Send failed" };

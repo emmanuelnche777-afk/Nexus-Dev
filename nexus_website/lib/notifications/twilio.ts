@@ -19,11 +19,60 @@ export interface WhatsAppOptions {
   body: string;
 }
 
+async function sendTextBeeSms(options: SmsOptions) {
+  const apiKey = process.env.TEXTBEE_API_KEY;
+  if (!apiKey) return null;
+
+  const simSubscriptionId = process.env.TEXTBEE_SIM_SUBSCRIPTION_ID
+    ? Number(process.env.TEXTBEE_SIM_SUBSCRIPTION_ID)
+    : undefined;
+  if (simSubscriptionId !== undefined && !Number.isInteger(simSubscriptionId)) {
+    return { success: false, error: "TEXTBEE_SIM_SUBSCRIPTION_ID must be a number" };
+  }
+
+  try {
+    const response = await fetch("https://api.textbee.dev/api/v1/gateway/send-sms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": apiKey },
+      body: JSON.stringify({
+        recipients: [options.to],
+        message: options.body,
+        ...(process.env.TEXTBEE_DEVICE_ID ? { deviceId: process.env.TEXTBEE_DEVICE_ID } : {}),
+        ...(simSubscriptionId !== undefined ? { simSubscriptionId } : {}),
+      }),
+      signal: AbortSignal.timeout(15_000),
+      cache: "no-store",
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || payload?.data?.success !== true) {
+      const message = typeof payload?.message === "string" ? payload.message
+        : typeof payload?.data?.message === "string" ? payload.data.message
+        : `TextBee request failed (${response.status})`;
+      return { success: false, error: message };
+    }
+
+    return {
+      success: true,
+      queued: true,
+      provider: "textbee",
+      status: "queued",
+      batchId: payload.data.smsBatchId,
+      recipientCount: payload.data.recipientCount,
+      message: "TextBee accepted the SMS and queued it for the connected phone.",
+    };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Could not reach TextBee" };
+  }
+}
+
 export async function sendSms(options: SmsOptions) {
+  const textBeeResult = await sendTextBeeSms(options);
+  if (textBeeResult) return textBeeResult;
+
   const client = getTwilioClient();
   if (!client) {
-    console.warn("[notifications] Twilio not configured, skipping SMS:", options.to);
-    return { skipped: true, reason: "Twilio credentials not configured" };
+    console.warn("[notifications] No SMS provider configured, skipping SMS:", options.to);
+    return { skipped: true, reason: "Configure TextBee or Twilio to send SMS" };
   }
   if (!process.env.TWILIO_PHONE_NUMBER) {
     return { skipped: true, reason: "TWILIO_PHONE_NUMBER is not configured" };

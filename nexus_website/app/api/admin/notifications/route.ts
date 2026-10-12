@@ -29,6 +29,9 @@ export async function GET(request: Request) {
     const stats = {
       total: allLogs.length,
       sent: allLogs.filter((l) => l.status === "sent").length,
+      delivered: allLogs.filter((l) => l.status === "delivered").length,
+      queued: allLogs.filter((l) => l.status === "queued").length,
+      received: allLogs.filter((l) => l.status === "received").length,
       skipped: allLogs.filter((l) => l.status === "skipped").length,
       failed: allLogs.filter((l) => l.status === "failed").length,
       email: allLogs.filter((l) => l.type === "email").length,
@@ -37,11 +40,9 @@ export async function GET(request: Request) {
     };
 
     return NextResponse.json({ logs, stats });
-  } catch {
-    return NextResponse.json({
-      logs: [],
-      stats: { total: 0, sent: 0, skipped: 0, failed: 0, email: 0, sms: 0, whatsapp: 0 },
-    });
+  } catch (error) {
+    console.error("Failed to load notification history:", error);
+    return NextResponse.json({ error: "Failed to load notification history." }, { status: 500 });
   }
 }
 

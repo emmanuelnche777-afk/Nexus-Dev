@@ -15,6 +15,7 @@ const AUTH_PAGES = [
 
 const ADMIN_API_EXCEPTIONS = new Set([
   "/api/programs",
+  "/api/webhooks/textbee",
 ]);
 
 function hostnameFromUrl(value: string | undefined): string | null {

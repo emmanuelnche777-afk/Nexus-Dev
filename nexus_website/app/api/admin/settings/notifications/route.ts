@@ -8,7 +8,9 @@ export async function GET() {
 
   const resendConfigured = !!process.env.RESEND_API_KEY;
   const twilioCredentialsConfigured = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
-  const smsConfigured = twilioCredentialsConfigured && !!process.env.TWILIO_PHONE_NUMBER;
+  const twilioSmsConfigured = twilioCredentialsConfigured && !!process.env.TWILIO_PHONE_NUMBER;
+  const textbeeConfigured = !!process.env.TEXTBEE_API_KEY;
+  const smsProvider = textbeeConfigured ? "textbee" : twilioSmsConfigured ? "twilio" : null;
   const whatsappConfigured = twilioCredentialsConfigured && !!process.env.TWILIO_WHATSAPP_FROM;
 
   return NextResponse.json({
@@ -19,10 +21,17 @@ export async function GET() {
       },
       twilio: {
         configured: twilioCredentialsConfigured,
-        smsConfigured,
+        smsConfigured: twilioSmsConfigured,
         whatsappConfigured,
         phone: process.env.TWILIO_PHONE_NUMBER || "",
         whatsapp: process.env.TWILIO_WHATSAPP_FROM || "",
+      },
+      sms: {
+        configured: Boolean(smsProvider),
+        provider: smsProvider,
+        textbeeDeviceConfigured: !!process.env.TEXTBEE_DEVICE_ID,
+        textbeeSimConfigured: !!process.env.TEXTBEE_SIM_SUBSCRIPTION_ID,
+        inboundWebhookConfigured: !!process.env.TEXTBEE_WEBHOOK_SECRET,
       },
     },
   });

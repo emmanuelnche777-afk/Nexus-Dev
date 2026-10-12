@@ -28,6 +28,13 @@ interface ProviderStatus {
   providers: {
     resend: { configured: boolean; from: string };
     twilio: { configured: boolean; smsConfigured: boolean; whatsappConfigured: boolean; phone: string; whatsapp: string };
+    sms: {
+      configured: boolean;
+      provider: "textbee" | "twilio" | null;
+      textbeeDeviceConfigured: boolean;
+      textbeeSimConfigured: boolean;
+      inboundWebhookConfigured: boolean;
+    };
   };
 }
 
@@ -37,7 +44,7 @@ interface LogEntry {
   to: string;
   subject?: string;
   body?: string;
-  status: "sent" | "skipped" | "failed";
+  status: "sent" | "delivered" | "queued" | "received" | "unknown" | "skipped" | "failed";
   sentBy?: string;
   sentAt: string;
   result?: unknown;
@@ -45,7 +52,7 @@ interface LogEntry {
 }
 
 interface SendResult {
-  status?: "sent" | "skipped" | "failed";
+  status?: "sent" | "queued" | "skipped" | "failed";
   error?: string;
   reason?: string;
   [key: string]: unknown;
@@ -59,6 +66,10 @@ const TYPE_META: Record<NotificationType, { icon: LucideIcon; label: string; col
 
 const STATUS_META: Record<string, { icon: LucideIcon; color: string; label: string }> = {
   sent: { icon: CheckCircle2, color: "bg-emerald-100 text-emerald-700", label: "Sent" },
+  delivered: { icon: CheckCircle2, color: "bg-green-100 text-green-700", label: "Delivered" },
+  queued: { icon: Clock, color: "bg-blue-100 text-blue-700", label: "Queued" },
+  received: { icon: MessageSquare, color: "bg-cyan-100 text-cyan-800", label: "Received" },
+  unknown: { icon: AlertCircle, color: "bg-amber-100 text-amber-700", label: "Status unclear" },
   skipped: { icon: AlertCircle, color: "bg-amber-100 text-amber-700", label: "Skipped" },
   failed: { icon: XCircle, color: "bg-red-100 text-red-700", label: "Failed" },
 };
@@ -76,6 +87,9 @@ export default function NotificationsPage() {
   const [stats, setStats] = useState({
     total: 0,
     sent: 0,
+    delivered: 0,
+    queued: 0,
+    received: 0,
     skipped: 0,
     failed: 0,
     email: 0,
@@ -83,29 +97,34 @@ export default function NotificationsPage() {
     whatsapp: 0,
   });
   const [loadingLogs, setLoadingLogs] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [logsLoaded, setLogsLoaded] = useState(false);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<"all" | NotificationType>("all");
 
   async function loadProviderStatus() {
     try {
       const res = await fetch("/api/admin/settings/notifications");
-      if (res.ok) setProviderStatus(await res.json());
-    } catch (err) {
-      console.error(err);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not check notification providers.");
+      setProviderStatus(data);
+    } catch (cause) {
+      setLoadError(cause instanceof Error ? cause.message : "Could not check notification providers.");
     }
   }
 
   const loadLogs = useCallback(async () => {
     setLoadingLogs(true);
+    setLoadError("");
     try {
-      const res = await fetch("/api/admin/notifications?limit=100");
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data.logs || []);
-        if (data.stats) setStats(data.stats);
-      }
-    } catch (err) {
-      console.error(err);
+      const res = await fetch("/api/admin/notifications?limit=100", { cache: "no-store" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load notification history.");
+      setLogs(data.logs || []);
+      if (data.stats) setStats(data.stats);
+      setLogsLoaded(true);
+    } catch (cause) {
+      setLoadError(cause instanceof Error ? cause.message : "Could not load notification history.");
     } finally {
       setLoadingLogs(false);
     }
@@ -116,6 +135,8 @@ export default function NotificationsPage() {
       loadProviderStatus();
       void loadLogs();
     });
+    const refreshTimer = window.setInterval(() => void loadLogs(), 15_000);
+    return () => window.clearInterval(refreshTimer);
   }, [loadLogs]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -170,12 +191,14 @@ export default function NotificationsPage() {
     return (
       l.to.toLowerCase().includes(q) ||
       (l.subject || "").toLowerCase().includes(q) ||
+      (l.body || "").toLowerCase().includes(q) ||
       (l.sentBy || "").toLowerCase().includes(q)
     );
   });
 
   const resendReady = providerStatus?.providers.resend.configured === true;
-  const smsReady = providerStatus?.providers.twilio.smsConfigured === true;
+  const smsReady = providerStatus?.providers.sms.configured === true;
+  const smsProviderName = providerStatus?.providers.sms.provider === "twilio" ? "Twilio" : "TextBee";
   const whatsappReady = providerStatus?.providers.twilio.whatsappConfigured === true;
   const isProviderReady = type === "email" ? resendReady : type === "sms" ? smsReady : whatsappReady;
 
@@ -192,7 +215,7 @@ export default function NotificationsPage() {
           <div>
             <h1 className="text-2xl font-bold text-nexus-navy">Notifications</h1>
             <p className="mt-1 text-sm text-nexus-navy/70">
-              Send emails, SMS, and WhatsApp messages via Resend and Twilio
+              Send email, SMS, and WhatsApp notifications
             </p>
           </div>
         </div>
@@ -208,28 +231,36 @@ export default function NotificationsPage() {
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-4">
+      {loadError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{loadError}<button type="button" onClick={() => { void loadProviderStatus(); void loadLogs(); }} disabled={loadingLogs} className="ml-2 font-semibold underline">Try again</button></div>}
+
+      <div className="grid gap-3 sm:grid-cols-5">
         <StatCard
           label="Total"
-          value={stats.total}
+          value={logsLoaded ? stats.total : "—"}
           icon={Send}
           color="text-nexus-navy"
         />
         <StatCard
-          label="Sent"
-          value={stats.sent}
+          label="Sent / queued"
+          value={logsLoaded ? stats.sent + stats.delivered + stats.queued : "—"}
           icon={CheckCircle2}
           color="text-emerald-600"
         />
         <StatCard
+          label="Replies received"
+          value={logsLoaded ? stats.received : "—"}
+          icon={MessageSquare}
+          color="text-cyan-700"
+        />
+        <StatCard
           label="Skipped"
-          value={stats.skipped}
+          value={logsLoaded ? stats.skipped : "—"}
           icon={AlertCircle}
           color="text-amber-600"
         />
         <StatCard
           label="Failed"
-          value={stats.failed}
+          value={logsLoaded ? stats.failed : "—"}
           icon={XCircle}
           color="text-red-600"
         />
@@ -256,7 +287,7 @@ export default function NotificationsPage() {
                       smsReady ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {smsReady ? "Twilio SMS ✓" : "Twilio SMS ✗"}
+                    {smsReady ? `${smsProviderName} SMS ✓` : "SMS not configured"}
                   </span>
                 )}
                 {type === "whatsapp" && (
@@ -279,7 +310,7 @@ export default function NotificationsPage() {
                 {type === "email"
                   ? "Set RESEND_API_KEY in .env.local to send real emails. Otherwise sends will be skipped and logged."
                   : type === "sms"
-                    ? "Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in .env.local. Otherwise sends will be skipped and logged."
+                    ? "Set TEXTBEE_API_KEY, TEXTBEE_DEVICE_ID, and TEXTBEE_SIM_SUBSCRIPTION_ID in the server environment. Twilio remains available as a fallback."
                     : "Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_WHATSAPP_FROM in .env.local. Otherwise sends will be skipped and logged."}
               </p>
             </div>
@@ -294,7 +325,7 @@ export default function NotificationsPage() {
                 className="mt-1 w-full rounded-lg border border-nexus-navy/10 bg-white px-3 py-2 text-sm focus:border-nexus-cyan focus:outline-none"
               >
                 <option value="email">Email (Resend)</option>
-                <option value="sms">SMS (Twilio)</option>
+                <option value="sms">SMS ({smsProviderName})</option>
                 <option value="whatsapp">WhatsApp (Twilio)</option>
               </select>
             </div>
@@ -349,7 +380,9 @@ export default function NotificationsPage() {
               className={`mt-4 rounded-lg border p-4 ${
                 result.status === "sent"
                   ? "border-emerald-200 bg-emerald-50"
-                  : result.status === "skipped"
+                  : result.status === "queued"
+                    ? "border-blue-200 bg-blue-50"
+                    : result.status === "skipped"
                     ? "border-amber-200 bg-amber-50"
                     : "border-red-200 bg-red-50"
               }`}
@@ -358,12 +391,15 @@ export default function NotificationsPage() {
                 className={`text-sm font-semibold ${
                   result.status === "sent"
                     ? "text-emerald-800"
-                    : result.status === "skipped"
+                    : result.status === "queued"
+                      ? "text-blue-800"
+                      : result.status === "skipped"
                       ? "text-amber-800"
                       : "text-red-800"
                 }`}
               >
                 {result.status === "sent" && "✓ Sent successfully"}
+                {result.status === "queued" && "✓ Accepted and queued on the connected phone"}
                 {result.status === "skipped" && "⚠ Skipped (provider not configured)"}
                 {result.status === "failed" && "✗ Send failed"}
                 {!result.status && (result.error || "Completed")}
@@ -400,10 +436,14 @@ export default function NotificationsPage() {
                 required="RESEND_API_KEY"
               />
               <ProviderCard
-                name="Twilio (SMS)"
+                name={`${smsProviderName} (SMS)`}
                 ready={smsReady}
-                detail={`Phone: ${providerStatus.providers.twilio.phone || "—"}`}
-                required="TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER"
+                detail={providerStatus.providers.sms.provider === "textbee"
+                  ? `Device ${providerStatus.providers.sms.textbeeDeviceConfigured ? "configured" : "default device"}; SIM ${providerStatus.providers.sms.textbeeSimConfigured ? "selected" : "uses app default"}; inbound webhook ${providerStatus.providers.sms.inboundWebhookConfigured ? "configured" : "not configured"}`
+                  : `Phone: ${providerStatus.providers.twilio.phone || "—"}`}
+                required={providerStatus.providers.sms.provider === "textbee"
+                  ? "TEXTBEE_API_KEY; TEXTBEE_WEBHOOK_SECRET for incoming replies (device and SIM IDs optional)"
+                  : "TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER"}
               />
               <ProviderCard
                 name="Twilio (WhatsApp)"
@@ -419,8 +459,9 @@ export default function NotificationsPage() {
                   Setup
                 </p>
                 <p className="mt-1">
-                  Add credentials to <code className="rounded bg-white px-1">.env.local</code> and
-                  restart. Get keys at{" "}
+                  Add provider credentials to the server environment and redeploy. For local
+                  development, use <code className="rounded bg-white px-1">.env.local</code>.
+                  Email and SMS providers are configured separately: see{" "}
                   <a
                     href="https://resend.com"
                     target="_blank"
@@ -428,17 +469,15 @@ export default function NotificationsPage() {
                     className="text-nexus-cyan hover:underline"
                   >
                     resend.com
-                  </a>{" "}
-                  and{" "}
+                  </a>{" "}and{" "}
                   <a
-                    href="https://twilio.com"
+                    href="https://textbee.dev/dashboard"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-nexus-cyan hover:underline"
                   >
-                    twilio.com
-                  </a>
-                  .
+                    textbee.dev
+                  </a>.
                 </p>
               </div>
             </div>
@@ -479,10 +518,10 @@ export default function NotificationsPage() {
           ) : filteredLogs.length === 0 ? (
             <EmptyState
               icon={Clock}
-              title={logs.length === 0 ? "No notifications sent yet" : "No logs match your filters"}
+              title={logs.length === 0 ? "No notification activity yet" : "No logs match your filters"}
               description={
                 logs.length === 0
-                  ? "Send your first message above — it will appear here in the history."
+                  ? "Sent messages and incoming SMS replies will appear here. This list refreshes automatically."
                   : "Try a different search or filter."
               }
             />
@@ -506,7 +545,7 @@ export default function NotificationsPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium text-nexus-navy">
-                          {log.to}
+                          {log.status === "received" ? `From ${log.to}` : log.to}
                         </span>
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${sMeta.color}`}
@@ -524,6 +563,7 @@ export default function NotificationsPage() {
                         {new Date(log.sentAt).toLocaleString()}
                         {log.sentBy && ` • by ${log.sentBy}`}
                       </p>
+                      {log.type === "sms" && log.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-nexus-navy/80">{log.body}</p>}
                     </div>
                     <button
                       onClick={() => deleteLog(log.id)}
@@ -550,7 +590,7 @@ function StatCard({
   color,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   icon: LucideIcon;
   color: string;
 }) {
