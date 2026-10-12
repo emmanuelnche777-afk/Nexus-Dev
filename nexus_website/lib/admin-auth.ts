@@ -21,7 +21,7 @@ export type SafeAdminUser = {
   requiresFreshTwoFactor: boolean;
 };
 
-const IDLE_LOCK_MS = 5 * 60 * 1000;
+const TWO_FACTOR_REAUTH_MS = 5 * 60 * 1000;
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -152,11 +152,7 @@ export async function getSession(): Promise<SafeAdminUser | null> {
     }
 
     const now = new Date();
-    let sessionLocked = Boolean(session.lockedAt);
-    if (!sessionLocked && now.getTime() - session.lastActiveAt.getTime() >= IDLE_LOCK_MS) {
-      await prisma.adminSession.update({ where: { id: session.id }, data: { lockedAt: now } });
-      sessionLocked = true;
-    }
+    const sessionLocked = Boolean(session.lockedAt);
 
     return {
       id: session.user.id,
@@ -167,7 +163,7 @@ export async function getSession(): Promise<SafeAdminUser | null> {
       twoFactorEnabled: session.user.twoFactorEnabled,
       requiresTwoFactorSetup: !session.user.twoFactorEnabled,
       sessionLocked,
-      requiresFreshTwoFactor: !session.reauthenticatedAt || now.getTime() - session.reauthenticatedAt.getTime() > IDLE_LOCK_MS,
+      requiresFreshTwoFactor: !session.reauthenticatedAt || now.getTime() - session.reauthenticatedAt.getTime() > TWO_FACTOR_REAUTH_MS,
     };
   } catch {
     return null;
@@ -187,7 +183,6 @@ export async function recordSessionActivity(): Promise<boolean> {
       token: cookie.value,
       expiresAt: { gt: now },
       lockedAt: null,
-      lastActiveAt: { gt: new Date(now.getTime() - IDLE_LOCK_MS) },
     },
     data: { lastActiveAt: now },
   });

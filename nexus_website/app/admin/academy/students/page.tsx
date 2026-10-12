@@ -46,9 +46,9 @@ export default function StudentsPage() {
 
   async function loadStudents() {
     try {
-      const response = await fetchWithFreshTwoFactor("/api/admin/academy/students");
-      if (!response.ok) throw new Error("Failed to load students");
-      const data = await response.json();
+      const response = await fetch("/api/admin/academy/students", { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || `Failed to load students (${response.status})`);
       setStudents(data.students);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Failed to load students");

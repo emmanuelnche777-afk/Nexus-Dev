@@ -255,47 +255,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [router, pathname, sessionCheckAttempt]);
 
   useEffect(() => {
-    if (!session || isSessionLocked || pathname === "/admin/login" || pathname === "/admin/unlock") return;
-
-    let lastActivityRequest = 0;
-    let idleTimer: ReturnType<typeof setTimeout>;
-    const scheduleIdleLock = () => {
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        setIsSessionLocked(true);
-        void fetch("/api/admin/session/lock", { method: "POST", cache: "no-store" })
-          .then(async (response) => {
-            if (response.status === 401) {
-              router.replace("/admin/login");
-              return;
-            }
-            if (!response.ok) {
-              const data = await response.json().catch(() => ({}));
-              setLockError(data.error || "Could not confirm the session lock. Keep this page open and try again.");
-            }
-          })
-          .catch(() => setLockError("Could not confirm the session lock. Keep this page open and try again."));
-      }, 5 * 60 * 1000);
-    };
-    scheduleIdleLock();
-    const sendActivity = () => {
-      const now = Date.now();
-      scheduleIdleLock();
-      if (now - lastActivityRequest < 30_000) return;
-      lastActivityRequest = now;
-      void fetch("/api/admin/session", { method: "PATCH", cache: "no-store" })
-        .then((response) => { if (response.status === 423) setIsSessionLocked(true); })
-        .catch(() => undefined);
-    };
-    const events: Array<keyof WindowEventMap> = ["pointerdown", "keydown", "wheel", "touchstart"];
-    events.forEach((event) => window.addEventListener(event, sendActivity, { passive: true }));
-    return () => {
-      clearTimeout(idleTimer);
-      events.forEach((event) => window.removeEventListener(event, sendActivity));
-    };
-  }, [router, pathname, session, isSessionLocked]);
-
-  useEffect(() => {
     const isPaymentPage = pathname === "/admin/academy/payments" || pathname.startsWith("/admin/academy/payments/");
     if (session?.role && isPaymentPage && !hasPermission(session.role, "academy:payments:verify")) {
       router.replace("/admin/academy");

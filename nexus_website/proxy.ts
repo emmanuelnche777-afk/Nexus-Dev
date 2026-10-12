@@ -120,17 +120,6 @@ function isWriteMethod(method: string): boolean {
 }
 
 function requiresFreshTwoFactor(pathname: string, method: string): boolean {
-  if (method === "GET") {
-    return pathname === "/api/admin/opportunity-applications" ||
-      (pathname.startsWith("/api/admin/opportunity-applications/") &&
-        !pathname.endsWith("/options") && !pathname.endsWith("/assignees")) ||
-      pathname.startsWith("/api/admin/academy/students") ||
-      pathname === "/api/admin/academy/payments" ||
-      pathname === "/api/admin/newsletter" ||
-      (pathname.startsWith("/api/admin/staff/") && !pathname.endsWith("/resend-invite")) ||
-      pathname === "/api/admin/tech-hub/contracts" ||
-      (pathname.startsWith("/api/admin/tech-hub/contracts/") && !pathname.endsWith("/templates"));
-  }
   if (method === "DELETE") return true;
   if (pathname === "/api/admin/staff" && method === "POST") return true;
   if (pathname.startsWith("/api/admin/staff/") && ["PUT", "PATCH", "DELETE"].includes(method)) return true;
