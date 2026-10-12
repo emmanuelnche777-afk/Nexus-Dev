@@ -465,9 +465,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {lockingSession ? "Locking…" : "Lock now"}
               </button>
             )}
-            <Link href="/" className="text-sm text-nexus-navy/70 hover:text-nexus-navy">
+            <a href="https://nexus-public-beta.vercel.app" className="text-sm text-nexus-navy/70 hover:text-nexus-navy">
               View Site →
-            </Link>
+            </a>
           </div>
         </header>
 
