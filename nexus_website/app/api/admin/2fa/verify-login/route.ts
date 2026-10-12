@@ -4,8 +4,8 @@ import { cookies } from "next/headers";
 import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from "otplib";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
-import { decrypt } from "@/lib/encryption";
-import { createSessionWithExpiry, clearSession, SafeAdminUser } from "@/lib/admin-auth";
+import { decrypt, encrypt } from "@/lib/encryption";
+import { createSessionWithExpiry, SafeAdminUser } from "@/lib/admin-auth";
 import { checkFailedAttemptLimit, consumeChallengeAttempt, recordAttempt } from "@/lib/rate-limit";
 import { logAdminAction } from "@/lib/audit";
 
@@ -20,6 +20,7 @@ const CHALLENGE_ATTEMPT_LIMIT = 5;
 const ACCOUNT_ATTEMPT_LIMIT = 10;
 const IP_ATTEMPT_LIMIT = 30;
 const ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+const VERIFIED_REPLACEMENT_TTL_MS = 2 * 60 * 1000;
 
 interface PendingLoginPayload {
   challengeId: string;
@@ -30,6 +31,7 @@ interface PendingLoginPayload {
   role: string;
   phone: string;
   rememberMe?: boolean;
+  twoFactorVerifiedAt?: number;
   expiresAt: number;
 }
 
@@ -67,9 +69,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { code, type } = body as { code: string; type?: "totp" | "backup" };
+    const { code, type, replaceActiveSession } = body as {
+      code?: string;
+      type?: "totp" | "backup";
+      replaceActiveSession?: boolean;
+    };
+    const enteredCode = code?.trim() ?? "";
 
-    if (!code) {
+    const recentlyVerified =
+      typeof payload.twoFactorVerifiedAt === "number" &&
+      Date.now() - payload.twoFactorVerifiedAt >= 0 &&
+      Date.now() - payload.twoFactorVerifiedAt <= VERIFIED_REPLACEMENT_TTL_MS;
+
+    if (replaceActiveSession && !recentlyVerified) {
+      return NextResponse.json({ error: "Verify your authenticator code again before replacing the active session." }, { status: 401 });
+    }
+
+    if (!replaceActiveSession && !enteredCode) {
       return NextResponse.json({ error: "Verification code is required" }, { status: 400 });
     }
 
@@ -97,13 +113,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const challengeAttempt = await consumeChallengeAttempt(
-      payload.challengeId,
-      payload.challengeStartedAt,
-      CHALLENGE_ATTEMPT_LIMIT
-    );
+    const challengeAttempt = recentlyVerified && replaceActiveSession
+      ? null
+      : await consumeChallengeAttempt(
+          payload.challengeId,
+          payload.challengeStartedAt,
+          CHALLENGE_ATTEMPT_LIMIT
+        );
 
-    if (challengeAttempt.limited) {
+    if (challengeAttempt?.limited) {
       (cookieStore as unknown as { delete: (name: string, opts?: Record<string, unknown>) => void }).delete(PENDING_LOGIN_COOKIE, { path: "/" });
       return NextResponse.json(
         { error: "Too many verification attempts. Please sign in again." },
@@ -119,15 +137,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Account not eligible for 2FA" }, { status: 403 });
     }
 
-    let valid = false;
+    let valid = recentlyVerified && replaceActiveSession;
 
-    if (type === "backup") {
+    if (!valid && type === "backup") {
       if (!user.backupCodes) {
         return NextResponse.json({ error: "No backup codes available" }, { status: 400 });
       }
 
       const storedHashes: string[] = JSON.parse(user.backupCodes as string);
-      const enteredHash = crypto.createHash("sha256").update(code).digest("hex");
+      const enteredHash = crypto.createHash("sha256").update(enteredCode).digest("hex");
 
       const matchIndex = storedHashes.indexOf(enteredHash);
       if (matchIndex !== -1) {
@@ -139,13 +157,13 @@ export async function POST(request: NextRequest) {
 
         valid = true;
       }
-    } else {
+    } else if (!valid) {
       if (!user.twoFactorSecret) {
         return NextResponse.json({ error: "2FA not configured" }, { status: 400 });
       }
 
       const secret = decrypt(user.twoFactorSecret);
-      const result = await totp.verify(code, { secret });
+      const result = await totp.verify(enteredCode, { secret });
       valid = result.valid;
     }
 
@@ -164,7 +182,7 @@ export async function POST(request: NextRequest) {
         userAgent: request.headers.get("user-agent") || undefined,
       });
 
-      if (challengeAttempt.count >= CHALLENGE_ATTEMPT_LIMIT) {
+      if (challengeAttempt && challengeAttempt.count >= CHALLENGE_ATTEMPT_LIMIT) {
         (cookieStore as unknown as { delete: (name: string, opts?: Record<string, unknown>) => void }).delete(PENDING_LOGIN_COOKIE, { path: "/" });
         return NextResponse.json(
           { error: "Too many verification attempts. Please sign in again." },
@@ -174,9 +192,6 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ error: "Invalid verification code" }, { status: 401 });
     }
-
-    await clearSession();
-    (cookieStore as unknown as { delete: (name: string, opts?: Record<string, unknown>) => void }).delete(PENDING_LOGIN_COOKIE, { path: "/" });
 
     const safeUser = {
       id: user.id,
@@ -190,8 +205,26 @@ export async function POST(request: NextRequest) {
       requiresFreshTwoFactor: false,
     };
 
-    const created = await createSessionWithExpiry(safeUser, request.headers.get("x-forwarded-for") || undefined, request.headers.get("user-agent") || undefined, !!payload.rememberMe);
+    const created = await createSessionWithExpiry(
+      safeUser,
+      request.headers.get("x-forwarded-for") || undefined,
+      request.headers.get("user-agent") || undefined,
+      !!payload.rememberMe,
+      Boolean(replaceActiveSession)
+    );
     if (!created) {
+      const verifiedPayload = JSON.stringify({ ...payload, twoFactorVerifiedAt: Date.now() });
+      (cookieStore as unknown as { set: (name: string, value: string, opts: Record<string, unknown>) => void }).set(
+        PENDING_LOGIN_COOKIE,
+        encrypt(verifiedPayload),
+        {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: Math.ceil(VERIFIED_REPLACEMENT_TTL_MS / 1000),
+          path: "/",
+        }
+      );
       await logAdminAction({
         actorId: user.id,
         adminEmail: user.email,
@@ -204,13 +237,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: "This account already has an active session. Sign out from that session before signing in here, or reset your password if that device is lost.",
         code: "SESSION_ALREADY_ACTIVE",
+        canReplaceActiveSession: true,
       }, { status: 409 });
     }
+
+    (cookieStore as unknown as { delete: (name: string, opts?: Record<string, unknown>) => void }).delete(PENDING_LOGIN_COOKIE, { path: "/" });
 
     await logAdminAction({
       actorId: user.id,
       adminEmail: user.email,
-      action: "sign_in_completed",
+      action: replaceActiveSession ? "sign_in_completed_replaced_active_session" : "sign_in_completed",
       resourceType: "admin_account",
       resourceId: user.id,
       ipAddress: ip || undefined,

@@ -10,6 +10,7 @@ export default function TwoFactorLoginPage() {
   const [useBackup, setUseBackup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [canReplaceActiveSession, setCanReplaceActiveSession] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -22,10 +23,8 @@ export default function TwoFactorLoginPage() {
     void checkSession();
   }, [router]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!code.trim()) return;
-
+  async function verifyLogin(replaceActiveSession = false) {
+    if (!replaceActiveSession && !code.trim()) return;
     setLoading(true);
     setError("");
 
@@ -35,6 +34,7 @@ export default function TwoFactorLoginPage() {
       body: JSON.stringify({
         code,
         type: useBackup ? "backup" : "totp",
+        replaceActiveSession,
       }),
     });
 
@@ -42,11 +42,17 @@ export default function TwoFactorLoginPage() {
 
     if (!res.ok || !data.success) {
       setError(data.error || "Invalid code");
+      setCanReplaceActiveSession(Boolean(data.canReplaceActiveSession));
       setLoading(false);
       return;
     }
 
     window.location.href = "/admin/dashboard"; // eslint-disable-line @next/next/no-location-assign-relative-destination
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await verifyLogin();
   }
 
   return (
@@ -76,6 +82,20 @@ export default function TwoFactorLoginPage() {
           <p className={AUTH_ERROR_CLASS}>
             {error}
           </p>
+        )}
+
+        {canReplaceActiveSession && (
+          <div className="rounded-md border border-amber-300/40 bg-amber-100/10 p-4 text-sm text-nexus-white">
+            <p>Your password and authenticator code were verified. Replacing the active session will sign out the old browser or device.</p>
+            <button
+              type="button"
+              onClick={() => void verifyLogin(true)}
+              disabled={loading}
+              className="mt-3 w-full rounded-md border border-nexus-cyan px-4 py-2 font-semibold text-nexus-cyan transition hover:bg-nexus-cyan hover:text-nexus-dark disabled:opacity-60"
+            >
+              {loading ? "Replacing session..." : "Replace active session"}
+            </button>
+          </div>
         )}
 
         <button

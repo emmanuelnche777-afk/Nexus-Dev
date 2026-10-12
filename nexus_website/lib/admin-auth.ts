@@ -71,7 +71,8 @@ export async function createSessionWithExpiry(
   user: SafeAdminUser,
   ip: string | undefined,
   userAgent: string | undefined,
-  rememberMe: boolean
+  rememberMe: boolean,
+  replaceExistingSession = false
 ): Promise<boolean> {
   const token = crypto.randomBytes(32).toString("hex");
   const maxAge = rememberMe ? SESSION_MAX_AGE_REMEMBERED : SESSION_MAX_AGE;
@@ -81,7 +82,11 @@ export async function createSessionWithExpiry(
     const active = await tx.adminSession.count({
       where: { userId: user.id, expiresAt: { gt: now } },
     });
-    if (active > 0) return false;
+    if (active > 0 && !replaceExistingSession) return false;
+
+    if (replaceExistingSession) {
+      await tx.adminSession.deleteMany({ where: { userId: user.id } });
+    }
 
     await tx.adminSession.create({
       data: {

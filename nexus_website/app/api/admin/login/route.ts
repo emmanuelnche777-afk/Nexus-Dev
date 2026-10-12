@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { validateCredentials, createSessionWithExpiry, clearSession } from "@/lib/admin-auth";
+import { validateCredentials, createSessionWithExpiry } from "@/lib/admin-auth";
 import { checkRateLimit, recordAttempt } from "@/lib/rate-limit";
 import { encrypt } from "@/lib/encryption";
 import { prisma } from "@/lib/db";
@@ -65,7 +65,6 @@ export async function POST(request: NextRequest) {
   });
 
   if (dbUser?.twoFactorEnabled) {
-    await clearSession();
     const pendingPayload = JSON.stringify({
       challengeId: crypto.randomUUID(),
       challengeStartedAt: Date.now(),
