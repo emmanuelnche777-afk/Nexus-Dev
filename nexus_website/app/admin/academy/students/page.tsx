@@ -175,12 +175,12 @@ export default function StudentsPage() {
   };
 
   return (
-    <div className="bg-nexus-white p-6 rounded-lg border border-nexus-navy/10">
-      <div className="flex items-center justify-between mb-6">
+    <div className="min-w-0 rounded-lg border border-nexus-navy/10 bg-nexus-white p-4 sm:p-6">
+      <div className="mb-6 flex min-w-0 flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:justify-between">
         <h2 className="text-2xl font-bold text-nexus-navy">
           Student Management
         </h2>
-        <div className="flex gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           <button
             onClick={sendTestEmailToMe}
             disabled={testEmailSending}
@@ -206,7 +206,7 @@ export default function StudentsPage() {
           </button>
           <Link
             href="/admin/academy/students/new"
-            className="bg-nexus-cyan text-nexus-dark px-4 py-2 rounded-lg font-medium text-sm transition hover:bg-nexus-cyan-bright"
+            className="inline-flex items-center rounded-lg bg-nexus-cyan px-4 py-2 text-sm font-medium text-nexus-dark transition hover:bg-nexus-cyan-bright"
           >
             <Users className="h-4 w-4 mr-2" /> Register New Student
           </Link>
@@ -288,7 +288,7 @@ export default function StudentsPage() {
       </div>
 
       {/* Students Table */}
-      <div className="overflow-x-auto">
+      <div className="min-w-0 overflow-x-auto">
         <p className="mb-2 text-xs text-nexus-navy/55">Select up to 10 active, paid students for a reviewed batch send. Already-sent channels are protected from duplicates.</p>
         <table className="w-full rounded-lg border border-nexus-navy/10">
           <thead>

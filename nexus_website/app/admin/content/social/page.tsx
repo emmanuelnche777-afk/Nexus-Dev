@@ -164,7 +164,7 @@ export default function SocialQueuePage() {
               ) : (
                 <p className="mt-1 text-sm text-amber-800">Add the Instagram app credentials and encryption key to the server environment first.</p>
               )}
-            {instagram.redirectUri && <p className="mt-2 text-xs text-nexus-navy/70">Meta callback URL: <code className="select-all rounded bg-gray-100 px-1 py-0.5">{instagram.redirectUri}</code></p>}
+            {instagram.redirectUri && <p className="mt-2 break-words text-xs text-nexus-navy/70">Meta callback URL: <code className="select-all break-all rounded bg-gray-100 px-1 py-0.5">{instagram.redirectUri}</code></p>}
           </div>
         </div>
         {instagram.connected ? (

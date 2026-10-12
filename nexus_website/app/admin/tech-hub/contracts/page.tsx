@@ -352,9 +352,9 @@ export default function TechHubContractManagementPage() {
   );
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
+    <div className="min-w-0 p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <Link
             href="/admin/tech-hub"
             className="mb-2 inline-flex items-center gap-1 text-sm text-nexus-navy/60 hover:text-nexus-cyan"
@@ -366,7 +366,7 @@ export default function TechHubContractManagementPage() {
             Manage client contracts, templates, and digital signatures for Tech Hub services.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setArchivedView((value) => !value)} className="rounded-lg border border-nexus-navy/10 px-4 py-2 text-sm font-semibold text-nexus-navy">
             {archivedView ? "Active contracts" : "Archived contracts"}
           </button>
@@ -418,10 +418,10 @@ export default function TechHubContractManagementPage() {
                 </div>
               </div>
               <div className="mt-3 space-y-1">
-                <p className="text-sm text-nexus-navy/60">
+                <p className="break-words text-sm text-nexus-navy/60">
                   <span className="font-medium">Service:</span> {contract.serviceType}
                 </p>
-                <p className="text-sm text-nexus-navy/60">
+                <p className="break-all text-sm text-nexus-navy/60">
                   <span className="font-medium">Client:</span> {contract.clientEmail}
                 </p>
                 <p className="text-sm text-nexus-navy/60">
@@ -429,7 +429,7 @@ export default function TechHubContractManagementPage() {
                   {contract.orderId || (contract.client?.description ? "Linked order" : "Unlinked")}
                 </p>
               </div>
-              <div className="mt-4 flex items-center justify-between">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[contract.status] || "bg-gray-100 text-gray-800"}`}
                 >

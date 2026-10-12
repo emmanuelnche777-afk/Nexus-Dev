@@ -184,9 +184,9 @@ export default function MessagingPage() {
   });
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
+    <div className="min-w-0 p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <Link
             href="/admin/tech-hub"
             className="mb-2 inline-flex items-center gap-1 text-sm text-nexus-navy/60 hover:text-nexus-cyan"
@@ -198,12 +198,12 @@ export default function MessagingPage() {
             Archive conversations to hide them from the active list while keeping their messages available to restore later.
           </p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => { setArchivedView((value) => !value); setFilterStatus("all"); }} className="inline-flex items-center gap-2 rounded-lg border border-nexus-navy/10 px-4 py-2 text-sm font-semibold text-nexus-navy">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => { setArchivedView((value) => !value); setFilterStatus("all"); }} className="inline-flex max-w-full items-center gap-2 rounded-lg border border-nexus-navy/10 px-3 py-2 text-sm font-semibold text-nexus-navy sm:px-4">
             {archivedView ? <RotateCcw className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
             {archivedView ? "Active conversations" : "Archived conversations"}
           </button>
-          <button onClick={startNewConversation} className="inline-flex items-center gap-2 rounded-lg bg-nexus-cyan px-4 py-2 text-sm font-semibold text-white hover:bg-nexus-cyan-dark">
+          <button onClick={startNewConversation} className="inline-flex max-w-full items-center gap-2 rounded-lg bg-nexus-cyan px-3 py-2 text-sm font-semibold text-white hover:bg-nexus-cyan-dark sm:px-4">
             <Plus className="h-4 w-4" /> Start Conversation
           </button>
         </div>

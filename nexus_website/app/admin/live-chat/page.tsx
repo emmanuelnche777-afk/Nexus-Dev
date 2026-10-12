@@ -110,9 +110,9 @@ export default function LiveChatPage() {
   const activeChats = chats.filter((c) => c.status === "active").length;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-6">
+    <div className="flex min-w-0 flex-col gap-4 lg:h-[calc(100vh-8rem)] lg:flex-row lg:gap-6">
       {/* Chat List */}
-      <div className="w-80 flex-shrink-0 space-y-4">
+      <div className="w-full min-w-0 space-y-4 lg:w-80 lg:shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-nexus-navy">Live Chat</h1>
@@ -133,7 +133,7 @@ export default function LiveChatPage() {
           />
         </div>
 
-        <div className="max-h-[60vh] space-y-2 overflow-y-auto">
+        <div className="max-h-64 space-y-2 overflow-y-auto lg:max-h-[60vh]">
           {loading ? (
             <LoadingState label="Loading chats..." size="sm" />
           ) : filteredChats.length === 0 ? (
@@ -172,7 +172,7 @@ export default function LiveChatPage() {
       </div>
 
       {/* Chat Detail */}
-      <div className="flex flex-1 flex-col rounded-xl border border-nexus-navy/10 bg-white">
+      <div className="flex min-h-80 min-w-0 flex-1 flex-col rounded-xl border border-nexus-navy/10 bg-white lg:min-h-0">
         {selectedChat ? (
           <>
             <div className="border-b border-nexus-navy/10 p-4">

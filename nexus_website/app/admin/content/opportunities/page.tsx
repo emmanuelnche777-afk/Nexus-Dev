@@ -294,15 +294,15 @@ export default function OpportunitiesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
           <Link
             href="/admin/content"
             className="rounded-md p-2 text-nexus-navy/60 hover:bg-nexus-navy/5"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl font-bold text-nexus-navy">Opportunities</h1>
             <p className="mt-1 text-sm text-nexus-navy/70">
               Public listings shown on the Join Us page. A listing is only visible
@@ -312,7 +312,7 @@ export default function OpportunitiesPage() {
         </div>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-nexus-cyan px-4 py-2.5 text-sm font-medium text-white transition hover:bg-nexus-cyan-bright"
+          className="flex w-fit max-w-full items-center gap-2 rounded-lg bg-nexus-cyan px-4 py-2.5 text-sm font-medium text-white transition hover:bg-nexus-cyan-bright"
         >
           <Plus className="h-4 w-4" />
           New Opportunity

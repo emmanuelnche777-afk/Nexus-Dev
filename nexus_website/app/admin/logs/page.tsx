@@ -121,16 +121,16 @@ export default function LogsPage() {
         ) : (
           <div className="divide-y divide-nexus-navy/10">
             {filteredLogs.map((log) => (
-              <div key={log.id} className="px-6 py-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
+              <div key={log.id} className="min-w-0 px-4 py-4 sm:px-6">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
                     <div className="rounded-lg bg-nexus-cyan/10 p-2">
                       <ScrollText className="h-4 w-4 text-nexus-cyan" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1 break-words">
                       <p className="font-medium text-nexus-navy">{log.action.replace(/_/g, " ")}</p>
                       <p className="text-sm text-nexus-navy">{log.item}</p>
-                      {log.resourceId && <p className="text-xs text-nexus-navy/50">Record: {log.resourceId}</p>}
+                      {log.resourceId && <p className="break-all text-xs text-nexus-navy/50">Record: {log.resourceId}</p>}
                       {log.details && (
                         <p className="text-xs text-nexus-navy/50">{log.details}</p>
                       )}
@@ -142,7 +142,7 @@ export default function LogsPage() {
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-nexus-navy/50">
+                  <p className="break-words text-xs text-nexus-navy/50 sm:shrink-0 sm:text-right">
                     {new Date(log.timestamp).toLocaleString()}
                   </p>
                 </div>

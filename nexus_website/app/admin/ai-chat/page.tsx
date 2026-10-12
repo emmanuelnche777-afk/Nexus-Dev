@@ -109,8 +109,8 @@ export default function AiChatPage() {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-22rem)] gap-6">
-        <div className="w-96 flex-shrink-0 space-y-3">
+      <div className="flex min-w-0 flex-col gap-4 lg:h-[calc(100vh-22rem)] lg:flex-row lg:gap-6">
+        <div className="w-full min-w-0 space-y-3 lg:w-96 lg:shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-navy/40" />
             <input
@@ -122,7 +122,7 @@ export default function AiChatPage() {
             />
           </div>
 
-          <div className="max-h-full space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-64 space-y-2 overflow-y-auto pr-1 lg:max-h-full">
             {loading ? (
               <LoadingState label="Loading conversations..." size="sm" />
             ) : filtered.length === 0 ? (
@@ -171,7 +171,7 @@ export default function AiChatPage() {
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col rounded-xl border border-nexus-navy/10 bg-white">
+        <div className="flex min-h-80 min-w-0 flex-1 flex-col rounded-xl border border-nexus-navy/10 bg-white lg:min-h-0">
           {selected ? (
             <>
               <div className="flex items-center justify-between border-b border-nexus-navy/10 p-4">

@@ -267,7 +267,7 @@ export default function MyProfilePage() {
   const PASSWORD_MIN = 10;
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <PageHeader
         title={user.name}
         subtitle={user.email}
@@ -275,16 +275,16 @@ export default function MyProfilePage() {
       />
 
       <Card>
-        <div className="flex items-center gap-6">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-6">
           <Avatar name={user.name} size="lg" />
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-nexus-navy">{user.name}</h2>
+              <h2 className="break-words text-xl font-semibold text-nexus-navy">{user.name}</h2>
               <Badge variant={user.status === "ACTIVE" ? "active" : "suspended"}>
                 {user.status}
               </Badge>
             </div>
-            <p className="mt-1 text-sm text-nexus-navy/60">{user.email}</p>
+            <p className="mt-1 break-all text-sm text-nexus-navy/60">{user.email}</p>
             <p className="text-xs text-nexus-navy/50">
               Role: <span className="font-medium">{user.role.replace("_", " ")}</span>
             </p>
