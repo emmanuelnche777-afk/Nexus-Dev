@@ -108,6 +108,9 @@ export default function NotificationsPage() {
       const res = await fetch("/api/admin/settings/notifications");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not check notification providers.");
+      if (!data?.providers?.email || !data?.providers?.sms || !data?.providers?.twilio) {
+        throw new Error("Notification provider information is unavailable.");
+      }
       setProviderStatus(data);
     } catch (cause) {
       setLoadError(cause instanceof Error ? cause.message : "Could not check notification providers.");
@@ -121,7 +124,7 @@ export default function NotificationsPage() {
       const res = await fetch("/api/admin/notifications?limit=100", { cache: "no-store" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not load notification history.");
-      setLogs(data.logs || []);
+      setLogs(Array.isArray(data.logs) ? data.logs : []);
       if (data.stats) setStats(data.stats);
       setLogsLoaded(true);
     } catch (cause) {
@@ -132,10 +135,8 @@ export default function NotificationsPage() {
   }, []);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      loadProviderStatus();
-      void loadLogs();
-    });
+    void loadProviderStatus();
+    void loadLogs();
     const refreshTimer = window.setInterval(() => void loadLogs(), 15_000);
     return () => window.clearInterval(refreshTimer);
   }, [loadLogs]);
@@ -534,7 +535,7 @@ export default function NotificationsPage() {
           ) : (
             <div className="divide-y divide-nexus-navy/10">
               {filteredLogs.map((log) => {
-                const tMeta = TYPE_META[log.type];
+                const tMeta = TYPE_META[log.type] || TYPE_META.email;
                 const sMeta = STATUS_META[log.status] || STATUS_META.sent;
                 const TypeIcon = tMeta.icon;
                 const StatusIcon = sMeta.icon;
