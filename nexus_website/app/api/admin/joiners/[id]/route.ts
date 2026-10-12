@@ -101,14 +101,25 @@ export async function PUT(
       ) {
         return NextResponse.json({ error: "Invalid status" }, { status: 400 });
       }
-      update.status = body.status;
-      // RESPONDED is only ever reached via the respond action, which owns the
-      // respondedAt timestamp.
-      update.reviewedAt =
-        body.status === PathwayInquiryStatus.NEW ? null : new Date();
-      // Resets the SLA clock on every status change, so "time in current stage"
-      // is answerable without reconstructing it from a history.
-      update.stageEnteredAt = new Date();
+      if (body.status === PathwayInquiryStatus.RESPONDED && existing.status !== PathwayInquiryStatus.RESPONDED) {
+        return NextResponse.json(
+          { error: "Use Send Response to mark an inquiry as responded." },
+          { status: 400 }
+        );
+      }
+      if (existing.status === PathwayInquiryStatus.RESPONDED && body.status !== PathwayInquiryStatus.RESPONDED) {
+        return NextResponse.json(
+          { error: "A responded inquiry cannot be moved back to an open status." },
+          { status: 400 }
+        );
+      }
+      if (body.status !== existing.status) {
+        update.status = body.status;
+        update.reviewedAt =
+          body.status === PathwayInquiryStatus.NEW ? null : new Date();
+        // Only a real transition restarts the SLA clock; note edits do not.
+        update.stageEnteredAt = new Date();
+      }
     }
 
     if (typeof body.adminNotes === "string") {
@@ -294,25 +305,48 @@ export async function POST(
       whatsappResult,
     });
 
-    const updated = await prisma.pathwayInquiry.update({
-      where: { id },
-      data: {
-        status: PathwayInquiryStatus.RESPONDED,
-        respondedAt: new Date(),
-        reviewedAt: inquiry.reviewedAt ?? new Date(),
-        responseMessage: message,
-        stageEnteredAt: new Date(),
-      },
-    });
+    const whatsappAttempted = Boolean(inquiry.phone?.trim());
+    const emailDelivered = emailResult?.success === true;
+    const whatsappDelivered = whatsappResult?.success === true;
+    const sent = emailDelivered || whatsappDelivered;
+    const emailState = emailDelivered ? "sent" : emailResult?.skipped ? "skipped" : "failed";
+    const whatsappState = !whatsappAttempted
+      ? "not_attempted"
+      : whatsappDelivered
+        ? "sent"
+        : whatsappResult?.skipped
+          ? "skipped"
+          : "failed";
+    const delivery = describeDelivery(emailResult, whatsappResult, whatsappAttempted).replace(
+      "Response recorded",
+      sent ? "Delivery confirmed" : "No delivery confirmed"
+    );
+
+    const updated = sent
+      ? await prisma.pathwayInquiry.update({
+          where: { id },
+          data: {
+            status: PathwayInquiryStatus.RESPONDED,
+            respondedAt: new Date(),
+            reviewedAt: inquiry.reviewedAt ?? new Date(),
+            responseMessage: message,
+            stageEnteredAt: new Date(),
+          },
+        })
+      : inquiry;
 
     await logAdminAction({
+      actorId: user.id,
       adminEmail: user.email,
-      action: "respond",
+      action: sent ? "respond" : "response_delivery_failed",
       resourceType: "pathway_inquiry",
       resourceId: id,
       newValue: {
         chars: message.length,
-        whatsappAttempted: Boolean(inquiry.phone?.trim()),
+        channel: `email:${emailState};whatsapp:${whatsappState}`,
+        sent,
+        failed: Number(emailState === "failed") + Number(whatsappState === "failed"),
+        skipped: Number(emailState === "skipped") + Number(whatsappState === "skipped"),
       },
     });
 
@@ -320,12 +354,9 @@ export async function POST(
       inquiry: updated,
       emailResult,
       whatsappResult,
-      whatsappAttempted: Boolean(inquiry.phone?.trim()),
-      delivery: describeDelivery(
-        emailResult,
-        whatsappResult,
-        Boolean(inquiry.phone?.trim())
-      ),
+      whatsappAttempted,
+      sent,
+      delivery,
     });
   } catch (error) {
     console.error("Failed to respond to pathway inquiry:", error);

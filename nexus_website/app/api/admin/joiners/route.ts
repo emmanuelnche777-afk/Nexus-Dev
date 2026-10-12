@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/permissions-server";
 import { PERMISSIONS } from "@/lib/permissions-data";
 import { PathwayInquiryStatus } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { PATHWAY_IDS } from "@/lib/join-us-pathways";
 import {
   canSeeAnyPathway,
@@ -11,7 +12,7 @@ import {
   pathwayWhereFor,
 } from "@/lib/intake-scope";
 import { resolveOwners } from "@/lib/intake-owners";
-import { computeSla } from "@/lib/intake-sla";
+import { computeSla, RESPONSE_TARGET_HOURS, TRIAGE_TARGET_HOURS } from "@/lib/intake-sla";
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 50;
@@ -79,7 +80,22 @@ export async function GET(request: Request) {
   try {
     const where = pathwayWhereFor(user.role, filters);
 
-    const [inquiries, total] = await Promise.all([
+    const now = new Date();
+    const triageCutoff = new Date(now.getTime() - TRIAGE_TARGET_HOURS * 60 * 60 * 1000);
+    const responseCutoff = new Date(now.getTime() - RESPONSE_TARGET_HOURS * 60 * 60 * 1000);
+    const overdueWhere = {
+      AND: [
+        where,
+        {
+          OR: [
+            { status: PathwayInquiryStatus.NEW, stageEnteredAt: { lte: triageCutoff } },
+            { status: PathwayInquiryStatus.REVIEWED, stageEnteredAt: { lte: responseCutoff } },
+          ],
+        },
+      ],
+    } as unknown as Prisma.PathwayInquiryWhereInput;
+
+    const [inquiries, total, overdue] = await Promise.all([
       prisma.pathwayInquiry.findMany({
         where,
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -87,12 +103,12 @@ export async function GET(request: Request) {
         ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       }),
       prisma.pathwayInquiry.count({ where }),
+      prisma.pathwayInquiry.count({ where: overdueWhere }),
     ]);
 
     const hasMore = inquiries.length > limit;
     const rows = hasMore ? inquiries.slice(0, limit) : inquiries;
 
-    const now = new Date();
     const owners = await resolveOwners(rows.map((r) => r.ownerId));
 
     // SLA is derived here rather than stored, so it can never go stale.
@@ -101,8 +117,6 @@ export async function GET(request: Request) {
       owner: r.ownerId ? owners.get(r.ownerId) ?? null : null,
       sla: computeSla({ status: r.status, stageEnteredAt: r.stageEnteredAt }, now),
     }));
-
-    const overdue = enriched.filter((r) => r.sla.overdue).length;
 
     return NextResponse.json({
       inquiries: enriched,

@@ -71,6 +71,8 @@ export default function JoinersPage() {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [pathwayFilter, setPathwayFilter] = useState<string>("all");
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
@@ -84,6 +86,7 @@ export default function JoinersPage() {
 
   async function loadInquiries() {
     setLoading(true);
+    setLoadError(null);
     try {
       const query = new URLSearchParams({
         status: statusFilter,
@@ -92,7 +95,8 @@ export default function JoinersPage() {
       });
       if (search.trim()) query.set("search", search.trim());
       const res = await fetch(`/api/admin/joiners?${query.toString()}`);
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not load joiners.");
       setInquiries(data.inquiries || []);
       // Previously the endpoint returned a bare array capped at 200 rows, so a
       // long queue looked complete while silently hiding entries.
@@ -101,6 +105,7 @@ export default function JoinersPage() {
       setHasMore(Boolean(data.hasMore));
     } catch (error) {
       console.error("Failed to load joiners:", error);
+      setLoadError(error instanceof Error ? error.message : "Could not load joiners.");
     } finally {
       setLoading(false);
     }
@@ -108,6 +113,7 @@ export default function JoinersPage() {
 
   async function loadMore() {
     setLoadingMore(true);
+    setLoadMoreError(null);
     try {
       const query = new URLSearchParams({
         status: statusFilter,
@@ -119,11 +125,13 @@ export default function JoinersPage() {
       const last = inquiries[inquiries.length - 1];
       if (last) query.set("cursor", last.id);
       const res = await fetch(`/api/admin/joiners?${query.toString()}`);
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not load more joiners.");
       setInquiries((prev) => [...prev, ...(data.inquiries || [])]);
       setHasMore(Boolean(data.hasMore));
     } catch (error) {
       console.error("Failed to load more joiners:", error);
+      setLoadMoreError(error instanceof Error ? error.message : "Could not load more joiners.");
     } finally {
       setLoadingMore(false);
     }
@@ -164,8 +172,8 @@ export default function JoinersPage() {
       <div className="space-y-3">
         {overdue > 0 && (
           <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {overdue} inquir{overdue !== 1 ? "ies have" : "y has"} passed the
-            response target in the current stage.
+            {overdue} inquir{overdue !== 1 ? "ies have" : "y has"} passed the current-stage target
+            (triage for new inquiries, response for reviewed inquiries).
           </p>
         )}
         <div className="flex flex-wrap gap-2" role="tablist" aria-label="Owner filter">
@@ -238,6 +246,17 @@ export default function JoinersPage() {
       <div className="rounded-xl border border-nexus-navy/10 bg-white">
         {loading ? (
           <LoadingState label="Loading joiners..." />
+        ) : loadError ? (
+          <div className="p-6 text-center">
+            <p role="alert" className="text-sm text-red-700">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => void loadInquiries()}
+              className="mt-3 rounded-lg bg-nexus-navy px-4 py-2 text-sm font-medium text-white hover:bg-nexus-navy-deep"
+            >
+              Try again
+            </button>
+          </div>
         ) : inquiries.length === 0 ? (
           <EmptyState
             icon={UserPlus}
@@ -309,6 +328,7 @@ export default function JoinersPage() {
             Showing {inquiries.length} of {total}
             {total !== inquiries.length && hasMore ? " — load more for the rest" : ""}
           </span>
+          {loadMoreError && <span role="alert" className="text-red-700">{loadMoreError}</span>}
           {hasMore && (
             <button
               onClick={loadMore}

@@ -12,6 +12,8 @@ import {
   UserPlus,
 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
+import { hasPermission } from "@/lib/permissions";
+import { PERMISSIONS, type AdminRole } from "@/lib/permissions-data";
 import {
   type PathwayDetailRow,
 } from "@/lib/join-us-pathways";
@@ -49,7 +51,7 @@ interface Inquiry {
   detailRows: PathwayDetailRow[];
 }
 
-const STATUSES = ["NEW", "REVIEWED", "RESPONDED"] as const;
+const STATUSES = ["NEW", "REVIEWED"] as const;
 
 const STATUS_STYLES: Record<string, string> = {
   NEW: "bg-amber-100 text-amber-700",
@@ -66,6 +68,7 @@ export default function JoinerDetailPage({
   const [inquiry, setInquiry] = useState<Inquiry | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [status, setStatus] = useState("NEW");
   const [adminNotes, setAdminNotes] = useState("");
@@ -80,10 +83,28 @@ export default function JoinerDetailPage({
   const [assignees, setAssignees] = useState<OwnerSummary[]>([]);
   const [assigning, setAssigning] = useState(false);
   const [assignError, setAssignError] = useState<string | null>(null);
+  const [canTriage, setCanTriage] = useState(false);
+  const [canRespond, setCanRespond] = useState(false);
 
   useEffect(() => {
+    loadPermissions();
     loadAssignees();
   }, []);
+
+  async function loadPermissions() {
+    try {
+      const res = await fetch("/api/admin/session", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      const role = data.user?.role;
+      if (typeof role !== "string") return;
+      const adminRole = role as AdminRole;
+      setCanTriage(hasPermission(adminRole, PERMISSIONS.PATHWAY_INQUIRIES_TRIAGE));
+      setCanRespond(hasPermission(adminRole, PERMISSIONS.PATHWAY_INQUIRIES_RESPOND));
+    } catch {
+      // Keep controls hidden unless the signed-in role can be confirmed.
+    }
+  }
 
   async function loadAssignees() {
     try {
@@ -125,19 +146,25 @@ export default function JoinerDetailPage({
 
   async function loadInquiry() {
     setLoading(true);
+    setLoadError(null);
+    setNotFound(false);
     try {
       const res = await fetch(`/api/admin/joiners/${id}`, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
       if (res.status === 404) {
         setNotFound(true);
+        setInquiry(null);
         return;
       }
-      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load this inquiry.");
+      if (!data.inquiry) throw new Error("The inquiry response was incomplete. Please try again.");
       const record: Inquiry = data.inquiry;
       setInquiry(record);
       setStatus(record.status);
       setAdminNotes(record.adminNotes || "");
     } catch (error) {
       console.error("Failed to load inquiry:", error);
+      setLoadError(error instanceof Error ? error.message : "Could not load this inquiry.");
     } finally {
       setLoading(false);
     }
@@ -182,7 +209,11 @@ export default function JoinerDetailPage({
         setRespondError(data.error || "Failed to send response");
         return;
       }
-      setRespondResult(data.delivery || "Response recorded.");
+      if (!data.sent) {
+        setRespondError(data.delivery || "No delivery was confirmed. Your draft is still here so you can retry.");
+        return;
+      }
+      setRespondResult(data.delivery || "At least one delivery channel confirmed the response.");
       setResponseMessage("");
       await loadInquiry();
     } catch (error) {
@@ -195,14 +226,31 @@ export default function JoinerDetailPage({
 
   if (loading) return <LoadingState label="Loading inquiry..." />;
 
-  if (notFound || !inquiry) {
+  if (notFound) {
     return (
       <div className="py-12 text-center">
         <p className="text-nexus-navy">Inquiry not found</p>
-        <Link
-          href="/admin/joiners"
-          className="mt-4 inline-block text-nexus-cyan hover:underline"
+        <Link href="/admin/joiners" className="mt-4 inline-block text-nexus-cyan hover:underline">
+          Back to joiners
+        </Link>
+      </div>
+    );
+  }
+
+  if (loadError || !inquiry) {
+    return (
+      <div className="mx-auto max-w-xl rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+        <p role="alert" className="text-sm text-red-700">
+          {loadError || "The inquiry could not be loaded."}
+        </p>
+        <button
+          type="button"
+          onClick={() => void loadInquiry()}
+          className="mt-4 rounded-lg bg-nexus-navy px-4 py-2 text-sm font-medium text-white hover:bg-nexus-navy-deep"
         >
+          Try again
+        </button>
+        <Link href="/admin/joiners" className="ml-4 text-sm text-nexus-cyan hover:underline">
           Back to joiners
         </Link>
       </div>
@@ -305,7 +353,7 @@ export default function JoinerDetailPage({
 
         {/* Admin controls */}
         <div className="space-y-6">
-          <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
+          {canTriage && <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-nexus-navy/60">
               Review
             </h3>
@@ -316,9 +364,11 @@ export default function JoinerDetailPage({
                 </label>
                 <select
                   value={status}
+                  disabled={inquiry.status === "RESPONDED"}
                   onChange={(e) => setStatus(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-nexus-navy/10 px-3 py-2 text-sm focus:border-nexus-cyan focus:outline-none"
                 >
+                  {inquiry.status === "RESPONDED" && <option value="RESPONDED">RESPONDED</option>}
                   {STATUSES.map((s) => (
                     <option key={s} value={s}>
                       {s}
@@ -384,9 +434,9 @@ export default function JoinerDetailPage({
                 </div>
               </dl>
             </div>
-          </section>
+          </section>}
 
-          {assignees.length > 0 && (
+          {canTriage && assignees.length > 0 && (
             <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-nexus-navy/60">
                 Ownership
@@ -424,7 +474,7 @@ export default function JoinerDetailPage({
             </section>
           )}
 
-          <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
+          {canRespond && <section className="rounded-xl border border-nexus-navy/10 bg-white p-6">
             <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-nexus-navy/60">
               Respond
             </h3>
@@ -471,7 +521,12 @@ export default function JoinerDetailPage({
                 </p>
               </div>
             )}
-          </section>
+          </section>}
+          {!canTriage && !canRespond && (
+            <p className="rounded-lg border border-nexus-navy/10 bg-white p-4 text-sm text-nexus-navy/60">
+              You can view this inquiry, but your role does not include update or response access.
+            </p>
+          )}
         </div>
       </div>
     </div>
