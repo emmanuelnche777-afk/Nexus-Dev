@@ -39,6 +39,12 @@ export default function StaffPage() {
   const [actionMenu, setActionMenu] = useState<string | null>(null);
   const [resendLoading, setResendLoading] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("tab") === "former") {
+      setActiveTab("former");
+    }
+  }, []);
+
    useEffect(() => {
     void fetch("/api/admin/staff", { cache: "no-store" })
       .then((res) => {
@@ -90,7 +96,7 @@ export default function StaffPage() {
       const matchesTab =
         activeTab === "all" ||
         (activeTab === "active" && member.status === "ACTIVE" && (!member.invitedAt || member.hasAcceptedInvite)) ||
-        (activeTab === "invited" && member.invitedAt && !member.hasAcceptedInvite) ||
+        (activeTab === "invited" && member.status === "ACTIVE" && member.invitedAt && !member.hasAcceptedInvite) ||
         (activeTab === "suspended" && member.status === "SUSPENDED") ||
         (activeTab === "former" && member.status === "DELETED");
 
@@ -101,7 +107,7 @@ export default function StaffPage() {
   const summary = useMemo(() => {
     return {
       active: staff.filter((s) => s.status === "ACTIVE" && (!s.invitedAt || s.hasAcceptedInvite)).length,
-      pending: staff.filter((s) => s.invitedAt && !s.hasAcceptedInvite).length,
+      pending: staff.filter((s) => s.status === "ACTIVE" && s.invitedAt && !s.hasAcceptedInvite).length,
       suspended: staff.filter((s) => s.status === "SUSPENDED").length,
       twoFactor: staff.filter((s) => s.twoFactorEnabled).length,
     };
@@ -265,46 +271,49 @@ export default function StaffPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="relative inline-block">
-                        <button
-                          onClick={() => setActionMenu(actionMenu === member.id ? null : member.id)}
-                          className="rounded-md p-1.5 text-nexus-navy/50 hover:bg-nexus-navy/5 hover:text-nexus-navy"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
-                        {actionMenu === member.id && (
-                          <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setActionMenu(null)}
-                          />
-                        )}
-                        {actionMenu === member.id && (
-                          <div className="absolute right-0 z-20 mt-1 w-40 rounded-md border border-nexus-navy/10 bg-white py-1 shadow-lg">
-                            <button
-                              onClick={() => {
-                                setActionMenu(null);
-                                router.push(`/admin/staff/${member.id}`);
-                              }}
-                              className="block w-full px-3 py-2 text-left text-sm text-nexus-navy hover:bg-nexus-navy/5"
-                            >
-                              View details
-                            </button>
-                            {member.invitedAt && member.status === "ACTIVE" && (
+                      {member.status !== "DELETED" && (
+                        <div className="relative inline-block">
+                          <button
+                            onClick={() => setActionMenu(actionMenu === member.id ? null : member.id)}
+                            className="rounded-md p-1.5 text-nexus-navy/50 hover:bg-nexus-navy/5 hover:text-nexus-navy"
+                            aria-label={`Actions for ${member.name}`}
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                          {actionMenu === member.id && (
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setActionMenu(null)}
+                            />
+                          )}
+                          {actionMenu === member.id && (
+                            <div className="absolute right-0 z-20 mt-1 w-40 rounded-md border border-nexus-navy/10 bg-white py-1 shadow-lg">
                               <button
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  await handleResendInvite(member.id);
+                                onClick={() => {
                                   setActionMenu(null);
+                                  router.push(`/admin/staff/${member.id}`);
                                 }}
-                                disabled={resendLoading === member.id}
-                                className="block w-full px-3 py-2 text-left text-sm text-nexus-navy hover:bg-nexus-navy/5 disabled:opacity-60"
+                                className="block w-full px-3 py-2 text-left text-sm text-nexus-navy hover:bg-nexus-navy/5"
                               >
-                                {resendLoading === member.id ? "Resending..." : "Resend invite"}
+                                View details
                               </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                              {member.invitedAt && member.status === "ACTIVE" && (
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    await handleResendInvite(member.id);
+                                    setActionMenu(null);
+                                  }}
+                                  disabled={resendLoading === member.id}
+                                  className="block w-full px-3 py-2 text-left text-sm text-nexus-navy hover:bg-nexus-navy/5 disabled:opacity-60"
+                                >
+                                  {resendLoading === member.id ? "Resending..." : "Resend invite"}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

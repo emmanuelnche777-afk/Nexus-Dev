@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
 
   try {
     const staff = await prisma.adminUser.findMany({
-      where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,

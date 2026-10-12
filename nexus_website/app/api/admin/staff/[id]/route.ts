@@ -196,6 +196,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   const { user, authorized } = await requirePermission("staff:*");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (user.role !== "SUPER_ADMIN") {
+    return NextResponse.json({ error: "Only the Super Admin can mark staff as former" }, { status: 403 });
+  }
 
   const { id } = await params;
 

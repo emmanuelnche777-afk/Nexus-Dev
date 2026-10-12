@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Save, User, Key } from "lucide-react";
+import { Shield, Save, User, Key, UserX } from "lucide-react";
 import PageHeader from "@/components/admin/ui/page-header";
 import Card from "@/components/admin/ui/card";
 import Badge from "@/components/admin/ui/badge";
@@ -58,6 +58,7 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [retiring, setRetiring] = useState(false);
 
   useEffect(() => {
     void params.then(({ id }) => setStaffId(id));
@@ -167,6 +168,26 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  async function markAsFormer() {
+    if (!staffId || !staff) return;
+    const confirmed = window.confirm(
+      `Mark ${staff.name} as a former staff member? This will revoke all their admin sessions and block future sign-ins. Their account history will be retained, and their email address will remain reserved.`
+    );
+    if (!confirmed) return;
+
+    setRetiring(true);
+    setSaveError("");
+    try {
+      const res = await fetchWithFreshTwoFactor(`/api/admin/staff/${staffId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to mark staff member as former");
+      router.push("/admin/staff?tab=former");
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to mark staff member as former");
+      setRetiring(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -203,6 +224,28 @@ export default function StaffDetailPage({ params }: { params: Promise<{ id: stri
         subtitle={staff.email}
         backHref="/admin/staff"
       />
+
+      {isSuperAdmin && staff.role !== "SUPER_ADMIN" && staff.status !== "DELETED" && (
+        <Card className="border-red-200 bg-red-50/40">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-nexus-navy">Offboard this staff member</h3>
+              <p className="mt-1 text-sm text-nexus-navy/60">
+                Mark them as former, revoke all active sessions, and retain their account history.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={markAsFormer}
+              loading={retiring}
+              icon={<UserX className="h-4 w-4" />}
+            >
+              Mark as former
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <Card>
         <div className="flex items-center gap-6">
