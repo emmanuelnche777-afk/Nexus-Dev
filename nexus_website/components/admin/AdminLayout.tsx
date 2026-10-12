@@ -112,6 +112,7 @@ const NAV_PERMISSION_BY_HREF: Record<string, string> = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/notifications", label: "Notifications", icon: MessageSquare },
   {
     href: "/admin/academy",
     label: "Academy",
@@ -283,6 +284,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return null;
     }
     if (item.href === "/admin/logs" && session?.role !== "SUPER_ADMIN") return null;
+    if (item.href === "/admin/notifications" && session?.role !== "SUPER_ADMIN") return null;
     if (!item.children && itemPermission && (!session?.role || !hasPermission(session.role, itemPermission))) {
       return null;
     }

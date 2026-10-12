@@ -4,6 +4,7 @@ import { logAdminAction } from "@/lib/audit";
 import { requirePermission } from "@/lib/permissions-server";
 import { PERMISSIONS } from "@/lib/permissions-data";
 import { sendEmail } from "@/lib/notifications";
+import { sendOptionalSms } from "@/lib/notifications/send-optional-sms";
 import { CONTACT } from "@/lib/site";
 
 const unauthorized = () => NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -58,14 +59,17 @@ export async function POST(
   try {
     const inquiry = await prisma.partnerInquiry.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, organization: true, status: true },
+      select: { id: true, name: true, email: true, phone: true, organization: true, status: true },
     });
     if (!inquiry) return NextResponse.json({ error: "Partnership request not found" }, { status: 404 });
 
-    const payload = (await request.json().catch(() => null)) as { body?: unknown } | null;
+    const payload = (await request.json().catch(() => null)) as { body?: unknown; sendSms?: unknown } | null;
+    const sendSmsToo = payload?.sendSms === true;
     const body = typeof payload?.body === "string" ? payload.body.trim() : "";
     if (!body) return NextResponse.json({ error: "Write a message before sending" }, { status: 400 });
     if (body.length > 12000) return NextResponse.json({ error: "Message is too long" }, { status: 400 });
+    if (sendSmsToo && !inquiry.phone?.trim()) return NextResponse.json({ error: "This contact has no saved phone number for SMS" }, { status: 400 });
+    if (sendSmsToo && body.length > 1600) return NextResponse.json({ error: "SMS messages must be 1,600 characters or fewer" }, { status: 400 });
 
     const subject = `Re: NEXUS partnership proposal — ${inquiry.organization}`;
     const message = await prisma.partnershipInquiryEmail.create({
@@ -95,6 +99,10 @@ export async function POST(
       return NextResponse.json({ error: reason }, { status: skipped ? 503 : 502 });
     }
 
+    const smsDelivery = sendSmsToo
+      ? await sendOptionalSms({ to: inquiry.phone!, body, sentById: user.id, subject })
+      : null;
+
     const [sentMessage] = await prisma.$transaction([
       prisma.partnershipInquiryEmail.update({
         where: { id: message.id },
@@ -118,10 +126,10 @@ export async function POST(
       action: "reply",
       resourceType: "partnership",
       resourceId: id,
-      newValue: { messageId: sentMessage.id, subject, deliveryStatus: "sent" },
+      newValue: { messageId: sentMessage.id, subject, deliveryStatus: "sent", smsStatus: smsDelivery?.status ?? "not_requested" },
     });
 
-    return NextResponse.json({ message: sentMessage }, { status: 201 });
+    return NextResponse.json({ message: sentMessage, smsStatus: smsDelivery?.status ?? "not_requested", smsResult: smsDelivery?.result ?? null }, { status: 201 });
   } catch (error) {
     console.error("Failed to send partnership reply:", error);
     return NextResponse.json({ error: "Failed to send partnership reply" }, { status: 500 });

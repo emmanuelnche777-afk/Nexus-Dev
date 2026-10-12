@@ -6,9 +6,10 @@ import { sendEmail } from "@/lib/notifications";
 import { escapeHtml } from "@/lib/email-html";
 import { enforceActorRateLimit } from "@/lib/rate-limit";
 import { logAdminAction } from "@/lib/audit";
+import { sendOptionalSms } from "@/lib/notifications/send-optional-sms";
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ paymentId: string }> }
 ) {
   const { user, authorized } = await requirePermission("academy:payments:notify");
@@ -39,8 +40,13 @@ export async function POST(
       return NextResponse.json({ error: "This payment is already marked Paid" }, { status: 409 });
     }
 
+    const payload = await request.json().catch(() => ({})) as { sendSms?: unknown };
+    const sendSmsToo = payload.sendSms === true;
+
     const recipient = payment.registration?.email || payment.student?.email;
+    const phone = payment.registration?.phone || payment.student?.phone;
     if (!recipient) return NextResponse.json({ error: "No email address is saved for this payment" }, { status: 400 });
+    if (sendSmsToo && !phone?.trim()) return NextResponse.json({ error: "No phone number is saved for this payment" }, { status: 400 });
 
     const name = payment.registration?.fullName || payment.student?.fullName || "Student";
     const program = payment.registration?.programSlug || payment.programSlug || "your program";
@@ -56,6 +62,9 @@ export async function POST(
     `;
 
     const result = await sendEmail({ to: recipient, subject, html });
+    const sms = sendSmsToo
+      ? await sendOptionalSms({ to: phone!, body: `NEXUS Academy: Please check your email for instructions to submit payment proof. Reference: ${payment.reference || "unavailable"}.`, sentById: user.id, subject })
+      : null;
     const status = result?.skipped ? "skipped" : result?.success === false ? "failed" : "sent";
     await prisma.notificationLog.create({
       data: {
@@ -74,13 +83,13 @@ export async function POST(
       action: "request_payment_proof",
       resourceType: "payment",
       resourceId: payment.id,
-      newValue: { status },
+      newValue: { status, smsStatus: sms?.status ?? "not_requested" },
     });
 
     if (status === "failed") {
       return NextResponse.json({ error: "Failed to send payment reminder" }, { status: 502 });
     }
-    return NextResponse.json({ success: true, status });
+    return NextResponse.json({ success: true, status, smsStatus: sms?.status ?? "not_requested" });
   } catch (error) {
     console.error("Failed to send payment proof reminder:", error);
     return NextResponse.json({ error: "Failed to send payment reminder" }, { status: 500 });

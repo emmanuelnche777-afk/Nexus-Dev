@@ -39,6 +39,7 @@ export default function SettingsPage() {
   const [providers, setProviders] = useState({
     resend: { configured: false, from: "" },
     twilio: { configured: false, phone: "", whatsapp: "" },
+    sms: { configured: false, provider: null as "textbee" | "twilio" | null, textbeeDeviceConfigured: false, textbeeSimConfigured: false, inboundWebhookConfigured: false },
   });
   const [editing, setEditing] = useState(false);
   const pendingVideoUploadRef = useRef<CloudinaryVideoUpload | null>(null);
@@ -556,20 +557,22 @@ export default function SettingsPage() {
             <div className="rounded-xl border border-nexus-navy/10 bg-white p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-nexus-navy">Twilio (SMS / WhatsApp)</h3>
+                  <h3 className="font-semibold text-nexus-navy">SMS and WhatsApp</h3>
                   <p className="mt-1 text-sm text-nexus-navy">
-                    Send SMS and WhatsApp notifications
+                    SMS uses TextBee when configured; WhatsApp uses Twilio.
                   </p>
                 </div>
-                {providers.twilio.configured ? (
+                {providers.sms.configured || providers.twilio.configured ? (
                   <CheckCircle className="h-5 w-5 text-green-600" />
                 ) : (
                   <XCircle className="h-5 w-5 text-red-600" />
                 )}
               </div>
               <div className="mt-4 space-y-2 text-sm text-nexus-navy">
-                <p>Status: {providers.twilio.configured ? "Configured" : "Not configured"}</p>
-                {providers.twilio.phone && <p>Phone: {providers.twilio.phone}</p>}
+                <p>SMS: {providers.sms.provider === "textbee" ? "TextBee connected" : providers.sms.provider === "twilio" ? "Twilio connected" : "Not configured"}</p>
+                {providers.sms.provider === "textbee" && <p>Connected device: {providers.sms.textbeeDeviceConfigured ? "configured" : "default TextBee device"}; SIM: {providers.sms.textbeeSimConfigured ? "selected" : "default device SIM"}</p>}
+                {providers.sms.inboundWebhookConfigured && <p>Incoming SMS webhook: configured</p>}
+                <p>WhatsApp: {providers.twilio.configured ? "Twilio configured" : "Not configured"}</p>
                 {providers.twilio.whatsapp && <p>WhatsApp: {providers.twilio.whatsapp}</p>}
               </div>
             </div>

@@ -7,7 +7,7 @@ export interface NotificationLogEntry {
   to: string;
   subject?: string;
   body?: string;
-  status: "sent" | "failed" | "pending" | "skipped";
+  status: "sent" | "queued" | "failed" | "pending" | "skipped";
   result?: unknown;
   error?: string;
 }

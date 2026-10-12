@@ -19,6 +19,16 @@ export interface WhatsAppOptions {
   body: string;
 }
 
+export function normalizeSmsRecipient(phone: string) {
+  const trimmed = phone.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  if (!digits) return null;
+  if (trimmed.startsWith("+")) return `+${digits}`;
+  if (digits.startsWith("00")) return `+${digits.slice(2)}`;
+  if (/^6\d{8}$/.test(digits)) return `+237${digits}`;
+  return `+${digits}`;
+}
+
 async function sendTextBeeSms(options: SmsOptions) {
   const apiKey = process.env.TEXTBEE_API_KEY;
   if (!apiKey) return null;
@@ -31,11 +41,13 @@ async function sendTextBeeSms(options: SmsOptions) {
   }
 
   try {
+    const to = normalizeSmsRecipient(options.to);
+    if (!to) return { success: false, error: "Enter a valid mobile phone number" };
     const response = await fetch("https://api.textbee.dev/api/v1/gateway/send-sms", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": apiKey },
       body: JSON.stringify({
-        recipients: [options.to],
+        recipients: [to],
         message: options.body,
         ...(process.env.TEXTBEE_DEVICE_ID ? { deviceId: process.env.TEXTBEE_DEVICE_ID } : {}),
         ...(simSubscriptionId !== undefined ? { simSubscriptionId } : {}),
@@ -66,7 +78,10 @@ async function sendTextBeeSms(options: SmsOptions) {
 }
 
 export async function sendSms(options: SmsOptions) {
-  const textBeeResult = await sendTextBeeSms(options);
+  const normalized = normalizeSmsRecipient(options.to);
+  if (!normalized) return { success: false, error: "Enter a valid mobile phone number" };
+  const normalizedOptions = { ...options, to: normalized };
+  const textBeeResult = await sendTextBeeSms(normalizedOptions);
   if (textBeeResult) return textBeeResult;
 
   const client = getTwilioClient();
@@ -82,7 +97,7 @@ export async function sendSms(options: SmsOptions) {
     const result = await client.messages.create({
       body: options.body,
       from: process.env.TWILIO_PHONE_NUMBER,
-      to: options.to,
+      to: normalizedOptions.to,
     });
     return { success: true, sid: result.sid };
   } catch (error) {

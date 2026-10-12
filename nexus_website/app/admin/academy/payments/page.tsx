@@ -12,6 +12,7 @@ import {
   Loader2,
   User,
   GraduationCap,
+  RefreshCw,
 } from "lucide-react";
 import LoadingState from "@/components/admin/LoadingState";
 import EmptyState from "@/components/admin/EmptyState";
@@ -63,6 +64,7 @@ const STATUS_NOTES: Record<string, string> = {
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
@@ -70,6 +72,7 @@ export default function PaymentsPage() {
   const [formData, setFormData] = useState<Partial<Payment>>({});
   const [saving, setSaving] = useState(false);
   const [notifying, setNotifying] = useState<string | null>(null);
+  const [includeSmsReminder, setIncludeSmsReminder] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [clearConfirm, setClearConfirm] = useState("");
   const [canClearPayments, setCanClearPayments] = useState(false);
@@ -209,10 +212,12 @@ export default function PaymentsPage() {
     try {
       const response = await fetch(`/api/admin/academy/payments/${encodeURIComponent(payment.id)}/request-proof`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sendSms: includeSmsReminder }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || "Notification request failed");
-      alert("Notification sent to student email");
+      alert(`Email reminder sent.${result.smsStatus === "queued" ? " SMS queued with TextBee." : result.smsStatus === "failed" ? " SMS failed; check Notifications." : result.smsStatus === "skipped" ? " SMS was skipped because the provider is unavailable." : ""}`);
     } catch (error) {
       console.error("Failed to send notification:", error);
       alert("Failed to send notification");
@@ -253,13 +258,15 @@ export default function PaymentsPage() {
             </p>
           </div>
         </div>
-        {canClearPayments && <button
+        <div className="flex items-center gap-2">{canClearPayments && <button
           onClick={() => setShowClearModal(true)}
           className="rounded-lg border border-red-500 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition"
         >
           Clear Data
-        </button>}
+        </button>}<button type="button" onClick={() => void loadPayments()} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-nexus-navy/15 bg-white px-3 py-2 text-sm"><RefreshCw className="h-4 w-4" />Refresh</button></div>
       </div>
+
+      {loadError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{loadError}<button type="button" onClick={() => void loadPayments()} disabled={loading} className="ml-2 font-semibold underline">Try again</button></div>}
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-navy/40" />
@@ -272,8 +279,13 @@ export default function PaymentsPage() {
         />
       </div>
 
+      <label className="flex items-start gap-2 rounded-lg border border-nexus-navy/10 bg-white p-3 text-sm text-nexus-navy/70">
+        <input type="checkbox" checked={includeSmsReminder} onChange={(event) => setIncludeSmsReminder(event.target.checked)} />
+        <span>Include an SMS with payment proof reminders. SMS uses the student’s saved phone number and may use airtime from the TextBee phone.</span>
+      </label>
+
       <div className="rounded-xl border border-nexus-navy/10 bg-white">
-        {loading ? (
+        {loadError && payments.length === 0 ? <p className="p-5 text-sm text-red-700">Payments were not loaded; retry above.</p> : loading ? (
           <LoadingState label="Loading payments..." />
         ) : filteredPayments.length === 0 ? (
           <EmptyState
@@ -352,9 +364,9 @@ export default function PaymentsPage() {
                       {payment.status === "Pending" && payment.studentEmail && (
                     <button
                       onClick={() => handleNotify(payment)}
-                      disabled={notifying === payment.id}
+                      disabled={notifying === payment.id || (includeSmsReminder && !payment.studentPhone)}
                       className="rounded-md p-1.5 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
-                      title="Remind student to send payment proof"
+                      title={includeSmsReminder && !payment.studentPhone ? "No saved phone number for SMS" : "Remind student to send payment proof"}
                     >
                       {notifying === payment.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

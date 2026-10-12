@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import prisma from "@/lib/db";
 import { escapeHtml } from "@/lib/email-html";
-import { sendEmail, sendWhatsApp } from "@/lib/notifications";
+import { sendEmail, sendSms, sendWhatsApp } from "@/lib/notifications";
 import { getNotificationPublicUrl } from "@/lib/urls";
 
 const WELCOME_TEMPLATE = "student_welcome";
 const STALE_SENDING_MS = 10 * 60 * 1000;
 
-type DeliveryChannel = "email" | "whatsapp";
+type DeliveryChannel = "email" | "whatsapp" | "sms";
 type ProviderResult = {
   success?: boolean;
   skipped?: boolean;
@@ -22,6 +22,7 @@ export type StudentWelcomeResult = {
   studentCode: string;
   email: { status: string; error?: string; attemptCount: number };
   whatsapp: { status: string; error?: string; attemptCount: number };
+  sms: { status: string; error?: string; attemptCount: number };
 };
 
 function normalizePhone(phone: string): string | null {
@@ -57,6 +58,11 @@ function welcomeWhatsAppMessage(studentName: string, programTitle: string, code:
     `Verify your enrollment: ${verifyUrl}`,
     `— NEXUS Academy Team`,
   ].join("\n\n");
+}
+
+function welcomeSmsMessage(studentName: string, programTitle: string, code: string): string {
+  const verifyUrl = `${getNotificationPublicUrl()}/academy/verify`;
+  return `Welcome to NEXUS Academy, ${studentName}! Your registration for ${programTitle} is confirmed. Verification ID: ${code}. Verify: ${verifyUrl}`;
 }
 
 function errorText(value: unknown): string | undefined {
@@ -151,27 +157,49 @@ async function deliverChannel(args: {
         subject: `NEXUS Academy — ${args.student.programTitle} Registration Confirmed`,
         html: welcomeEmailHtml(args.student.fullName, args.student.programTitle, args.student.studentCode),
       });
-    } else {
+    } else if (args.channel === "whatsapp") {
       providerResult = await sendWhatsApp({
         to: args.recipient,
         body: welcomeWhatsAppMessage(args.student.fullName, args.student.programTitle, args.student.studentCode),
+      });
+    } else {
+      providerResult = await sendSms({
+        to: args.recipient,
+        body: welcomeSmsMessage(args.student.fullName, args.student.programTitle, args.student.studentCode),
       });
     }
   } catch (error) {
     providerResult = { success: false, error };
   }
 
-  const status = providerResult.skipped ? "skipped" : providerResult.success ? "sent" : "failed";
+  const status = providerResult.skipped
+    ? "skipped"
+    : providerResult.success
+      ? ("queued" in providerResult && providerResult.queued ? "queued" : "sent")
+      : "failed";
   const error = providerResult.skipped
     ? providerResult.reason || "Channel is not configured"
     : status === "failed" ? errorText(providerResult.error) : undefined;
-  const sentAt = status === "sent" ? new Date() : null;
+  const sentAt = status === "sent" || status === "queued" ? new Date() : null;
+  if (args.channel === "sms") {
+    await prisma.notificationLog.create({
+      data: {
+        id: randomUUID(),
+        type: "sms",
+        to: args.recipient,
+        body: welcomeSmsMessage(args.student.fullName, args.student.programTitle, args.student.studentCode),
+        status,
+        result: JSON.parse(JSON.stringify(providerResult)),
+        sentById: args.sentById,
+      },
+    }).catch((error) => console.error("Failed to log Academy SMS:", error));
+  }
   const updated = await prisma.academyNotificationDelivery.update({
     where: { id: claim.deliveryId },
     data: {
       status,
       error: error || null,
-      providerMessageId: providerResult.id || providerResult.sid || null,
+      providerMessageId: providerResult.id || providerResult.sid || ("batchId" in providerResult && typeof providerResult.batchId === "string" ? providerResult.batchId : null),
       sentAt,
       updatedAt: new Date(),
     },
@@ -192,7 +220,7 @@ export async function sendStudentWelcome(student: {
   email: string;
   phone: string;
   programTitle: string;
-}, sentById: string): Promise<StudentWelcomeResult> {
+}, sentById: string, includeSms = false): Promise<StudentWelcomeResult> {
   const email = await deliverChannel({
     student,
     channel: "email",
@@ -207,11 +235,21 @@ export async function sendStudentWelcome(student: {
     sentById,
   });
 
+  const sms = includeSms
+    ? await deliverChannel({
+        student,
+        channel: "sms",
+        recipient: normalizedPhone || "",
+        sentById,
+      })
+    : { status: "not_attempted", attemptCount: 0 };
+
   return {
     studentId: student.id,
     studentCode: student.studentCode,
     email,
     whatsapp,
+    sms,
   };
 }
 

@@ -7,6 +7,7 @@ import { resolveOwners } from "@/lib/intake-owners";
 import { computeSla } from "@/lib/intake-sla";
 import { logAdminAction } from "@/lib/audit";
 import { sendEmail, sendWhatsApp } from "@/lib/notifications";
+import { sendOptionalSms } from "@/lib/notifications/send-optional-sms";
 import { describeDelivery } from "@/lib/notifications/outcome";
 import { OpportunityApplicationStatus } from "@prisma/client";
 import { clean } from "@/lib/join-us-pathways";
@@ -292,6 +293,7 @@ export async function POST(
   try {
     const body = await request.json();
     const message = clean(body.message, 5000);
+    const sendSmsToo = body.sendSms === true;
     const outcome = body.status as OpportunityApplicationStatus;
 
     if (message.length < 1) {
@@ -324,6 +326,12 @@ export async function POST(
     if (!canSeeListingType(user.role, application.opportunity.type)) {
       return FORBIDDEN();
     }
+    if (sendSmsToo && !application.phone?.trim()) {
+      return NextResponse.json({ error: "This applicant has no saved phone number for SMS" }, { status: 400 });
+    }
+    if (sendSmsToo && message.length > 1600) {
+      return NextResponse.json({ error: "SMS messages must be 1,600 characters or fewer" }, { status: 400 });
+    }
 
     const subject = `NEXUS — update on your application for ${application.opportunity.title}`;
     const html = `<p>Hello ${escapeHtml(application.fullName)},</p>
@@ -347,11 +355,16 @@ export async function POST(
     if (application.phone?.trim()) {
       whatsappResult = await sendWhatsApp({ to: application.phone, body: message });
     }
+    const smsDelivery = sendSmsToo
+      ? await sendOptionalSms({ to: application.phone!, body: message, sentById: user.id, subject })
+      : null;
 
     console.info("[opportunity-application-response] delivery", {
       applicationId: id,
       emailResult,
       whatsappResult,
+      smsResult: smsDelivery?.result ?? null,
+      smsStatus: smsDelivery?.status ?? "not_requested",
     });
 
     const updated = await prisma.opportunityApplication.update({
@@ -374,6 +387,7 @@ export async function POST(
         status: outcome,
         chars: message.length,
         whatsappAttempted: Boolean(application.phone?.trim()),
+        smsStatus: smsDelivery?.status ?? "not_requested",
       },
     });
 
@@ -381,12 +395,14 @@ export async function POST(
       application: updated,
       emailResult,
       whatsappResult,
+      smsResult: smsDelivery?.result ?? null,
+      smsStatus: smsDelivery?.status ?? "not_requested",
       whatsappAttempted: Boolean(application.phone?.trim()),
-      delivery: describeDelivery(
+      delivery: `${describeDelivery(
         emailResult,
         whatsappResult,
         Boolean(application.phone?.trim())
-      ),
+      )}${smsDelivery ? `; SMS ${smsDelivery.status}` : ""}`,
     });
   } catch (error) {
     console.error("Failed to respond to opportunity application:", error);

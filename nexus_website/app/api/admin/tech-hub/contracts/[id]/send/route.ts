@@ -6,6 +6,7 @@ import { generateToken, getSignedUrl, hashSigningToken } from "@/lib/contract-si
 import { sendContractEmail } from "@/lib/contract-email";
 import { sendWhatsApp } from "@/lib/notifications";
 import { logNotification } from "@/lib/notification-log";
+import { sendOptionalSms } from "@/lib/notifications/send-optional-sms";
 
 export async function POST(
   request: Request,
@@ -16,6 +17,8 @@ export async function POST(
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
+    const payload = await request.json().catch(() => ({})) as { sendSms?: unknown };
+    const sendSmsToo = payload.sendSms === true;
     const { id } = await params;
     const contract = await prisma.contract.findUnique({ where: { id } });
     if (!contract) return NextResponse.json({ error: "Contract not found" }, { status: 404 });
@@ -27,6 +30,7 @@ export async function POST(
     if (!contract.bodyText.trim()) {
       return NextResponse.json({ error: "Contract body is empty" }, { status: 400 });
     }
+    if (sendSmsToo && !contract.clientPhone?.trim()) return NextResponse.json({ error: "This client has no saved phone number for SMS" }, { status: 400 });
 
     const token = generateToken();
     const tokenHash = hashSigningToken(token);
@@ -124,6 +128,16 @@ export async function POST(
       }
     }
 
+    const sms = sendSmsToo && phone
+      ? await sendOptionalSms({
+          to: normalizeWhatsAppNumber(phone),
+          body: `Hi ${updated.clientName}, your ${updated.contractType.replace(/-/g, " ")} for ${updated.serviceType} is ready for review and signature: ${signUrl}\n\nThis secure link expires in 7 days.`,
+          logBody: `Contract ${updated.id} signing link SMS requested; link expires in 7 days.`,
+          subject: `Contract signing link: ${updated.id}`,
+          sentById: user.id,
+        })
+      : null;
+
     await prisma.activityLog.create({
       data: {
         action: "contract.sent",
@@ -134,7 +148,7 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ contract: updated });
+    return NextResponse.json({ contract: updated, smsStatus: sms?.status ?? "not_requested" });
   } catch (error) {
     console.error("Failed to send contract:", error);
     return NextResponse.json({ error: "Failed to send contract" }, { status: 500 });

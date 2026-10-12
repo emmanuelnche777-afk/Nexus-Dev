@@ -104,6 +104,7 @@ export default function AdminServiceOrdersPage() {
   const [quoteAmount, setQuoteAmount] = useState("");
   const [quoteCurrency, setQuoteCurrency] = useState("XAF");
   const [quoteDuration, setQuoteDuration] = useState("");
+  const [quoteSms, setQuoteSms] = useState(false);
 
   useEffect(() => {
     load();
@@ -154,7 +155,7 @@ export default function AdminServiceOrdersPage() {
     });
   }, [orders, searchQuery, statusFilter, priorityFilter]);
 
-  async function updateOrder(id: string, patch: Partial<ServiceOrder>) {
+  async function updateOrder(id: string, patch: Partial<ServiceOrder> & { sendSms?: boolean }) {
     setSaving(true);
     setError(null);
     try {
@@ -170,6 +171,7 @@ export default function AdminServiceOrdersPage() {
       }
       setOrders((prev) => prev.map((o) => (o.id === id ? data : o)));
       setSelected((prev) => (prev?.id === id ? data : prev));
+      if (data.quoteEmailStatus) setSavedMessage(`Quote saved. Email: ${data.quoteEmailStatus}.${data.smsStatus === "queued" ? " SMS queued through TextBee." : data.smsStatus === "failed" ? " SMS failed." : data.smsStatus === "skipped" ? " SMS provider is not configured." : ""}`);
       return true;
     } catch {
       setError("Update failed");
@@ -230,6 +232,7 @@ export default function AdminServiceOrdersPage() {
       quoteCurrency,
       quoteDurationWeeks: quoteDuration ? Number(quoteDuration) : null,
       status: "quoted",
+      sendSms: quoteSms,
     });
     setQuoteOpen(false);
   }
@@ -660,6 +663,7 @@ export default function AdminServiceOrdersPage() {
                     />
                   </div>
                   <div className="flex gap-2 sm:col-span-3">
+                    {selected.clientPhone && <label className="flex basis-full items-start gap-2 text-xs text-nexus-navy/60"><input type="checkbox" checked={quoteSms} onChange={(event) => setQuoteSms(event.target.checked)} /><span>Also text the client that the quote is ready ({selected.clientPhone}). TextBee may use SIM airtime.</span></label>}
                     <button
                       onClick={saveQuote}
                       disabled={saving}

@@ -5,7 +5,7 @@ import { logAdminAction } from "@/lib/audit";
 import prisma from "@/lib/db";
 
 export async function GET(request: Request) {
-  const { user, authorized } = await requirePermission("content:*");
+  const { user, authorized } = await requirePermission("*");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const { user, authorized } = await requirePermission("content:*");
+  const { user, authorized } = await requirePermission("*");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

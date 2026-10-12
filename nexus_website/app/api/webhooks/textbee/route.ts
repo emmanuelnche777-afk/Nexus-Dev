@@ -141,6 +141,12 @@ export async function POST(request: Request) {
         } as Prisma.InputJsonValue,
       },
     });
+    if (nextStatus === "delivered" || nextStatus === "failed" || nextStatus === "sent") {
+      await prisma.academyNotificationDelivery.updateMany({
+        where: { providerMessageId: smsBatchId, channel: "sms", status: { in: ["queued", "sent"] } },
+        data: { status: nextStatus, error: nextStatus === "failed" && typeof event.errorMessage === "string" ? event.errorMessage : null, updatedAt: new Date() },
+      }).catch((error) => console.error("[textbee-webhook] Could not update Academy SMS delivery:", error));
+    }
   }
 
   return NextResponse.json({ accepted: true, matched: true });

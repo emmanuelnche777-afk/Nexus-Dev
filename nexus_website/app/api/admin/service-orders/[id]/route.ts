@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/notifications";
 import { logAdminAction } from "@/lib/audit";
 import { CONTACT } from "@/lib/site";
 import { escapeHtml, safeEmailSubject } from "@/lib/email-html";
+import { sendOptionalSms } from "@/lib/notifications/send-optional-sms";
 
 const ALLOWED_FIELDS = [
   "serviceType",
@@ -58,12 +59,15 @@ export async function PUT(
 
   try {
     const body = await request.json();
+    const sendSmsToo = body.sendSms === true;
     const { id } = await params;
     const existing = await prisma.serviceOrder.findUnique({ where: { id } });
 
     if (!existing) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
+    if (sendSmsToo && !existing.clientPhone?.trim()) return NextResponse.json({ error: "This client has no saved phone number for SMS" }, { status: 400 });
+    if (sendSmsToo && (typeof body.quoteAmount === "undefined" || body.quoteAmount === null)) return NextResponse.json({ error: "SMS can only be included when sending a quote" }, { status: 400 });
 
     const data: Record<string, unknown> = {};
     for (const key of ALLOWED_FIELDS) {
@@ -115,6 +119,7 @@ export async function PUT(
     });
 
     // Notify the client by email when a quote is issued
+    let emailSent = false;
     if (
       data.quoteAmount !== undefined &&
       data.quoteAmount !== null &&
@@ -124,7 +129,7 @@ export async function PUT(
       const currency = updated.quoteCurrency || "XAF";
       const weeks = updated.quoteDurationWeeks;
 
-      await sendEmail({
+      const emailResult = await sendEmail({
         to: updated.clientEmail,
         subject: safeEmailSubject(`Your NEXUS quote for "${updated.serviceType}"`),
         html: `
@@ -139,10 +144,18 @@ export async function PUT(
          `,
       }).catch((error) => {
         console.error("Quote email failed:", error);
+        return { success: false as const, error };
       });
+      emailSent = "success" in emailResult && emailResult.success === true;
     }
 
-    return NextResponse.json(updated);
+    const sms = sendSmsToo && updated.clientPhone
+      ? await sendOptionalSms({ to: updated.clientPhone, body: `NEXUS Tech Hub: Your ${updated.serviceType} quote is ready. Check your email for the price and details.`, sentById: user.id, subject: `Quote ready: ${updated.serviceType}` })
+      : null;
+
+    return NextResponse.json(data.quoteAmount !== undefined && data.quoteAmount !== null
+      ? { ...updated, quoteEmailStatus: emailSent ? "sent" : "not_confirmed", smsStatus: sms?.status ?? "not_requested" }
+      : updated);
   } catch (error) {
     console.error("Update order failed:", error);
     return NextResponse.json(

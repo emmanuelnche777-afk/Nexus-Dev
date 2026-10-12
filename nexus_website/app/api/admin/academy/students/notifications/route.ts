@@ -18,6 +18,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
+    const includeSms = body?.includeSms === true;
     const requested: unknown[] = Array.isArray(body?.studentIds) ? body.studentIds : [];
     const studentIds = Array.from(new Set<string>(
       requested.filter((id): id is string => typeof id === "string" && id.length > 0)
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
       sendStudentWelcome({
         ...student,
         programTitle: student.program.title,
-      }, user.id)
+      }, user.id, includeSms)
     ));
 
     const deliveries = results.map((result, index) => result.status === "fulfilled"
@@ -67,14 +68,16 @@ export async function POST(request: Request) {
           studentCode: students[index].studentCode,
           email: { status: "failed", error: "Failed to process email delivery", attemptCount: 0 },
           whatsapp: { status: "failed", error: "Failed to process WhatsApp delivery", attemptCount: 0 },
+          sms: { status: "failed", error: "Failed to process SMS delivery", attemptCount: 0 },
         });
 
     const counts = {
       students: deliveries.length,
-      sent: deliveries.reduce((sum, item) => sum + Number(item.email.status === "sent") + Number(item.whatsapp.status === "sent"), 0),
-      failed: deliveries.reduce((sum, item) => sum + Number(item.email.status === "failed") + Number(item.whatsapp.status === "failed"), 0),
-      skipped: deliveries.reduce((sum, item) => sum + Number(item.email.status === "skipped") + Number(item.whatsapp.status === "skipped"), 0),
-      alreadySent: deliveries.reduce((sum, item) => sum + Number(item.email.status === "already_sent") + Number(item.whatsapp.status === "already_sent"), 0),
+      sent: deliveries.reduce((sum, item) => sum + Number(item.email.status === "sent") + Number(item.whatsapp.status === "sent") + Number(item.sms.status === "sent"), 0),
+      queued: deliveries.reduce((sum, item) => sum + Number(item.sms.status === "queued"), 0),
+      failed: deliveries.reduce((sum, item) => sum + Number(item.email.status === "failed") + Number(item.whatsapp.status === "failed") + Number(item.sms.status === "failed"), 0),
+      skipped: deliveries.reduce((sum, item) => sum + Number(item.email.status === "skipped") + Number(item.whatsapp.status === "skipped") + Number(item.sms.status === "skipped"), 0),
+      alreadySent: deliveries.reduce((sum, item) => sum + Number(item.email.status === "already_sent") + Number(item.whatsapp.status === "already_sent") + Number(item.sms.status === "already_sent"), 0),
     };
 
     await logAdminAction({
@@ -82,7 +85,7 @@ export async function POST(request: Request) {
       adminEmail: user.email,
       action: "send_academy_student_welcome",
       resourceType: "student",
-      newValue: { studentCount: deliveries.length, ...counts },
+      newValue: { studentCount: deliveries.length, includeSms, ...counts },
     });
 
     return NextResponse.json({ success: counts.failed === 0, counts, deliveries });

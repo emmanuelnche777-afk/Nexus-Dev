@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import AdminModal from "@/components/admin/AdminModal";
 import { fetchWithFreshTwoFactor } from "@/lib/admin-sensitive-fetch";
-import { Users, Loader2, Search, Mail, MessageCircle, Send } from "lucide-react";
+import { Users, Loader2, Search, Mail, MessageCircle, Send, Smartphone } from "lucide-react";
 
 interface Student {
   id: string;
@@ -35,10 +35,14 @@ export default function StudentsPage() {
   const [clearPhrase, setClearPhrase] = useState("");
   const [clearing, setClearing] = useState(false);
   const [notifying, setNotifying] = useState(false);
+  const [includeSms, setIncludeSms] = useState(false);
   const [testEmailSending, setTestEmailSending] = useState(false);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [sendingStudentIds, setSendingStudentIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notificationNotice, setNotificationNotice] = useState("");
+  const [notificationError, setNotificationError] = useState("");
+  const [notificationProgress, setNotificationProgress] = useState("");
 
   useEffect(() => {
     loadStudents();
@@ -80,49 +84,55 @@ export default function StudentsPage() {
     if (!selected.length) return;
     const recipientPreview = selected.map((student) => `${student.fullName} — ${student.email || "no email"} — ${student.phone || "no phone"}`).join("\n");
     if (!window.confirm(
-      `Send the welcome email and WhatsApp to these ${selected.length} selected active, paid student(s)?\nAlready-sent channels will be skipped; failed or skipped channels can be retried.\n\n${recipientPreview}`
+      `Send welcome email and WhatsApp messages to ${selected.length} selected active, paid students in batches of 10?${includeSms ? " Also send SMS to saved phone numbers using the connected SIM (airtime may be used)." : ""}\nUp to 100 students (10 batches) can be processed per hour. Already-sent channels will be skipped.\n\n${recipientPreview}`
     )) return;
     setNotifying(true);
+    setNotificationError("");
+    setNotificationNotice("");
+    const totals = { students: 0, sent: 0, queued: 0, failed: 0, skipped: 0, alreadySent: 0 };
+    const batches: Student[][] = [];
+    for (let index = 0; index < selected.length; index += 10) batches.push(selected.slice(index, index + 10));
     try {
-      const res = await fetchWithFreshTwoFactor("/api/admin/academy/students/notifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentIds: selected.map((student) => student.id) }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        alert(data.error || "Failed to notify students");
-      } else {
-        alert(`Channel results across the selected students: ${data.counts?.sent || 0} sent, ${data.counts?.failed || 0} failed, ${data.counts?.skipped || 0} skipped, ${data.counts?.alreadySent || 0} already sent.`);
-        setSelectedStudentIds([]);
-        await loadStudents();
+      for (let index = 0; index < batches.length; index++) {
+        setNotificationProgress(`Sending batch ${index + 1} of ${batches.length}…`);
+        const res = await fetchWithFreshTwoFactor("/api/admin/academy/students/notifications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentIds: batches[index].map((student) => student.id), includeSms }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Batch ${index + 1} failed.`);
+        for (const key of Object.keys(totals) as Array<keyof typeof totals>) totals[key] += Number(data.counts?.[key] || 0);
       }
-    } catch (error) {
-      console.error("Failed to notify students:", error);
-      alert("Failed to notify students");
+      setNotificationNotice(`Processed ${totals.students} students: ${totals.sent} sent, ${totals.queued} SMS queued, ${totals.failed} failed, ${totals.skipped} skipped, ${totals.alreadySent} already sent.`);
+      setSelectedStudentIds([]);
+      await loadStudents();
+    } catch (cause) {
+      setNotificationError(`${cause instanceof Error ? cause.message : "Failed to notify students."} ${totals.students} student(s) in earlier batches were processed. Keep the selection and retry; previously delivered channels are skipped.`);
     } finally {
+      setNotificationProgress("");
       setNotifying(false);
     }
   }
 
   async function sendWelcomeToStudent(student: Student) {
-    if (!window.confirm(`Send the welcome email and WhatsApp to ${student.fullName} at the saved email and phone? Previously sent channels will not be resent.`)) return;
+    if (!window.confirm(`Send the welcome email and WhatsApp to ${student.fullName} at the saved email and phone?${includeSms ? " Also send an SMS using the connected SIM (airtime may be used)." : ""} Previously sent channels will not be resent.`)) return;
     setSendingStudentIds((current) => [...current, student.id]);
     try {
       const res = await fetchWithFreshTwoFactor("/api/admin/academy/students/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentIds: [student.id] }),
+        body: JSON.stringify({ studentIds: [student.id], includeSms }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) alert(data.error || "Failed to send welcome message");
+      if (!res.ok) setNotificationError(data.error || "Failed to send welcome message");
       else {
         const delivery = data.deliveries?.[0];
-        alert(`Email: ${delivery?.email?.status || "unknown"}. WhatsApp: ${delivery?.whatsapp?.status || "unknown"}.`);
+        setNotificationNotice(`${student.fullName}: Email ${delivery?.email?.status || "unknown"}; WhatsApp ${delivery?.whatsapp?.status || "unknown"}; SMS ${delivery?.sms?.status || "not selected"}.`);
         await loadStudents();
       }
-    } catch {
-      alert("Failed to send welcome message");
+    } catch (cause) {
+      setNotificationError(cause instanceof Error ? cause.message : "Failed to send welcome message");
     } finally {
       setSendingStudentIds((current) => current.filter((id) => id !== student.id));
     }
@@ -134,11 +144,11 @@ export default function StudentsPage() {
     try {
       const res = await fetch("/api/admin/academy/students/notifications/test", { method: "POST" });
       const data = await res.json().catch(() => ({}));
-      if (data.status === "sent") alert(`Test email sent to ${data.recipient}.`);
-      else if (data.status === "skipped") alert(`Test email skipped: ${data.reason || "Resend is not configured."}`);
-      else alert(`Test email failed: ${data.error || "Check the saved delivery log for details."}`);
-    } catch {
-      alert("Failed to send the test email.");
+      if (data.status === "sent") setNotificationNotice(`Test email sent to ${data.recipient}.`);
+      else if (data.status === "skipped") setNotificationNotice(`Test email skipped: ${data.reason || "Resend is not configured."}`);
+      else setNotificationError(`Test email failed: ${data.error || "Check the saved delivery log for details."}`);
+    } catch (cause) {
+      setNotificationError(cause instanceof Error ? cause.message : "Failed to send the test email.");
     } finally {
       setTestEmailSending(false);
     }
@@ -146,7 +156,7 @@ export default function StudentsPage() {
 
   function toggleStudentSelection(studentId: string, checked: boolean) {
     setSelectedStudentIds((current) => {
-      if (checked) return current.includes(studentId) || current.length >= 10 ? current : [...current, studentId];
+      if (checked) return current.includes(studentId) || current.length >= 100 ? current : [...current, studentId];
       return current.filter((id) => id !== studentId);
     });
   }
@@ -181,6 +191,10 @@ export default function StudentsPage() {
           Student Management
         </h2>
         <div className="flex min-w-0 flex-wrap gap-2">
+          <label className="inline-flex items-center gap-2 rounded-lg border border-nexus-navy/10 px-3 py-2 text-sm text-nexus-navy">
+            <input type="checkbox" checked={includeSms} onChange={(event) => setIncludeSms(event.target.checked)} />
+            Also send SMS
+          </label>
           <button
             onClick={sendTestEmailToMe}
             disabled={testEmailSending}
@@ -196,7 +210,7 @@ export default function StudentsPage() {
             className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700 text-sm transition disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
-            {notifying ? "Sending..." : `Send to Selected (${selectedStudentIds.length})`}
+            {notifying ? notificationProgress || "Sending..." : `Send to Selected (${selectedStudentIds.length})`}
           </button>
           <button
             onClick={() => setShowClearModal(true)}
@@ -212,6 +226,8 @@ export default function StudentsPage() {
           </Link>
         </div>
       </div>
+
+      {(notificationError || notificationNotice) && <div role={notificationError ? "alert" : "status"} className={`mb-4 rounded-lg border p-3 text-sm ${notificationError ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}>{notificationError || notificationNotice}<button type="button" onClick={() => { setNotificationError(""); setNotificationNotice(""); }} className="ml-2 font-semibold underline">Dismiss</button></div>}
 
       <AdminModal
         open={showClearModal}
@@ -289,16 +305,16 @@ export default function StudentsPage() {
 
       {/* Students Table */}
       <div className="min-w-0 overflow-x-auto">
-        <p className="mb-2 text-xs text-nexus-navy/55">Select up to 10 active, paid students for a reviewed batch send. Already-sent channels are protected from duplicates.</p>
+        <p className="mb-2 text-xs text-nexus-navy/55">Select up to 100 active, paid students. Welcome messages are sent in batches of 10, with a limit of 10 batches per hour. Already-sent channels are protected from duplicates.</p>
         <table className="w-full rounded-lg border border-nexus-navy/10">
           <thead>
             <tr className="border-b border-nexus-navy/10">
               <th className="px-3 py-3"><input
                 type="checkbox"
-                aria-label="Select up to 10 eligible students shown"
-                checked={filteredStudents.filter((student) => student.status === "Active" && student.paymentStatus === "Paid").length > 0 && filteredStudents.filter((student) => student.status === "Active" && student.paymentStatus === "Paid").slice(0, 10).every((student) => selectedStudentIds.includes(student.id))}
+                aria-label="Select up to 100 eligible students shown"
+                checked={filteredStudents.filter((student) => student.status === "Active" && student.paymentStatus === "Paid").slice(0, 100).length > 0 && filteredStudents.filter((student) => student.status === "Active" && student.paymentStatus === "Paid").slice(0, 100).every((student) => selectedStudentIds.includes(student.id))}
                 onChange={(event) => {
-                  const eligible = filteredStudents.filter((student) => student.status === "Active" && student.paymentStatus === "Paid").slice(0, 10);
+                  const eligible = filteredStudents.filter((student) => student.status === "Active" && student.paymentStatus === "Paid").slice(0, 100);
                   setSelectedStudentIds(event.target.checked ? eligible.map((student) => student.id) : []);
                 }}
               /></th>
@@ -317,7 +333,7 @@ export default function StudentsPage() {
                   type="checkbox"
                   aria-label={`Select ${student.fullName}`}
                   checked={selectedStudentIds.includes(student.id)}
-                  disabled={!(student.status === "Active" && student.paymentStatus === "Paid") || (!selectedStudentIds.includes(student.id) && selectedStudentIds.length >= 10)}
+                  disabled={!(student.status === "Active" && student.paymentStatus === "Paid") || (!selectedStudentIds.includes(student.id) && selectedStudentIds.length >= 100)}
                   onChange={(event) => toggleStudentSelection(student.id, event.target.checked)}
                 /></td>
                 <td className="text-nexus-navy/80 px-6 py-4">
@@ -347,6 +363,7 @@ export default function StudentsPage() {
                 <td className="px-6 py-4 text-xs text-nexus-navy/65">
                   <p><Mail className="mr-1 inline h-3 w-3" />{student.notificationDeliveries?.find((item) => item.channel === "email")?.status || "not sent"}</p>
                   <p><MessageCircle className="mr-1 inline h-3 w-3" />{student.notificationDeliveries?.find((item) => item.channel === "whatsapp")?.status || "not sent"}</p>
+                  <p><Smartphone className="mr-1 inline h-3 w-3" />SMS {student.notificationDeliveries?.find((item) => item.channel === "sms")?.status || "not sent"}</p>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">

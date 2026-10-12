@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
-import { sendEmail, sendWhatsApp, sendSms } from "@/lib/notifications";
+import { sendEmail, sendWhatsApp, sendSms, normalizeSmsRecipient } from "@/lib/notifications";
 import prisma from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { escapeHtmlWithBreaks } from "@/lib/email-html";
@@ -37,7 +37,9 @@ export async function POST(request: NextRequest) {
       if (digits.length < 8 || digits.length > 15) {
         return NextResponse.json({ error: "Enter one valid phone number" }, { status: 400 });
       }
-      to = `+${digits}`;
+      to = type === "sms"
+        ? normalizeSmsRecipient(to) || ""
+        : `+${digits}`;
     }
 
     const actorLimit = await enforceActorRateLimit(user.id, "manual-notifications", 20, 60 * 60 * 1000);

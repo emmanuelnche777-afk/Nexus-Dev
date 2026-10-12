@@ -73,10 +73,12 @@ export default function PartnershipsPage() {
   const [loadedFilter, setLoadedFilter] = useState<Filter | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("active");
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Partnership | null>(null);
   const [messages, setMessages] = useState<PartnershipEmail[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [reply, setReply] = useState("");
+  const [sendSmsToo, setSendSmsToo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -178,7 +180,7 @@ export default function PartnershipsPage() {
       const response = await fetch(`/api/admin/partnerships/${selected.id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: reply }),
+        body: JSON.stringify({ body: reply, sendSms: sendSmsToo }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Could not send this reply.");
@@ -353,9 +355,11 @@ export default function PartnershipsPage() {
                 <form onSubmit={sendReply} className="space-y-3 border-t border-nexus-navy/10 p-4">
                   <label htmlFor="partnership-reply" className="block text-sm font-medium text-nexus-navy">Reply to {selected.contactName}</label>
                   <textarea id="partnership-reply" value={reply} onChange={(event) => setReply(event.target.value)} rows={5} maxLength={12000} required placeholder="Write your response…" className="w-full rounded-md border border-nexus-navy/15 px-3 py-2 text-sm" />
+                  {selected.contactPhone && <label className="flex items-start gap-2 text-xs text-nexus-navy/60"><input type="checkbox" checked={sendSmsToo} onChange={(event) => setSendSmsToo(event.target.checked)} disabled={reply.length > 1600 && !sendSmsToo} /><span>Also text this reply to {selected.contactPhone} (may use SIM airtime; max 1,600 characters)</span></label>}
+                  {sendSmsToo && reply.length > 1600 && <p className="text-xs text-red-700">Shorten the reply to 1,600 characters or fewer to send it by SMS.</p>}
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-nexus-navy/50">The reply will be emailed to {selected.contactEmail}.</span>
-                    <button type="submit" disabled={sending || !reply.trim()} className="inline-flex shrink-0 items-center gap-2 rounded-md bg-nexus-cyan px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><Send className="h-4 w-4" />{sending ? "Sending…" : "Send email"}</button>
+                    <span className="text-xs text-nexus-navy/50">Email: {selected.contactEmail}</span>
+                    <button type="submit" disabled={sending || !reply.trim() || (sendSmsToo && reply.length > 1600)} className="inline-flex shrink-0 items-center gap-2 rounded-md bg-nexus-cyan px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><Send className="h-4 w-4" />{sending ? "Sending…" : "Send reply"}</button>
                   </div>
                 </form>
               </div>

@@ -280,15 +280,18 @@ export default function TechHubContractManagementPage() {
 
   async function sendForSignature(contract: Contract) {
     if (!confirm("Send this contract to the client for signature?")) return;
+    const sendSms = Boolean(contract.clientPhone && confirm(`Also send the private signing link to ${contract.clientPhone} by SMS? TextBee may use SIM airtime. The link expires in 7 days.`));
     setSending(true);
     try {
       const res = await fetchWithFreshTwoFactor(`/api/admin/tech-hub/contracts/${contract.id}/send`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sendSms }),
       });
       const data = await res.json();
       if (res.ok) {
         await loadContracts();
-        setError(null);
+        setError(data.smsStatus === "queued" ? "Contract sent. TextBee queued the signing link SMS." : data.smsStatus === "failed" ? "Contract sent by email, but the SMS failed. Check Notifications." : null);
       } else {
         setError(data.emailError || data.error || "Failed to send contract");
       }

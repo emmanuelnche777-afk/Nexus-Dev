@@ -118,6 +118,7 @@ export default function OpportunityApplicationDetailPage({
   const [saveError, setSaveError] = useState<string | null>(null);
 
    const [responseMessage, setResponseMessage] = useState("");
+   const [sendSmsToo, setSendSmsToo] = useState(false);
    const [respondStatus, setRespondStatus] = useState<"MATCHED" | "NOT_A_FIT">(
      "MATCHED"
    );
@@ -245,14 +246,14 @@ export default function OpportunityApplicationDetailPage({
       const res = await fetch(`/api/admin/opportunity-applications/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: responseMessage, status: respondStatus }),
+        body: JSON.stringify({ message: responseMessage, status: respondStatus, sendSms: sendSmsToo }),
       });
       const data = await res.json();
       if (!res.ok) {
         setRespondError(data.error || "Failed to send response");
         return;
       }
-      setRespondResult(data.delivery || "Response recorded.");
+      setRespondResult(`${data.delivery || "Response recorded."}${data.smsStatus === "queued" ? " SMS queued through TextBee." : data.smsStatus === "failed" ? " SMS failed; check Notifications." : data.smsStatus === "skipped" ? " SMS was skipped because no provider is configured." : ""}`);
       setResponseMessage("");
       await loadApplication();
     } catch (error) {
@@ -543,6 +544,11 @@ export default function OpportunityApplicationDetailPage({
                 placeholder="Write your reply to the applicant..."
                 className="w-full rounded-lg border border-nexus-navy/10 px-3 py-2 text-sm focus:border-nexus-cyan focus:outline-none"
               />
+              {application.phone && <label className="flex items-start gap-2 text-xs text-nexus-navy/70">
+                <input type="checkbox" checked={sendSmsToo} onChange={(event) => setSendSmsToo(event.target.checked)} disabled={responseMessage.length > 1600 && !sendSmsToo} />
+                <span>Also send this reply by SMS to {application.phone} (may use SIM airtime; max 1,600 characters)</span>
+              </label>}
+              {sendSmsToo && responseMessage.length > 1600 && <p className="text-xs text-red-700">Shorten the reply to 1,600 characters or fewer to send it by SMS.</p>}
               {respondError && (
                 <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                   {respondError}
@@ -555,7 +561,7 @@ export default function OpportunityApplicationDetailPage({
               )}
               <button
                 onClick={handleRespond}
-                disabled={responding || !responseMessage.trim()}
+                disabled={responding || !responseMessage.trim() || (sendSmsToo && responseMessage.length > 1600)}
                 className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-nexus-navy px-4 py-2 text-sm font-medium text-white transition hover:bg-nexus-navy-deep disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />

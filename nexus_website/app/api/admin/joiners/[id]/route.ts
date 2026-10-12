@@ -7,6 +7,7 @@ import { resolveOwners } from "@/lib/intake-owners";
 import { computeSla } from "@/lib/intake-sla";
 import { logAdminAction } from "@/lib/audit";
 import { sendEmail, sendWhatsApp } from "@/lib/notifications";
+import { sendOptionalSms } from "@/lib/notifications/send-optional-sms";
 import { describeDelivery } from "@/lib/notifications/outcome";
 import { PathwayInquiryStatus } from "@prisma/client";
 import {
@@ -260,6 +261,7 @@ export async function POST(
   try {
     const body = await request.json();
     const message = clean(body.message, 5000);
+    const sendSmsToo = body.sendSms === true;
     if (message.length < 1) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
@@ -271,6 +273,12 @@ export async function POST(
 
     if (!canSeePathway(user.role, inquiry.pathway)) {
       return FORBIDDEN();
+    }
+    if (sendSmsToo && !inquiry.phone?.trim()) {
+      return NextResponse.json({ error: "This applicant has no saved phone number for SMS" }, { status: 400 });
+    }
+    if (sendSmsToo && message.length > 1600) {
+      return NextResponse.json({ error: "SMS messages must be 1,600 characters or fewer" }, { status: 400 });
     }
 
     const pathwayLabel = isPathwayId(inquiry.pathway)
@@ -298,6 +306,9 @@ export async function POST(
     if (inquiry.phone?.trim()) {
       whatsappResult = await sendWhatsApp({ to: inquiry.phone, body: message });
     }
+    const smsDelivery = sendSmsToo
+      ? await sendOptionalSms({ to: inquiry.phone!, body: message, sentById: user.id, subject })
+      : null;
 
     console.info("[joiner-response] delivery", {
       inquiryId: id,
@@ -308,7 +319,8 @@ export async function POST(
     const whatsappAttempted = Boolean(inquiry.phone?.trim());
     const emailDelivered = emailResult?.success === true;
     const whatsappDelivered = whatsappResult?.success === true;
-    const sent = emailDelivered || whatsappDelivered;
+    const smsAccepted = smsDelivery?.status === "queued" || smsDelivery?.status === "sent";
+    const sent = emailDelivered || whatsappDelivered || smsAccepted;
     const emailState = emailDelivered ? "sent" : emailResult?.skipped ? "skipped" : "failed";
     const whatsappState = !whatsappAttempted
       ? "not_attempted"
@@ -343,9 +355,9 @@ export async function POST(
       resourceId: id,
       newValue: {
         chars: message.length,
-        channel: `email:${emailState};whatsapp:${whatsappState}`,
+        channel: `email:${emailState};whatsapp:${whatsappState};sms:${smsDelivery?.status ?? "not_requested"}`,
         sent,
-        failed: Number(emailState === "failed") + Number(whatsappState === "failed"),
+        failed: Number(emailState === "failed") + Number(whatsappState === "failed") + Number(smsDelivery?.status === "failed"),
         skipped: Number(emailState === "skipped") + Number(whatsappState === "skipped"),
       },
     });
@@ -354,9 +366,11 @@ export async function POST(
       inquiry: updated,
       emailResult,
       whatsappResult,
+      smsResult: smsDelivery?.result ?? null,
       whatsappAttempted,
       sent,
-      delivery,
+      smsStatus: smsDelivery?.status ?? "not_requested",
+      delivery: smsDelivery ? `${delivery}; SMS ${smsDelivery.status}` : delivery,
     });
   } catch (error) {
     console.error("Failed to respond to pathway inquiry:", error);

@@ -76,6 +76,7 @@ export default function JoinerDetailPage({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const [responseMessage, setResponseMessage] = useState("");
+  const [sendSmsToo, setSendSmsToo] = useState(false);
   const [responding, setResponding] = useState(false);
   const [respondError, setRespondError] = useState<string | null>(null);
   const [respondResult, setRespondResult] = useState<string | null>(null);
@@ -202,7 +203,7 @@ export default function JoinerDetailPage({
       const res = await fetch(`/api/admin/joiners/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: responseMessage }),
+        body: JSON.stringify({ message: responseMessage, sendSms: sendSmsToo }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -213,7 +214,7 @@ export default function JoinerDetailPage({
         setRespondError(data.delivery || "No delivery was confirmed. Your draft is still here so you can retry.");
         return;
       }
-      setRespondResult(data.delivery || "At least one delivery channel confirmed the response.");
+      setRespondResult(`${data.delivery || "At least one delivery channel confirmed the response."}${data.smsStatus === "queued" ? " SMS queued through TextBee." : data.smsStatus === "failed" ? " SMS failed; check Notifications." : data.smsStatus === "skipped" ? " SMS was skipped because no provider is configured." : ""}`);
       setResponseMessage("");
       await loadInquiry();
     } catch (error) {
@@ -481,7 +482,7 @@ export default function JoinerDetailPage({
             <p className="mb-4 text-xs text-nexus-navy/60">
               Sends your message to the applicant by email
               {inquiry.phone ? " and WhatsApp" : ""}, then sets the status to
-              RESPONDED.
+              RESPONDED.{inquiry.phone ? " Choose SMS below to also text the saved number; TextBee may use SIM airtime." : ""}
             </p>
             <div className="space-y-3">
               <textarea
@@ -491,6 +492,11 @@ export default function JoinerDetailPage({
                 placeholder="Write your reply to the applicant..."
                 className="w-full rounded-lg border border-nexus-navy/10 px-3 py-2 text-sm focus:border-nexus-cyan focus:outline-none"
               />
+              {inquiry.phone && <label className="flex items-start gap-2 text-xs text-nexus-navy/70">
+                <input type="checkbox" checked={sendSmsToo} onChange={(event) => setSendSmsToo(event.target.checked)} disabled={responseMessage.length > 1600 && !sendSmsToo} />
+                <span>Also send this reply by SMS to {inquiry.phone} (may use SIM airtime; max 1,600 characters)</span>
+              </label>}
+              {sendSmsToo && responseMessage.length > 1600 && <p className="text-xs text-red-700">Shorten the reply to 1,600 characters or fewer to send it by SMS.</p>}
               {respondError && (
                 <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                   {respondError}
@@ -503,7 +509,7 @@ export default function JoinerDetailPage({
               )}
               <button
                 onClick={handleRespond}
-                disabled={responding || !responseMessage.trim()}
+                disabled={responding || !responseMessage.trim() || (sendSmsToo && responseMessage.length > 1600)}
                 className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-nexus-navy px-4 py-2 text-sm font-medium text-white transition hover:bg-nexus-navy-deep disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
