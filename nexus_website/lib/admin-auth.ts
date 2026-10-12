@@ -194,6 +194,21 @@ export async function recordSessionActivity(): Promise<boolean> {
   return result.count === 1;
 }
 
+/** Locks the current session immediately while keeping it available for password unlock. */
+export async function lockCurrentSession(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const cookie = (cookieStore as unknown as { get: (name: string) => { value?: string } | undefined })
+    .get(SESSION_COOKIE);
+  if (!cookie?.value) return false;
+
+  const now = new Date();
+  const result = await prisma.adminSession.updateMany({
+    where: { token: cookie.value, expiresAt: { gt: now }, lockedAt: null },
+    data: { lockedAt: now },
+  });
+  return result.count === 1;
+}
+
 export async function hasRecentTwoFactorVerification(maxAgeMs = 5 * 60 * 1000): Promise<boolean> {
   const cookieStore = await cookies();
   const cookie = (cookieStore as unknown as { get: (name: string) => { value?: string } | undefined })

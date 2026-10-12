@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { hasPermission, type AdminRole } from "@/lib/permissions";
-import { LayoutDashboard, GraduationCap, BookOpen, Users, UserCircle, PenLine, FileText, Map, BookOpen as OpportunitiesIcon, Brain, MessageSquare, Building2, Package, Settings, ScrollText, ClipboardList, Play, LogOut, Menu, X, ChevronDown, Handshake, Sparkles, DollarSign, UserPlus, LineChart, Mail, BriefcaseBusiness, Inbox, Share2 } from "lucide-react";
+import { LayoutDashboard, GraduationCap, BookOpen, Users, UserCircle, PenLine, FileText, Map, BookOpen as OpportunitiesIcon, Brain, MessageSquare, Building2, Package, Settings, ScrollText, ClipboardList, Play, LogOut, Menu, X, ChevronDown, Handshake, Sparkles, DollarSign, UserPlus, LineChart, Mail, BriefcaseBusiness, Inbox, Share2, Lock } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 type ChildItem = { href: string; label: string; icon: LucideIcon };
@@ -152,6 +152,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [session, setSession] = useState<{ email: string; name: string; role: AdminRole } | null>(null);
   const [sessionCheckError, setSessionCheckError] = useState(false);
   const [sessionCheckAttempt, setSessionCheckAttempt] = useState(0);
+  const [lockingSession, setLockingSession] = useState(false);
+  const [lockError, setLockError] = useState("");
   const [menuOverride, setMenuOverride] = useState<{ pathname: string; href: string | null } | null>(null);
   const activeParentHref = getActiveParentHref(pathname);
   const openMenuHref = menuOverride?.pathname === pathname ? menuOverride.href : activeParentHref;
@@ -331,6 +333,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.refresh();
   }
 
+  async function handleLockNow() {
+    setLockingSession(true);
+    setLockError("");
+    try {
+      const response = await fetch("/api/admin/session/lock", { method: "POST", cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not lock this session");
+      router.replace("/admin/unlock");
+      router.refresh();
+    } catch (cause) {
+      setLockError(cause instanceof Error ? cause.message : "Could not lock this session");
+      setLockingSession(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-nexus-gray/30">
       {sidebarOpen && (
@@ -390,7 +407,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="ml-auto flex items-center gap-4">
+          <div className="ml-auto flex items-center gap-3">
+            {session && (
+              <button
+                type="button"
+                onClick={handleLockNow}
+                disabled={lockingSession}
+                className="inline-flex items-center gap-2 rounded-md border border-nexus-navy/15 px-3 py-2 text-sm font-medium text-nexus-navy transition hover:bg-nexus-gray disabled:cursor-wait disabled:opacity-60"
+              >
+                <Lock className="h-4 w-4" />
+                {lockingSession ? "Locking…" : "Lock now"}
+              </button>
+            )}
             <Link href="/" className="text-sm text-nexus-navy/70 hover:text-nexus-navy">
               View Site →
             </Link>
@@ -398,6 +426,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         <main className="flex-1">
+          {lockError && (
+            <div role="alert" className="m-4 rounded-md border border-red-500/30 bg-red-50 px-4 py-3 text-sm text-red-800">
+              {lockError}
+            </div>
+          )}
           {sessionCheckError && (
             <div role="alert" className="m-4 flex items-center justify-between gap-4 rounded-md border border-amber-500/30 bg-amber-50 px-4 py-3 text-sm text-amber-900">
               <span>Could not verify your admin session. Check your connection and try again.</span>
