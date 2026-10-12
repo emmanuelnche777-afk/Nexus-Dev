@@ -10,6 +10,65 @@ import type { LucideIcon } from "lucide-react";
 type ChildItem = { href: string; label: string; icon: LucideIcon };
 type NavItem = { href: string; label: string; icon: LucideIcon; children?: ChildItem[] };
 
+function SessionLockOverlay({ onUnlocked, systemError }: { onUnlocked: () => void; systemError: string }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/session/unlock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not unlock this session");
+      setPassword("");
+      onUnlocked();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not unlock this session");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/95 px-4 backdrop-blur-sm" role="presentation">
+      <form
+        onSubmit={handleSubmit}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="session-lock-title"
+        className="w-full max-w-md space-y-5 rounded-xl bg-white p-6 shadow-xl ring-1 ring-nexus-navy/10"
+      >
+        <div>
+          <h1 id="session-lock-title" className="text-2xl font-semibold text-nexus-navy">Session locked</h1>
+          <p className="mt-2 text-sm text-nexus-navy/70">For your security, this session locked after five minutes without activity. Enter your password to continue.</p>
+        </div>
+        {(error || systemError) && <p role="alert" className="rounded-md border border-red-500/30 bg-red-50 px-3 py-2 text-sm text-red-800">{error || systemError}</p>}
+        <label htmlFor="session-lock-password" className="block text-sm font-medium text-nexus-navy">Password</label>
+        <input
+          id="session-lock-password"
+          type="password"
+          autoComplete="current-password"
+          autoFocus
+          required
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          className="w-full rounded-md border border-nexus-navy/20 px-3 py-2.5 text-nexus-navy outline-none focus:border-nexus-cyan focus:ring-2 focus:ring-nexus-cyan/20"
+        />
+        <button type="submit" disabled={loading} className="w-full rounded-md bg-nexus-navy px-4 py-2.5 font-medium text-white disabled:cursor-wait disabled:opacity-60">
+          {loading ? "Unlocking…" : "Unlock session"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 const NAV_PERMISSION_BY_HREF: Record<string, string> = {
   "/admin/content/blog": "content:blog:*",
   "/admin/content/faq": "content:faq:*",
@@ -149,7 +208,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [session, setSession] = useState<{ email: string; name: string; role: AdminRole } | null>(null);
+  const [session, setSession] = useState<{ email: string; name: string; role: AdminRole; sessionLocked: boolean } | null>(null);
+  const [isSessionLocked, setIsSessionLocked] = useState(false);
   const [sessionCheckError, setSessionCheckError] = useState(false);
   const [sessionCheckAttempt, setSessionCheckAttempt] = useState(0);
   const [lockingSession, setLockingSession] = useState(false);
@@ -170,10 +230,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .then((data) => {
         if (cancelled) return;
         if (!data.authenticated) {
+          setSession(null);
+          setIsSessionLocked(false);
           router.push("/admin/login");
         } else {
           setSessionCheckError(false);
           setSession(data.user);
+          setIsSessionLocked(Boolean(data.user.sessionLocked));
         }
       })
       .catch((err) => {
@@ -188,20 +251,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [router, pathname, sessionCheckAttempt]);
 
   useEffect(() => {
+    if (!session || isSessionLocked || pathname === "/admin/login" || pathname === "/admin/unlock") return;
+
     let lastActivityRequest = 0;
     let idleTimer: ReturnType<typeof setTimeout>;
-    const scheduleLockRedirect = () => {
+    const scheduleIdleLock = () => {
       clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => router.replace("/admin/unlock"), 5 * 60 * 1000);
+      idleTimer = setTimeout(() => {
+        setIsSessionLocked(true);
+        void fetch("/api/admin/session/lock", { method: "POST", cache: "no-store" })
+          .then(async (response) => {
+            if (response.status === 401) {
+              router.replace("/admin/login");
+              return;
+            }
+            if (!response.ok) {
+              const data = await response.json().catch(() => ({}));
+              setLockError(data.error || "Could not confirm the session lock. Keep this page open and try again.");
+            }
+          })
+          .catch(() => setLockError("Could not confirm the session lock. Keep this page open and try again."));
+      }, 5 * 60 * 1000);
     };
-    scheduleLockRedirect();
+    scheduleIdleLock();
     const sendActivity = () => {
       const now = Date.now();
-      scheduleLockRedirect();
+      scheduleIdleLock();
       if (now - lastActivityRequest < 30_000) return;
       lastActivityRequest = now;
       void fetch("/api/admin/session", { method: "PATCH", cache: "no-store" })
-        .then((response) => { if (response.status === 423) router.replace("/admin/unlock"); })
+        .then((response) => { if (response.status === 423) setIsSessionLocked(true); })
         .catch(() => undefined);
     };
     const events: Array<keyof WindowEventMap> = ["pointerdown", "keydown", "wheel", "touchstart"];
@@ -210,7 +289,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       clearTimeout(idleTimer);
       events.forEach((event) => window.removeEventListener(event, sendActivity));
     };
-  }, [router]);
+  }, [router, pathname, session, isSessionLocked]);
 
   useEffect(() => {
     const isPaymentPage = pathname === "/admin/academy/payments" || pathname.startsWith("/admin/academy/payments/");
@@ -323,7 +402,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   };
 
-  if (pathname === "/admin/login") {
+  if (pathname === "/admin/login" || pathname === "/admin/unlock") {
     return <>{children}</>;
   }
 
@@ -340,8 +419,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const response = await fetch("/api/admin/session/lock", { method: "POST", cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not lock this session");
-      router.replace("/admin/unlock");
-      router.refresh();
+      setLockingSession(false);
+      setIsSessionLocked(true);
     } catch (cause) {
       setLockError(cause instanceof Error ? cause.message : "Could not lock this session");
       setLockingSession(false);
@@ -358,6 +437,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       <aside
+        inert={isSessionLocked}
+        aria-hidden={isSessionLocked}
         className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-nexus-dark transition-transform duration-300 lg:static lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -399,7 +480,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0" inert={isSessionLocked} aria-hidden={isSessionLocked}>
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-nexus-cyan/10 bg-nexus-white px-4 lg:px-6">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -452,6 +533,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ) : children}
         </main>
       </div>
+      {isSessionLocked && (
+        <SessionLockOverlay
+          systemError={lockError}
+          onUnlocked={() => {
+            setIsSessionLocked(false);
+            setSession((current) => current ? { ...current, sessionLocked: false } : current);
+            setLockingSession(false);
+            setLockError("");
+          }}
+        />
+      )}
     </div>
   );
 }
