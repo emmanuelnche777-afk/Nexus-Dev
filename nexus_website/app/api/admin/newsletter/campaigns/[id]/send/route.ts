@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/permissions-server";
 import { enforceActorRateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/notifications";
+import { isEmailConfigured } from "@/lib/notifications/email";
 import { createUnsubscribeToken, renderNewsletterHtml } from "@/lib/newsletter";
 import type { Prisma } from "@prisma/client";
 import { logAdminAction } from "@/lib/audit";
@@ -17,8 +18,8 @@ export async function POST(request: Request, { params }: CampaignParams) {
   const { user, authorized } = await requirePermission("newsletter:send");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!process.env.RESEND_API_KEY) {
-    return NextResponse.json({ error: "Email delivery is not configured. Add RESEND_API_KEY before sending campaigns." }, { status: 503 });
+  if (!isEmailConfigured()) {
+    return NextResponse.json({ error: "Email delivery is not configured. Connect Gmail or configure Resend before sending campaigns." }, { status: 503 });
   }
 
   const { id } = await params;

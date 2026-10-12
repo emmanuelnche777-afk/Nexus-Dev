@@ -26,6 +26,7 @@ type NotificationType = "email" | "sms" | "whatsapp";
 
 interface ProviderStatus {
   providers: {
+    email: { configured: boolean; provider: "gmail" | "resend" | null; gmailConfigured: boolean; resendConfigured: boolean; from: string };
     resend: { configured: boolean; from: string };
     twilio: { configured: boolean; smsConfigured: boolean; whatsappConfigured: boolean; phone: string; whatsapp: string };
     sms: {
@@ -196,11 +197,14 @@ export default function NotificationsPage() {
     );
   });
 
-  const resendReady = providerStatus?.providers.resend.configured === true;
+  const emailReady = providerStatus?.providers.email.configured === true;
+  const emailProviderName = providerStatus?.providers.email.provider === "gmail"
+    ? "Gmail"
+    : providerStatus?.providers.email.provider === "resend" ? "Resend" : "Email";
   const smsReady = providerStatus?.providers.sms.configured === true;
   const smsProviderName = providerStatus?.providers.sms.provider === "twilio" ? "Twilio" : "TextBee";
   const whatsappReady = providerStatus?.providers.twilio.whatsappConfigured === true;
-  const isProviderReady = type === "email" ? resendReady : type === "sms" ? smsReady : whatsappReady;
+  const isProviderReady = type === "email" ? emailReady : type === "sms" ? smsReady : whatsappReady;
 
   return (
     <div className="space-y-6">
@@ -274,12 +278,12 @@ export default function NotificationsPage() {
               <div className="flex items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                    resendReady
+                    emailReady
                       ? "bg-emerald-100 text-emerald-700"
                       : "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {resendReady ? "Resend ✓" : "Resend ✗"}
+                  {emailReady ? `${emailProviderName} ✓` : "Email not configured"}
                 </span>
                 {type !== "whatsapp" && (
                   <span
@@ -308,7 +312,7 @@ export default function NotificationsPage() {
               <p className="font-semibold">Provider not configured</p>
               <p className="mt-1 text-xs">
                 {type === "email"
-                  ? "Set RESEND_API_KEY in .env.local to send real emails. Otherwise sends will be skipped and logged."
+                  ? "Connect Gmail with OAuth credentials, or configure Resend. Otherwise sends will be skipped and logged."
                   : type === "sms"
                     ? "Set TEXTBEE_API_KEY, TEXTBEE_DEVICE_ID, and TEXTBEE_SIM_SUBSCRIPTION_ID in the server environment. Twilio remains available as a fallback."
                     : "Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_WHATSAPP_FROM in .env.local. Otherwise sends will be skipped and logged."}
@@ -324,7 +328,7 @@ export default function NotificationsPage() {
                 onChange={(e) => setType(e.target.value as NotificationType)}
                 className="mt-1 w-full rounded-lg border border-nexus-navy/10 bg-white px-3 py-2 text-sm focus:border-nexus-cyan focus:outline-none"
               >
-                <option value="email">Email (Resend)</option>
+                <option value="email">Email ({emailProviderName})</option>
                 <option value="sms">SMS ({smsProviderName})</option>
                 <option value="whatsapp">WhatsApp (Twilio)</option>
               </select>
@@ -430,10 +434,12 @@ export default function NotificationsPage() {
           ) : (
             <div className="mt-4 space-y-3">
               <ProviderCard
-                name="Resend (Email)"
-                ready={resendReady}
-                detail={`From: ${providerStatus.providers.resend.from}`}
-                required="RESEND_API_KEY"
+                name={`${emailProviderName} (Email)`}
+                ready={emailReady}
+                detail={`From: ${providerStatus.providers.email.from || "—"}`}
+                required={providerStatus.providers.email.provider === "gmail"
+                  ? "GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_USER"
+                  : "GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_USER; or RESEND_API_KEY"}
               />
               <ProviderCard
                 name={`${smsProviderName} (SMS)`}

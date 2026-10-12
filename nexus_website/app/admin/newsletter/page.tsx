@@ -32,6 +32,7 @@ type NewsletterData = {
   unsubscribedCount: number;
   campaigns: Campaign[];
   emailConfigured: boolean;
+  emailProvider: "gmail" | "resend" | null;
 };
 
 function displayStatus(status: string) {
@@ -140,7 +141,7 @@ export default function NewsletterAdminPage() {
 
   async function createAndSend() {
     if (!data?.emailConfigured) {
-      setError("Email delivery is not configured. Add RESEND_API_KEY before sending campaigns.");
+      setError("Email delivery is not configured. Connect Gmail or configure Resend before sending campaigns.");
       return;
     }
     if (!data.activeCount) {
@@ -168,7 +169,7 @@ export default function NewsletterAdminPage() {
 
   async function sendTestEmail() {
     if (!data?.emailConfigured) {
-      setError("Email delivery is not configured. Add RESEND_API_KEY before sending a test.");
+      setError("Email delivery is not configured. Connect Gmail or configure Resend before sending a test.");
       return;
     }
     if (!subject.trim() || !body.trim()) {
@@ -238,12 +239,12 @@ export default function NewsletterAdminPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <SummaryCard label="Active subscribers" value={data?.activeCount ?? "—"} icon={<Mail className="h-5 w-5" />} />
         <SummaryCard label="Unsubscribed" value={data?.unsubscribedCount ?? "—"} icon={<UserMinus className="h-5 w-5" />} />
-        <SummaryCard label="Email provider" value={data?.emailConfigured ? "Ready" : "Not configured"} icon={<ShieldCheck className="h-5 w-5" />} />
+        <SummaryCard label="Email provider" value={data?.emailConfigured ? (data.emailProvider === "gmail" ? "Gmail ready" : "Resend ready") : "Not configured"} icon={<ShieldCheck className="h-5 w-5" />} />
       </div>
 
       {!data?.emailConfigured && !loading && (
         <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          Subscribers can still sign up, but campaigns cannot be delivered until `RESEND_API_KEY` is configured.
+          Subscribers can still sign up, but campaigns cannot be delivered until Gmail or Resend is configured.
         </div>
       )}
 

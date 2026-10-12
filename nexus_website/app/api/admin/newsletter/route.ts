@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requirePermission } from "@/lib/permissions-server";
+import { getEmailProviderStatus } from "@/lib/notifications/email";
 import { logSensitiveAccess } from "@/lib/audit";
 
 export async function GET(request: Request) {
@@ -49,7 +50,8 @@ export async function GET(request: Request) {
       activeCount,
       unsubscribedCount,
       campaigns,
-      emailConfigured: Boolean(process.env.RESEND_API_KEY),
+      emailConfigured: getEmailProviderStatus().configured,
+      emailProvider: getEmailProviderStatus().provider,
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("[newsletter] Failed to load admin data:", error);

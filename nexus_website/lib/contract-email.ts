@@ -1,7 +1,4 @@
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const from = process.env.RESEND_FROM || "onboarding@resend.dev";
+import { sendEmail } from "@/lib/notifications";
 
 export async function sendContractEmail(
   to: string,
@@ -10,8 +7,7 @@ export async function sendContractEmail(
   contract: { id: string; contractType: string; serviceType: string; totalAmount: number | null; currency: string }
 ): Promise<boolean> {
   try {
-    const { error } = await resend.emails.send({
-      from,
+    const result = await sendEmail({
       to,
       subject: `Nexus Tech Hub: ${contract.contractType} for ${contract.serviceType}`,
       html: `
@@ -24,8 +20,7 @@ export async function sendContractEmail(
         <p>Best regards,<br>Nexus Tech Hub Team</p>
       `,
     });
-    if (error) throw error;
-    return true;
+    return result.success === true;
   } catch (error) {
     console.error("Failed to send contract email:", error);
     return false;
@@ -38,8 +33,7 @@ export async function sendSignedConfirmationEmail(
   contractId: string
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
-      from,
+    const result = await sendEmail({
       to,
       subject: `Nexus Tech Hub: Your contract is signed`,
       html: `
@@ -49,7 +43,7 @@ export async function sendSignedConfirmationEmail(
         <p>Best regards,<br>Nexus Tech Hub Team</p>
       `,
     });
-    return true;
+    return result.success === true;
   } catch (error) {
     console.error("Failed to send signed confirmation:", error);
     return false;

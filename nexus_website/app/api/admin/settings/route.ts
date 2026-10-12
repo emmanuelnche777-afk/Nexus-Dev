@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { getEmailProviderStatus } from "@/lib/notifications/email";
 import prisma from "@/lib/db";
 import { invalidatePublicSiteSettingsCache } from "@/lib/site-settings";
 import { validateVideoUrl } from "@/lib/video-url";
@@ -64,6 +65,25 @@ export async function GET() {
     const settings = mergeWithDefaults(record);
     return NextResponse.json({
       settings,
+      providers: {
+        email: getEmailProviderStatus(),
+        resend: {
+          configured: Boolean(process.env.RESEND_API_KEY),
+          from: process.env.EMAIL_FROM_ADDRESS || process.env.RESEND_FROM || "onboarding@resend.dev",
+        },
+        twilio: {
+          configured: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN),
+          phone: process.env.TWILIO_PHONE_NUMBER || "",
+          whatsapp: process.env.TWILIO_WHATSAPP_FROM || "",
+        },
+        sms: {
+          configured: Boolean(process.env.TEXTBEE_API_KEY || (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER)),
+          provider: process.env.TEXTBEE_API_KEY ? "textbee" : process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER ? "twilio" : null,
+          textbeeDeviceConfigured: Boolean(process.env.TEXTBEE_DEVICE_ID),
+          textbeeSimConfigured: Boolean(process.env.TEXTBEE_SIM_SUBSCRIPTION_ID),
+          inboundWebhookConfigured: Boolean(process.env.TEXTBEE_WEBHOOK_SECRET),
+        },
+      },
       maintenance: {
         enabled: settings.maintenanceMode,
         message: settings.maintenanceMessage,

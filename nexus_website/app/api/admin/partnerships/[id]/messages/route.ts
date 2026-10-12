@@ -90,7 +90,7 @@ export async function POST(
     if (!("success" in result) || !result.success) {
       const skipped = "skipped" in result && result.skipped;
       const reason = skipped
-        ? "Email sending is not configured yet. Set RESEND_API_KEY before sending replies."
+        ? "Email sending is not configured yet. Connect Gmail or configure Resend before sending replies."
         : "The email provider could not send this reply. Please try again.";
       await prisma.partnershipInquiryEmail.update({
         where: { id: message.id },

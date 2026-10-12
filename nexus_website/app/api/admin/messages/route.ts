@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    void sendEmail({
+    await sendEmail({
       to: message.recipient.email,
       subject: safeEmailSubject(`New message from ${message.sender.name || "NEXUS Admin"}`),
       html: `

@@ -1,17 +1,14 @@
 export function validateEnv() {
   const missing: string[] = [];
 
-  if (!process.env.RESEND_API_KEY) {
-    missing.push("RESEND_API_KEY");
-  }
-  if (!process.env.TWILIO_ACCOUNT_SID) {
-    missing.push("TWILIO_ACCOUNT_SID");
-  }
-  if (!process.env.TWILIO_AUTH_TOKEN) {
-    missing.push("TWILIO_AUTH_TOKEN");
-  }
-  if (!process.env.TWILIO_WHATSAPP_FROM) {
-    missing.push("TWILIO_WHATSAPP_FROM");
+  const gmailReady = [
+    process.env.GMAIL_CLIENT_ID,
+    process.env.GMAIL_CLIENT_SECRET,
+    process.env.GMAIL_REFRESH_TOKEN,
+    process.env.GMAIL_USER,
+  ].every(Boolean);
+  if (!gmailReady && !process.env.RESEND_API_KEY) {
+    missing.push("Gmail OAuth credentials or RESEND_API_KEY");
   }
 
   return {

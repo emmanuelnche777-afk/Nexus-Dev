@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    void sendEmail({
+    await sendEmail({
       to: email.toLowerCase(),
       subject: "NEXUS Admin Access Ready",
       html: `

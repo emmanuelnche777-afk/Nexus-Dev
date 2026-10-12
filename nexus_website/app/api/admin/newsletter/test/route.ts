@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
 import { enforceActorRateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/notifications";
+import { isEmailConfigured } from "@/lib/notifications/email";
 import { escapeHtml, escapeHtmlWithBreaks, safeEmailSubject } from "@/lib/email-html";
 
 const MAX_SUBJECT_LENGTH = 150;
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
   const { user, authorized } = await requirePermission("newsletter:send");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (!process.env.RESEND_API_KEY) {
+  if (!isEmailConfigured()) {
     return NextResponse.json({ error: "Email delivery is not configured." }, { status: 503 });
   }
 
