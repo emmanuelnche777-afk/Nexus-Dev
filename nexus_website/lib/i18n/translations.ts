@@ -1053,7 +1053,7 @@ export const translations: Record<Language, TranslationKeys> = {
       explorePrograms: "Explore Our Programs",
       gapEyebrow: "The gap",
       gapTitle: "A future that reflects the people who live it.",
-      gapDesc: "Cameroon’s strength lies in its people—their ideas, resourcefulness and many ways of seeing the world. Yet promising skills and digital ideas do not always become practical opportunities or services people can access, trust and use. The opportunity is to connect local insight with the skills, partnerships and support that help good ideas address real needs and create lasting value.",
+      gapDesc: "Cameroon’s strength lies in its people, their ideas, resourcefulness and many ways of seeing the world. Yet promising skills and digital ideas do not always become practical opportunities or services people can access, trust and use. The opportunity is to connect local insight with the skills, partnerships and support that help good ideas address real needs and create lasting value.",
       gapPoint1Title: "Skills into action",
       gapPoint1Text: "Knowledge and ideas are a starting point. Turning them into useful work takes hands-on experience, guidance and collaboration with the people who understand each challenge firsthand.",
       gapPoint2Title: "Digital value for everyday life",
