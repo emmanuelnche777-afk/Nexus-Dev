@@ -111,6 +111,7 @@ const NAV_PERMISSION_BY_HREF: Record<string, string> = {
 };
 
 const NAV_ITEMS: NavItem[] = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   {
     href: "/admin/academy",
     label: "Academy",
@@ -153,7 +154,6 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/admin/content/social", label: "Social post review", icon: Share2 },
     ],
   },
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/my-profile", label: "My Profile", icon: UserCircle },
   {
     href: "/admin/requests",
