@@ -26,6 +26,10 @@ function SessionLockOverlay({ onUnlocked, systemError }: { onUnlocked: () => voi
         body: JSON.stringify({ password }),
       });
       const data = await response.json();
+      if (response.status === 401 && data.error?.includes("Sign in again")) {
+        window.location.assign("/admin/login");
+        return;
+      }
       if (!response.ok) throw new Error(data.error || "Could not unlock this session");
       setPassword("");
       onUnlocked();

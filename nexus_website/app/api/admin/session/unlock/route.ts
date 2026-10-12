@@ -22,9 +22,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Enter your password to unlock this session" }, { status: 400 });
   }
 
-  const unlocked = await unlockCurrentSession(password);
+  const result = await unlockCurrentSession(password);
+  const unlocked = result === "unlocked";
   await recordAttempt(attemptKey, unlocked, request.headers.get("x-real-ip") || undefined, request.headers.get("user-agent") || undefined);
-  if (!unlocked) {
+  if (result === "invalid_password") {
     await logAdminAction({
       actorId: user.id,
       adminEmail: user.email,
@@ -33,7 +34,10 @@ export async function POST(request: NextRequest) {
       ipAddress: request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
       userAgent: request.headers.get("user-agent") || undefined,
     });
-    return NextResponse.json({ error: "The password is incorrect or this session is no longer available" }, { status: 401 });
+    return NextResponse.json({ error: "The password is incorrect. Check it and try again." }, { status: 401 });
+  }
+  if (result === "session_unavailable") {
+    return NextResponse.json({ error: "This sign-in session has expired. Sign in again to continue." }, { status: 401 });
   }
 
   await logAdminAction({

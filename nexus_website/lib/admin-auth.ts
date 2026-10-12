@@ -233,27 +233,49 @@ export async function markTwoFactorVerified(): Promise<void> {
   });
 }
 
-export async function unlockCurrentSession(password: string): Promise<boolean> {
+export type UnlockSessionResult = "unlocked" | "invalid_password" | "session_unavailable";
+
+export async function unlockCurrentSession(password: string): Promise<UnlockSessionResult> {
   const cookieStore = await cookies();
   const cookie = (cookieStore as unknown as { get: (name: string) => { value?: string } | undefined })
     .get(SESSION_COOKIE);
-  if (!cookie?.value) return false;
+  if (!cookie?.value) return "session_unavailable";
 
   const session = await prisma.adminSession.findFirst({
     where: { token: cookie.value, expiresAt: { gt: new Date() } },
     include: { user: true },
   });
-  if (!session?.lockedAt || session.user.status !== "ACTIVE" || session.user.deletedAt || !session.user.passwordHash) {
-    return false;
+  if (!session || session.user.status !== "ACTIVE" || session.user.deletedAt || !session.user.passwordHash) {
+    return "session_unavailable";
   }
-  if (!(await comparePassword(password, session.user.passwordHash))) return false;
+  if (!(await comparePassword(password, session.user.passwordHash))) return "invalid_password";
 
   const now = new Date();
-  await prisma.adminSession.update({
-    where: { id: session.id },
+  // Another request may have cleared lockedAt after the lock overlay appeared.
+  // A valid password should restore this same session instead of trapping the user.
+  const updated = await prisma.adminSession.updateMany({
+    where: {
+      id: session.id,
+      token: cookie.value,
+      userId: session.userId,
+      expiresAt: { gt: now },
+      lockedAt: session.lockedAt,
+    },
     data: { lockedAt: null, lastActiveAt: now },
   });
-  return true;
+  if (updated.count === 1) return "unlocked";
+
+  const current = await prisma.adminSession.findFirst({
+    where: { id: session.id, token: cookie.value, userId: session.userId, expiresAt: { gt: now } },
+    select: { lockedAt: true },
+  });
+  if (!current || current.lockedAt) return "session_unavailable";
+
+  const touched = await prisma.adminSession.updateMany({
+    where: { id: session.id, token: cookie.value, userId: session.userId, expiresAt: { gt: now }, lockedAt: null },
+    data: { lastActiveAt: now },
+  });
+  return touched.count === 1 ? "unlocked" : "session_unavailable";
 }
 
 export async function clearSession(): Promise<void> {
