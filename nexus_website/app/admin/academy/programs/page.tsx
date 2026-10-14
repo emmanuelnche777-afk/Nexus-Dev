@@ -197,13 +197,14 @@ export default function ProgramsPage() {
       const formDataUpload = new FormData();
       formDataUpload.append("file", file);
       formDataUpload.append("type", "image");
+      formDataUpload.append("context", "academy-program");
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         body: formDataUpload,
       });
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
-      setFormData({ ...formData, thumbnailUrl: data.url });
+      setFormData((current) => ({ ...current, thumbnailUrl: data.url }));
       setThumbnailPreview(data.url);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to upload thumbnail");

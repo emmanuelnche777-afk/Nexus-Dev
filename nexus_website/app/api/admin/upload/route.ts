@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     const user = await getSession();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const canUploadAnyType = ["*", "content:journey:*", "techhub:*"]
+    const canUploadAnyType = ["*", "content:journey:*", "techhub:*", "academy:programs:*"]
       .some((permission) => hasPermission(user.role, permission));
     if (!canUploadAnyType) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -51,11 +51,14 @@ export async function POST(request: Request) {
     const type = formData.get("type") as string;
     const isJourneyMedia = formData.get("context") === "journey";
     const isTechHubImage = type === "techhub-image";
+    const isAcademyProgramImage = type === "image" && formData.get("context") === "academy-program";
     const permission = isTechHubImage
       ? "techhub:*"
       : isJourneyMedia
         ? "content:journey:*"
-        : "*";
+        : isAcademyProgramImage
+          ? "academy:programs:*"
+          : "*";
     if (!hasPermission(user.role, permission)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

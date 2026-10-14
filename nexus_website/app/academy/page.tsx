@@ -526,7 +526,7 @@ export default function AcademyPage() {
                               className="object-cover"
                               sizes="(max-width: 768px) 100vw, 40vw"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-br from-nexus-navy/90 to-nexus-dark/70" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-nexus-navy/40 to-nexus-dark/25" />
                           </div>
                         ) : (
                           <div className="absolute inset-0 bg-gradient-to-br from-nexus-navy to-nexus-dark" />
