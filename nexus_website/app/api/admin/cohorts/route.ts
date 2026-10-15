@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
+import { normalizeCohortDates } from "@/lib/cohort-dates";
 
 import prisma from "@/lib/db";
 
@@ -58,11 +59,16 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const id = body.id || `cohort-${Date.now()}`;
-    const cohortData = { ...body };
+    const normalized = normalizeCohortDates(body, true);
+    if (normalized.error) {
+      return NextResponse.json({ error: normalized.error }, { status: 400 });
+    }
+    const cohortData = { ...normalized.data };
     delete cohortData.currentStudents;
     const newCohort = await prisma.cohort.create({ data: { ...cohortData, id, currentStudents: 0 } });
     return NextResponse.json(newCohort, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Failed to create academy cohort:", error);
     return NextResponse.json({ error: "Failed to create cohort" }, { status: 500 });
   }
 }

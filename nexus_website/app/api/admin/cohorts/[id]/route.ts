@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/permissions-server";
 import { logAdminAction } from "@/lib/audit";
+import { normalizeCohortDates } from "@/lib/cohort-dates";
 
 import prisma from "@/lib/db";
 
@@ -40,14 +41,19 @@ export async function PUT(
         return NextResponse.json({ error: "Capacity cannot be lower than the number of registered students" }, { status: 400 });
       }
     }
-    const cohortData = { ...body };
+    const normalized = normalizeCohortDates(body);
+    if (normalized.error) {
+      return NextResponse.json({ error: normalized.error }, { status: 400 });
+    }
+    const cohortData = { ...normalized.data };
     delete cohortData.currentStudents;
     const cohort = await prisma.cohort.update({
       where: { id },
       data: cohortData,
     });
     return NextResponse.json(cohort);
-  } catch {
+  } catch (error) {
+    console.error("Failed to update academy cohort:", error);
     return NextResponse.json({ error: "Failed to update cohort" }, { status: 500 });
   }
 }
